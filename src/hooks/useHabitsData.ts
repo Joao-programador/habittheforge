@@ -1,6 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/context/AuthContext";
 import { format } from "date-fns";
 
 export interface Habit {
@@ -27,96 +25,123 @@ export interface BadgeRow {
 
 const fmtDate = (d: Date) => format(d, "yyyy-MM-dd");
 
+const KEY_HABITS = "forge-habits";
+const KEY_COMPLETIONS = "forge-completions";
+const KEY_BADGES = "forge-badges";
+
+function load<T>(key: string, fallback: T): T {
+  try {
+    const v = localStorage.getItem(key);
+    return v ? (JSON.parse(v) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+function save<T>(key: string, v: T) {
+  localStorage.setItem(key, JSON.stringify(v));
+}
+function uid() {
+  return crypto.randomUUID();
+}
+
+// Singleton state shared between hook instances so updates propagate
+let _habits: Habit[] = load(KEY_HABITS, []);
+let _completions: Completion[] = load(KEY_COMPLETIONS, []);
+let _badges: BadgeRow[] = load(KEY_BADGES, []);
+const listeners = new Set<() => void>();
+const notify = () => listeners.forEach((l) => l());
+
 export function useHabitsData() {
-  const { user } = useAuth();
-  const [habits, setHabits] = useState<Habit[]>([]);
-  const [completions, setCompletions] = useState<Completion[]>([]);
-  const [badges, setBadges] = useState<BadgeRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, force] = useState(0);
+  useEffect(() => {
+    const l = () => force((x) => x + 1);
+    listeners.add(l);
+    return () => {
+      listeners.delete(l);
+    };
+  }, []);
+
+  const addHabit = useCallback(async (h: { name: string; emoji: string; color: string }) => {
+    const newHabit: Habit = {
+      id: uid(),
+      name: h.name,
+      emoji: h.emoji,
+      color: h.color,
+      position: _habits.length,
+      created_at: new Date().toISOString(),
+    };
+    _habits = [..._habits, newHabit];
+    save(KEY_HABITS, _habits);
+    notify();
+  }, []);
+
+  const updateHabit = useCallback(async (id: string, patch: Partial<Habit>) => {
+    _habits = _habits.map((h) => (h.id === id ? { ...h, ...patch } : h));
+    save(KEY_HABITS, _habits);
+    notify();
+  }, []);
+
+  const deleteHabit = useCallback(async (id: string) => {
+    _habits = _habits.filter((h) => h.id !== id);
+    _completions = _completions.filter((c) => c.habit_id !== id);
+    _badges = _badges.filter((b) => b.habit_id !== id);
+    save(KEY_HABITS, _habits);
+    save(KEY_COMPLETIONS, _completions);
+    save(KEY_BADGES, _badges);
+    notify();
+  }, []);
+
+  const toggleCompletion = useCallback(async (habit_id: string, date: Date) => {
+    const dateStr = fmtDate(date);
+    const existing = _completions.find((c) => c.habit_id === habit_id && c.date === dateStr);
+    if (existing) {
+      _completions = _completions.filter((c) => c.id !== existing.id);
+    } else {
+      _completions = [..._completions, { id: uid(), habit_id, date: dateStr }];
+    }
+    save(KEY_COMPLETIONS, _completions);
+    notify();
+  }, []);
+
+  const isCompleted = useCallback(
+    (habit_id: string, date: Date) =>
+      _completions.some((c) => c.habit_id === habit_id && c.date === fmtDate(date)),
+    []
+  );
+
+  const unlockBadge = useCallback(async (badge_key: string, habit_id: string | null = null) => {
+    const exists = _badges.some((b) => b.badge_key === badge_key && b.habit_id === habit_id);
+    if (exists) return null;
+    const row: BadgeRow = {
+      id: uid(),
+      badge_key,
+      habit_id,
+      unlocked_at: new Date().toISOString(),
+    };
+    _badges = [..._badges, row];
+    save(KEY_BADGES, _badges);
+    notify();
+    return row;
+  }, []);
 
   const refresh = useCallback(async () => {
-    if (!user) return;
-    setLoading(true);
-    const [h, c, b] = await Promise.all([
-      supabase.from("habits").select("*").eq("user_id", user.id).order("position"),
-      supabase.from("completions").select("*").eq("user_id", user.id),
-      supabase.from("badges").select("*").eq("user_id", user.id),
-    ]);
-    if (h.data) setHabits(h.data as Habit[]);
-    if (c.data) setCompletions(c.data as Completion[]);
-    if (b.data) setBadges(b.data as BadgeRow[]);
-    setLoading(false);
-  }, [user]);
-
-  useEffect(() => { refresh(); }, [refresh]);
-
-  // CRUD
-  const addHabit = async (h: { name: string; emoji: string; color: string }) => {
-    if (!user) return;
-    const { data, error } = await supabase
-      .from("habits")
-      .insert({ ...h, user_id: user.id, position: habits.length })
-      .select()
-      .single();
-    if (!error && data) setHabits((p) => [...p, data as Habit]);
-  };
-
-  const updateHabit = async (id: string, patch: Partial<Habit>) => {
-    if (!user) return;
-    await supabase.from("habits").update(patch).eq("id", id);
-    setHabits((p) => p.map((h) => (h.id === id ? { ...h, ...patch } : h)));
-  };
-
-  const deleteHabit = async (id: string) => {
-    if (!user) return;
-    await supabase.from("habits").delete().eq("id", id);
-    setHabits((p) => p.filter((h) => h.id !== id));
-    setCompletions((p) => p.filter((c) => c.habit_id !== id));
-  };
-
-  const toggleCompletion = async (habit_id: string, date: Date) => {
-    if (!user) return;
-    const dateStr = fmtDate(date);
-    const existing = completions.find(
-      (c) => c.habit_id === habit_id && c.date === dateStr
-    );
-    if (existing) {
-      await supabase.from("completions").delete().eq("id", existing.id);
-      setCompletions((p) => p.filter((c) => c.id !== existing.id));
-    } else {
-      const { data, error } = await supabase
-        .from("completions")
-        .insert({ habit_id, date: dateStr, user_id: user.id })
-        .select()
-        .single();
-      if (!error && data) setCompletions((p) => [...p, data as Completion]);
-    }
-  };
-
-  const isCompleted = (habit_id: string, date: Date) =>
-    completions.some((c) => c.habit_id === habit_id && c.date === fmtDate(date));
-
-  const unlockBadge = async (badge_key: string, habit_id: string | null = null) => {
-    if (!user) return;
-    const exists = badges.some(
-      (b) => b.badge_key === badge_key && b.habit_id === habit_id
-    );
-    if (exists) return null;
-    const { data, error } = await supabase
-      .from("badges")
-      .insert({ user_id: user.id, badge_key, habit_id })
-      .select()
-      .single();
-    if (!error && data) {
-      setBadges((p) => [...p, data as BadgeRow]);
-      return data as BadgeRow;
-    }
-    return null;
-  };
+    _habits = load(KEY_HABITS, []);
+    _completions = load(KEY_COMPLETIONS, []);
+    _badges = load(KEY_BADGES, []);
+    notify();
+  }, []);
 
   return {
-    habits, completions, badges, loading,
-    addHabit, updateHabit, deleteHabit,
-    toggleCompletion, isCompleted, unlockBadge, refresh,
+    habits: _habits,
+    completions: _completions,
+    badges: _badges,
+    loading: false,
+    addHabit,
+    updateHabit,
+    deleteHabit,
+    toggleCompletion,
+    isCompleted,
+    unlockBadge,
+    refresh,
   };
 }

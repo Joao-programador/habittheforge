@@ -1,8 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
-import { LayoutDashboard, Trophy, Settings, LogOut, Flame } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/button";
+import { LayoutDashboard, Trophy, Settings, Flame } from "lucide-react";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -14,7 +12,6 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
-  const { signOut, user } = useAuth();
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border/60">
@@ -56,21 +53,12 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-3 space-y-2">
-        {!collapsed && user && (
-          <div className="px-2 py-2 text-[11px] text-muted-foreground truncate">
-            {user.email}
+      <SidebarFooter className="p-3">
+        {!collapsed && (
+          <div className="px-2 py-1 text-[10px] text-muted-foreground italic leading-snug">
+            Dados salvos localmente neste navegador.
           </div>
         )}
-        <Button
-          variant="ghost"
-          size={collapsed ? "icon" : "sm"}
-          onClick={signOut}
-          className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-        >
-          <LogOut className="w-4 h-4" />
-          {!collapsed && "Sair"}
-        </Button>
       </SidebarFooter>
     </Sidebar>
   );
