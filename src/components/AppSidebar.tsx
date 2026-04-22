@@ -1,0 +1,77 @@
+import { NavLink, useLocation } from "react-router-dom";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
+import { LayoutDashboard, Trophy, Settings, LogOut, Flame } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
+
+const items = [
+  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Conquistas", url: "/achievements", icon: Trophy },
+  { title: "Configurações", url: "/settings", icon: Settings },
+];
+
+export function AppSidebar() {
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
+  const location = useLocation();
+  const { signOut, user } = useAuth();
+
+  return (
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border/60">
+      <SidebarHeader className="p-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center glow-primary shrink-0">
+            <Flame className="w-5 h-5 text-primary-foreground" strokeWidth={2.5} />
+          </div>
+          {!collapsed && (
+            <div className="overflow-hidden">
+              <div className="font-display text-lg leading-none tracking-tight">FORGE</div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] mt-0.5">
+                Discipline · Iron
+              </div>
+            </div>
+          )}
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {items.map((item) => {
+                const active = location.pathname === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={active}>
+                      <NavLink to={item.url} end className="gap-3">
+                        <item.icon className="w-4 h-4" />
+                        {!collapsed && <span className="font-medium">{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter className="p-3 space-y-2">
+        {!collapsed && user && (
+          <div className="px-2 py-2 text-[11px] text-muted-foreground truncate">
+            {user.email}
+          </div>
+        )}
+        <Button
+          variant="ghost"
+          size={collapsed ? "icon" : "sm"}
+          onClick={signOut}
+          className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+        >
+          <LogOut className="w-4 h-4" />
+          {!collapsed && "Sair"}
+        </Button>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
