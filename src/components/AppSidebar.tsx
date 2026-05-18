@@ -1,9 +1,10 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
-import { LayoutDashboard, Trophy, Settings, Flame } from "lucide-react";
+import { LayoutDashboard, Trophy, Settings, Flame, CalendarRange } from "lucide-react";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Planner", url: "/planner", icon: CalendarRange },
   { title: "Conquistas", url: "/achievements", icon: Trophy },
   { title: "Configurações", url: "/settings", icon: Settings },
 ];
