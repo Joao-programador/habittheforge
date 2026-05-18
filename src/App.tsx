@@ -7,6 +7,7 @@ import { SettingsProvider } from "@/context/SettingsContext";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import Achievements from "./pages/Achievements";
+import Planner from "./pages/Planner";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ const App = () => (
           <Sonner position="top-right" richColors />
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/planner" element={<Planner />} />
             <Route path="/achievements" element={<Achievements />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
