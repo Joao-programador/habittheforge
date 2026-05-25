@@ -3,6 +3,8 @@ import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { EventBlock } from "./EventBlock";
 import { getEventsForDay, type PlannerEvent } from "@/hooks/usePlanner";
+import { useTodos, getTodosForDay } from "@/hooks/useTodos";
+import { layoutDayEvents } from "@/lib/eventLayout";
 import { cn } from "@/lib/utils";
 
 const HOUR_PX = 44;
@@ -21,6 +23,12 @@ export function WeekView({ date, events, isHabitCompleted, onSlotClick, onEventC
   const weekStart = useMemo(() => startOfWeek(date, { weekStartsOn: 0 }), [date]);
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
   const today = new Date();
+  const { todos, toggleTodo } = useTodos();
+
+  const hasAnyTodo = useMemo(
+    () => days.some((d) => getTodosForDay(todos, d).length > 0),
+    [days, todos]
+  );
 
   return (
     <div className="surface-card overflow-hidden">
@@ -40,9 +48,38 @@ export function WeekView({ date, events, isHabitCompleted, onSlotClick, onEventC
           );
         })}
       </div>
+
+      {hasAnyTodo && (
+        <div className="grid grid-cols-[56px_repeat(7,minmax(0,1fr))] border-b border-border/40 bg-secondary/20">
+          <div className="text-[9px] uppercase tracking-widest text-muted-foreground font-mono text-right pr-2 pt-1.5">
+            Prazos
+          </div>
+          {days.map((d) => {
+            const dt = getTodosForDay(todos, d);
+            return (
+              <div key={d.toISOString()} className="border-l border-border/30 p-1 space-y-1 min-h-[28px]">
+                {dt.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => toggleTodo(t.id)}
+                    className={cn(
+                      "w-full text-left text-[10px] px-1.5 py-0.5 rounded truncate font-medium transition hover:brightness-125",
+                      t.completed && "line-through opacity-50"
+                    )}
+                    style={{ background: `${t.color}33`, borderLeft: `2px solid ${t.color}` }}
+                    title={t.title}
+                  >
+                    ◇ {t.title}
+                  </button>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       <div className="overflow-y-auto max-h-[calc(100vh-280px)]">
         <div className="grid grid-cols-[56px_repeat(7,minmax(0,1fr))]" style={{ height: HOUR_PX * 24 }}>
-          {/* hour col */}
           <div className="relative border-r border-border/40">
             {HOURS.map((h) => (
               <div key={h} style={{ height: HOUR_PX }} className="text-[10px] font-mono text-muted-foreground text-right pr-2 pt-0.5">
@@ -52,6 +89,7 @@ export function WeekView({ date, events, isHabitCompleted, onSlotClick, onEventC
           </div>
           {days.map((d) => {
             const dayEvents = getEventsForDay(events, d);
+            const laidOut = layoutDayEvents(dayEvents);
             const isToday = isSameDay(d, today);
             const nowMin = isToday ? today.getHours() * 60 + today.getMinutes() : -1;
             return (
@@ -66,17 +104,27 @@ export function WeekView({ date, events, isHabitCompleted, onSlotClick, onEventC
                     <div className="h-px bg-primary" />
                   </div>
                 )}
-                {dayEvents.map((ev) => {
+                {laidOut.map(({ event: ev, col, cols }) => {
                   const top = (ev.startMinutes / 60) * HOUR_PX;
                   const height = Math.max(20, (ev.durationMinutes / 60) * HOUR_PX - 2);
                   const completed = ev.habit_id ? isHabitCompleted(ev.habit_id, d) : false;
+                  const widthPct = 100 / cols;
                   return (
-                    <div key={ev.id + d.toISOString()} className="absolute left-0.5 right-0.5 z-[5]" style={{ top, height }}>
+                    <div
+                      key={ev.id + d.toISOString()}
+                      className="absolute z-[5]"
+                      style={{
+                        top,
+                        height,
+                        left: `calc(${col * widthPct}% + 1px)`,
+                        width: `calc(${widthPct}% - 2px)`,
+                      }}
+                    >
                       <EventBlock
                         event={ev}
                         date={format(d, "yyyy-MM-dd")}
                         completed={completed}
-                        compact={height < 36}
+                        compact
                         style={{ height: "100%" }}
                         onClick={() => onEventClick(ev)}
                         onToggleComplete={ev.habit_id ? () => onToggleHabit(ev.habit_id!, d) : undefined}
