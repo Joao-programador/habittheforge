@@ -1,8 +1,12 @@
 import { useMemo, useRef } from "react";
-import { format, isSameDay, parseISO } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { EventBlock } from "./EventBlock";
 import { getEventsForDay, type PlannerEvent } from "@/hooks/usePlanner";
+import { useTodos, getTodosForDay, type Todo } from "@/hooks/useTodos";
+import { layoutDayEvents } from "@/lib/eventLayout";
+import { Check, ListChecks } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const HOUR_PX = 56;
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -18,6 +22,9 @@ interface Props {
 
 export function DayView({ date, events, isHabitCompleted, onSlotClick, onEventClick, onToggleHabit }: Props) {
   const dayEvents = useMemo(() => getEventsForDay(events, date), [events, date]);
+  const laidOut = useMemo(() => layoutDayEvents(dayEvents), [dayEvents]);
+  const { todos, toggleTodo } = useTodos();
+  const dayTodos = useMemo(() => getTodosForDay(todos, date), [todos, date]);
   const today = isSameDay(date, new Date());
   const now = new Date();
   const nowMinutes = today ? now.getHours() * 60 + now.getMinutes() : -1;
@@ -33,9 +40,25 @@ export function DayView({ date, events, isHabitCompleted, onSlotClick, onEventCl
           {format(date, "dd 'de' MMMM", { locale: ptBR })}
         </span>
       </div>
+
+      {dayTodos.length > 0 && (
+        <div className="px-5 py-2.5 border-b border-border/40 bg-secondary/20">
+          <div className="flex items-center gap-2 mb-1.5">
+            <ListChecks className="w-3.5 h-3.5 text-primary" />
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-mono">
+              Prazos hoje
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {dayTodos.map((t) => (
+              <TodoChip key={t.id} todo={t} onToggle={() => toggleTodo(t.id)} />
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="relative overflow-y-auto max-h-[calc(100vh-280px)]">
         <div ref={gridRef} className="relative grid grid-cols-[64px_1fr]" style={{ height: HOUR_PX * 24 }}>
-          {/* Hour labels */}
           <div className="border-r border-border/40">
             {HOURS.map((h) => (
               <div key={h} style={{ height: HOUR_PX }} className="text-[10px] font-mono text-muted-foreground text-right pr-2 pt-0.5">
@@ -43,7 +66,6 @@ export function DayView({ date, events, isHabitCompleted, onSlotClick, onEventCl
               </div>
             ))}
           </div>
-          {/* Slot area */}
           <div className="relative">
             {HOURS.map((h) => (
               <div
@@ -59,16 +81,27 @@ export function DayView({ date, events, isHabitCompleted, onSlotClick, onEventCl
                 <div className="absolute -left-1 -top-1 w-2 h-2 rounded-full bg-primary" />
               </div>
             )}
-            {dayEvents.map((ev) => {
+            {laidOut.map(({ event: ev, col, cols }) => {
               const top = (ev.startMinutes / 60) * HOUR_PX;
               const height = Math.max(22, (ev.durationMinutes / 60) * HOUR_PX - 2);
               const completed = ev.habit_id ? isHabitCompleted(ev.habit_id, date) : false;
+              const widthPct = 100 / cols;
               return (
-                <div key={ev.id + format(date, "yyyy-MM-dd")} className="absolute left-1 right-2 z-[5]" style={{ top, height }}>
+                <div
+                  key={ev.id + format(date, "yyyy-MM-dd")}
+                  className="absolute z-[5] px-0.5"
+                  style={{
+                    top,
+                    height,
+                    left: `calc(${col * widthPct}% + 4px)`,
+                    width: `calc(${widthPct}% - 6px)`,
+                  }}
+                >
                   <EventBlock
                     event={ev}
                     date={format(date, "yyyy-MM-dd")}
                     completed={completed}
+                    compact={cols > 2}
                     style={{ height: "100%" }}
                     onClick={() => onEventClick(ev)}
                     onToggleComplete={ev.habit_id ? () => onToggleHabit(ev.habit_id!, date) : undefined}
@@ -80,5 +113,30 @@ export function DayView({ date, events, isHabitCompleted, onSlotClick, onEventCl
         </div>
       </div>
     </div>
+  );
+}
+
+function TodoChip({ todo, onToggle }: { todo: Todo; onToggle: () => void }) {
+  return (
+    <button
+      onClick={onToggle}
+      className={cn(
+        "inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-md border transition",
+        todo.completed
+          ? "opacity-50 line-through border-border/40 bg-secondary/40"
+          : "border-border/60 bg-card hover:border-primary/60"
+      )}
+      style={{ borderLeftColor: todo.color, borderLeftWidth: 3 }}
+    >
+      <span
+        className={cn(
+          "w-3.5 h-3.5 rounded-[4px] border flex items-center justify-center",
+          todo.completed ? "bg-success border-success" : "border-foreground/40"
+        )}
+      >
+        {todo.completed && <Check className="w-2.5 h-2.5 text-background" strokeWidth={4} />}
+      </span>
+      <span className="font-medium">{todo.title}</span>
+    </button>
   );
 }
