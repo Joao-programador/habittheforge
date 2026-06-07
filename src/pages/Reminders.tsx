@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { BellRing, Plus, Pencil, Trash2, BellOff, Bell, Eye } from "lucide-react";
 import { Reminder, useReminders } from "@/hooks/useReminders";
+import { useHabitsData } from "@/hooks/useHabitsData";
 import { ReminderDialog } from "@/components/reminders/ReminderDialog";
+
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
