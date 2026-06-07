@@ -33,6 +33,8 @@ export function ReminderDialog({ trigger, initial, onSave }: Props) {
   const [intervalMinutes, setIntervalMinutes] = useState<number>(initial?.intervalMinutes ?? 60);
   const [times, setTimes] = useState<string[]>(initial?.times ?? []);
   const [newTime, setNewTime] = useState("09:00");
+  const [habitId, setHabitId] = useState<string>(initial?.habitId ?? NO_HABIT);
+  const { habits } = useHabitsData();
 
   useEffect(() => {
     if (open && initial) {
@@ -41,6 +43,7 @@ export function ReminderDialog({ trigger, initial, onSave }: Props) {
       setMode(initial.mode);
       setIntervalMinutes(initial.intervalMinutes ?? 60);
       setTimes(initial.times ?? []);
+      setHabitId(initial.habitId ?? NO_HABIT);
     }
   }, [open, initial]);
 
@@ -57,12 +60,14 @@ export function ReminderDialog({ trigger, initial, onSave }: Props) {
       mode,
       intervalMinutes: mode === "interval" ? intervalMinutes : undefined,
       times: mode === "times" ? times : undefined,
+      habitId: habitId === NO_HABIT ? undefined : habitId,
     });
     setOpen(false);
     if (!initial) {
       setTitle("");
       setMessage("");
       setTimes([]);
+      setHabitId(NO_HABIT);
     }
   };
 
