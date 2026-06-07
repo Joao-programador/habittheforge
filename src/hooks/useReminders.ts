@@ -12,6 +12,7 @@ export interface Reminder {
   active: boolean;
   lastFiredAt?: number; // ms epoch
   createdAt: number;
+  habitId?: string; // optional link to a habit
 }
 
 const KEY = "forge-reminders";
