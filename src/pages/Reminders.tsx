@@ -18,6 +18,8 @@ function describeReminder(r: Reminder): string {
 
 export default function Reminders() {
   const { reminders, addReminder, updateReminder, deleteReminder } = useReminders();
+  const { habits } = useHabitsData();
+
   const [permission, setPermission] = useState<NotificationPermission | "unsupported">(
     typeof Notification === "undefined" ? "unsupported" : Notification.permission,
   );
