@@ -89,13 +89,36 @@ export function ReminderOverlay({ pending, onDismiss, remaining }: Props) {
           </p>
         )}
 
-        <Button
-          size="lg"
-          onClick={onDismiss}
-          className="mt-4 px-10 h-12 font-display tracking-wider uppercase text-sm"
-        >
-          Levanta
-        </Button>
+        {linkedHabit && (
+          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-muted-foreground">
+            <span className="text-lg">{linkedHabit.emoji}</span>
+            <span>Hábito: {linkedHabit.name}</span>
+            {alreadyDone && <span className="text-primary">· concluído hoje</span>}
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={onDismiss}
+            className="px-8 h-12 font-display tracking-wider uppercase text-sm"
+          >
+            Levanta
+          </Button>
+          {linkedHabit && (
+            <Button
+              size="lg"
+              onClick={completeHabit}
+              disabled={alreadyDone}
+              className="px-8 h-12 font-display tracking-wider uppercase text-sm gap-2"
+            >
+              <Check className="w-4 h-4" />
+              {alreadyDone ? "Já feito" : "Concluir hábito"}
+            </Button>
+          )}
+        </div>
+
       </div>
     </div>
   );
