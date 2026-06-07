@@ -1,8 +1,9 @@
 import { useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { pickRandomWojak } from "@/assets/wojaks";
 import { PendingReminder } from "@/hooks/useReminderEngine";
+import { useHabitsData } from "@/hooks/useHabitsData";
 
 interface Props {
   pending: PendingReminder | null;
