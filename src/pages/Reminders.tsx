@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { BellRing, Plus, Pencil, Trash2, BellOff, Bell, Eye } from "lucide-react";
 import { Reminder, useReminders } from "@/hooks/useReminders";
+import { useHabitsData } from "@/hooks/useHabitsData";
 import { ReminderDialog } from "@/components/reminders/ReminderDialog";
+
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
@@ -16,6 +18,8 @@ function describeReminder(r: Reminder): string {
 
 export default function Reminders() {
   const { reminders, addReminder, updateReminder, deleteReminder } = useReminders();
+  const { habits } = useHabitsData();
+
   const [permission, setPermission] = useState<NotificationPermission | "unsupported">(
     typeof Notification === "undefined" ? "unsupported" : Notification.permission,
   );
@@ -124,9 +128,22 @@ export default function Reminders() {
                   {r.message && (
                     <p className="text-sm text-muted-foreground line-clamp-1">{r.message}</p>
                   )}
-                  <div className="text-[11px] uppercase tracking-widest text-primary/80 mt-0.5">
-                    {describeReminder(r)}
+                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                    <span className="text-[11px] uppercase tracking-widest text-primary/80">
+                      {describeReminder(r)}
+                    </span>
+                    {r.habitId && (() => {
+                      const h = habits.find((x) => x.id === r.habitId);
+                      if (!h) return null;
+                      return (
+                        <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md bg-secondary/60 border border-border/40">
+                          <span>{h.emoji}</span>
+                          <span className="truncate max-w-[140px]">{h.name}</span>
+                        </span>
+                      );
+                    })()}
                   </div>
+
                 </div>
 
                 <Switch

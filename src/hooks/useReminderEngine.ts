@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { Reminder, isDue, useReminders } from "./useReminders";
+import { useHabitsData } from "./useHabitsData";
 
 export interface PendingReminder {
   reminder: Reminder;
@@ -8,6 +9,7 @@ export interface PendingReminder {
 
 export function useReminderEngine() {
   const { reminders, markFired } = useReminders();
+  const { isCompleted } = useHabitsData();
   const [queue, setQueue] = useState<PendingReminder[]>([]);
 
   const enqueue = useCallback((r: Reminder) => {
@@ -24,8 +26,12 @@ export function useReminderEngine() {
       const now = new Date();
       reminders.forEach((r) => {
         if (!isDue(r, now)) return;
+        // Skip if linked habit is already completed today
+        if (r.habitId && isCompleted(r.habitId, now)) {
+          markFired(r.id, now.getTime()); // bump so it doesn't keep retrying every tick
+          return;
+        }
         markFired(r.id, now.getTime());
-        // Try native notification
         if (typeof Notification !== "undefined" && Notification.permission === "granted") {
           try {
             new Notification(r.title || "Lembrete", {
@@ -42,7 +48,7 @@ export function useReminderEngine() {
     tick();
     const id = window.setInterval(tick, 30_000);
     return () => window.clearInterval(id);
-  }, [reminders, markFired, enqueue]);
+  }, [reminders, markFired, enqueue, isCompleted]);
 
   return { current: queue[0] ?? null, dismissCurrent, queueSize: queue.length };
 }

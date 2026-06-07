@@ -5,8 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Plus } from "lucide-react";
 import { Reminder, ReminderMode } from "@/hooks/useReminders";
+import { useHabitsData } from "@/hooks/useHabitsData";
+
+const NO_HABIT = "__none__";
 
 interface Props {
   trigger: React.ReactNode;
@@ -17,6 +21,7 @@ interface Props {
     mode: ReminderMode;
     intervalMinutes?: number;
     times?: string[];
+    habitId?: string;
   }) => void;
 }
 
@@ -28,6 +33,8 @@ export function ReminderDialog({ trigger, initial, onSave }: Props) {
   const [intervalMinutes, setIntervalMinutes] = useState<number>(initial?.intervalMinutes ?? 60);
   const [times, setTimes] = useState<string[]>(initial?.times ?? []);
   const [newTime, setNewTime] = useState("09:00");
+  const [habitId, setHabitId] = useState<string>(initial?.habitId ?? NO_HABIT);
+  const { habits } = useHabitsData();
 
   useEffect(() => {
     if (open && initial) {
@@ -36,6 +43,7 @@ export function ReminderDialog({ trigger, initial, onSave }: Props) {
       setMode(initial.mode);
       setIntervalMinutes(initial.intervalMinutes ?? 60);
       setTimes(initial.times ?? []);
+      setHabitId(initial.habitId ?? NO_HABIT);
     }
   }, [open, initial]);
 
@@ -52,12 +60,14 @@ export function ReminderDialog({ trigger, initial, onSave }: Props) {
       mode,
       intervalMinutes: mode === "interval" ? intervalMinutes : undefined,
       times: mode === "times" ? times : undefined,
+      habitId: habitId === NO_HABIT ? undefined : habitId,
     });
     setOpen(false);
     if (!initial) {
       setTitle("");
       setMessage("");
       setTimes([]);
+      setHabitId(NO_HABIT);
     }
   };
 
@@ -92,6 +102,30 @@ export function ReminderDialog({ trigger, initial, onSave }: Props) {
               className="mt-1.5"
             />
           </div>
+
+          <div>
+            <Label className="text-xs uppercase tracking-widest text-muted-foreground">Hábito vinculado (opcional)</Label>
+            <Select value={habitId} onValueChange={setHabitId}>
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Nenhum" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_HABIT}>Nenhum</SelectItem>
+                {habits.map((h) => (
+                  <SelectItem key={h.id} value={h.id}>
+                    <span className="mr-2">{h.emoji}</span>
+                    {h.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {habitId !== NO_HABIT && (
+              <p className="text-[11px] text-muted-foreground mt-1.5">
+                Silenciado nos dias em que o hábito já estiver concluído.
+              </p>
+            )}
+          </div>
+
 
           <div>
             <Label className="text-xs uppercase tracking-widest text-muted-foreground mb-2 block">Modo</Label>

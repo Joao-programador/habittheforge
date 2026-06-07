@@ -73,6 +73,7 @@ export function useHabitsData() {
     _habits = [..._habits, newHabit];
     save(KEY_HABITS, _habits);
     notify();
+    return newHabit;
   }, []);
 
   const updateHabit = useCallback(async (id: string, patch: Partial<Habit>) => {
