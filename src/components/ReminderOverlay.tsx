@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import wojak from "@/assets/wojak-motivacional.png";
+import { pickRandomWojak } from "@/assets/wojaks";
 import { PendingReminder } from "@/hooks/useReminderEngine";
 
 interface Props {
@@ -20,6 +20,7 @@ export function ReminderOverlay({ pending, onDismiss, remaining }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [pending, onDismiss]);
 
+  const wojak = useMemo(() => pickRandomWojak(), [pending?.firedAt]);
   if (!pending) return null;
   const { reminder } = pending;
 
