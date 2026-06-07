@@ -12,6 +12,8 @@ interface Props {
 }
 
 export function ReminderOverlay({ pending, onDismiss, remaining }: Props) {
+  const { habits, isCompleted, toggleCompletion } = useHabitsData();
+
   useEffect(() => {
     if (!pending) return;
     const onKey = (e: KeyboardEvent) => {
@@ -24,6 +26,14 @@ export function ReminderOverlay({ pending, onDismiss, remaining }: Props) {
   const wojak = useMemo(() => pickRandomWojak(), [pending?.firedAt]);
   if (!pending) return null;
   const { reminder } = pending;
+  const linkedHabit = reminder.habitId ? habits.find((h) => h.id === reminder.habitId) : null;
+  const alreadyDone = linkedHabit ? isCompleted(linkedHabit.id, new Date()) : false;
+
+  const completeHabit = () => {
+    if (linkedHabit && !alreadyDone) toggleCompletion(linkedHabit.id, new Date());
+    onDismiss();
+  };
+
 
   return (
     <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-2xl flex items-center justify-center animate-in fade-in duration-300">
