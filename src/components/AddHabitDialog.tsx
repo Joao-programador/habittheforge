@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
+import { useReminders } from "@/hooks/useReminders";
 
 const EMOJI_OPTIONS = ["💪", "📚", "🏃", "🧘", "💧", "🥗", "😴", "✍️", "🎯", "🧠", "☀️", "🚿", "🙏", "💼", "🎸", "🌱", "🔥", "⚡", "🏆", "✨"];
 const COLOR_OPTIONS = ["#4f46e5", "#8b5cf6", "#ec4899", "#f43f5e", "#f59e0b", "#10b981", "#06b6d4", "#3b82f6", "#facc15", "#ef4444"];
 
 interface Props {
-  onAdd: (h: { name: string; emoji: string; color: string }) => void;
+  onAdd: (h: { name: string; emoji: string; color: string }) => Promise<any> | any;
   trigger?: React.ReactNode;
 }
 
@@ -18,10 +19,20 @@ export function AddHabitDialog({ onAdd, trigger }: Props) {
   const [name, setName] = useState("");
   const [emoji, setEmoji] = useState("💪");
   const [color, setColor] = useState("#4f46e5");
+  const { addReminder } = useReminders();
 
-  const submit = () => {
+  const submit = async () => {
     if (!name.trim()) return;
-    onAdd({ name: name.trim(), emoji, color });
+    const created = await onAdd({ name: name.trim(), emoji, color });
+    if (created?.id) {
+      addReminder({
+        title: `${emoji} ${name.trim()}`,
+        message: "Hora de forjar esse hábito. Não negocia.",
+        mode: "times",
+        times: ["20:00"],
+        habitId: created.id,
+      });
+    }
     setName(""); setEmoji("💪"); setColor("#4f46e5"); setOpen(false);
   };
 
