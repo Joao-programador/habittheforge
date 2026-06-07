@@ -104,6 +104,30 @@ export function ReminderDialog({ trigger, initial, onSave }: Props) {
           </div>
 
           <div>
+            <Label className="text-xs uppercase tracking-widest text-muted-foreground">Hábito vinculado (opcional)</Label>
+            <Select value={habitId} onValueChange={setHabitId}>
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Nenhum" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_HABIT}>Nenhum</SelectItem>
+                {habits.map((h) => (
+                  <SelectItem key={h.id} value={h.id}>
+                    <span className="mr-2">{h.emoji}</span>
+                    {h.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {habitId !== NO_HABIT && (
+              <p className="text-[11px] text-muted-foreground mt-1.5">
+                Silenciado nos dias em que o hábito já estiver concluído.
+              </p>
+            )}
+          </div>
+
+
+          <div>
             <Label className="text-xs uppercase tracking-widest text-muted-foreground mb-2 block">Modo</Label>
             <RadioGroup value={mode} onValueChange={(v) => setMode(v as ReminderMode)} className="grid grid-cols-2 gap-2">
               <label className={`flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-colors ${mode === "interval" ? "border-primary bg-primary/10" : "border-border/40 bg-secondary/30"}`}>
