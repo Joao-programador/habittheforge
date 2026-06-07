@@ -5,8 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Plus } from "lucide-react";
 import { Reminder, ReminderMode } from "@/hooks/useReminders";
+import { useHabitsData } from "@/hooks/useHabitsData";
+
+const NO_HABIT = "__none__";
 
 interface Props {
   trigger: React.ReactNode;
@@ -17,6 +21,7 @@ interface Props {
     mode: ReminderMode;
     intervalMinutes?: number;
     times?: string[];
+    habitId?: string;
   }) => void;
 }
 
