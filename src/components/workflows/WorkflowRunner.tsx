@@ -48,21 +48,20 @@ export function WorkflowRunner({ workflow, onClose }: Props) {
     }
   }, [done, total, workflow, forged]);
 
-  if (!workflow) return null;
-
   const toggle = (id: string) =>
     setChecked((c) => ({ ...c, [id]: !c[id] }));
 
   return (
     <AnimatePresence>
-      <motion.div
-        key="runner"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-xl overflow-y-auto"
-      >
+      {isOpen && workflow && (
+        <motion.div
+          key="runner"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-xl overflow-y-auto"
+        >
         <div className="min-h-full flex flex-col">
           {/* Header */}
           <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border/40">
