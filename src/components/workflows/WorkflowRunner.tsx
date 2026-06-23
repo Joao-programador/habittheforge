@@ -78,7 +78,7 @@ export function WorkflowRunner({ workflow, onClose }: Props) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="shrink-0"
                   aria-label="Fechar"
                 >
