@@ -1,11 +1,12 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
-import { LayoutDashboard, Trophy, Settings, Flame, CalendarRange, ListChecks, BellRing } from "lucide-react";
+import { LayoutDashboard, Trophy, Settings, Flame, CalendarRange, ListChecks, BellRing, Workflow } from "lucide-react";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Planner", url: "/planner", icon: CalendarRange },
   { title: "To-Do", url: "/todos", icon: ListChecks },
+  { title: "Algoritmos", url: "/workflows", icon: Workflow },
   { title: "Lembretes", url: "/reminders", icon: BellRing },
   { title: "Conquistas", url: "/achievements", icon: Trophy },
   { title: "Configurações", url: "/settings", icon: Settings },
