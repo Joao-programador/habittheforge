@@ -55,6 +55,7 @@ export function WorkflowRunner({ workflow, onClose }: Props) {
 
   return (
     <AnimatePresence>
+      {console.log("render isOpen:", isOpen, "workflow:", workflow?.title)}
       {isOpen && workflow && (
         <motion.div
           key="runner"
