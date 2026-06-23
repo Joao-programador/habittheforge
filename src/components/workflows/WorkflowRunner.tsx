@@ -236,6 +236,7 @@ export function WorkflowRunner({ workflow, onClose }: Props) {
           )}
         </AnimatePresence>
       </motion.div>
+      )}
     </AnimatePresence>
   );
 }
