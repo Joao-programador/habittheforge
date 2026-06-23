@@ -10,6 +10,7 @@ import Achievements from "./pages/Achievements";
 import Planner from "./pages/Planner";
 import Todos from "./pages/Todos";
 import Reminders from "./pages/Reminders";
+import Workflows from "./pages/Workflows";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/planner" element={<Planner />} />
             <Route path="/todos" element={<Todos />} />
             <Route path="/reminders" element={<Reminders />} />
+            <Route path="/workflows" element={<Workflows />} />
             <Route path="/achievements" element={<Achievements />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
