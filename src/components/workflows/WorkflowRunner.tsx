@@ -31,8 +31,10 @@ export function WorkflowRunner({ workflow, onClose }: Props) {
   const progress = total > 0 ? (done / total) * 100 : 0;
 
   const handleClose = () => {
+    console.log("handleClose called, current isOpen:", isOpen);
     setIsOpen(false);
     window.setTimeout(() => {
+      console.log("calling onClose");
       onClose();
     }, 250);
   };
