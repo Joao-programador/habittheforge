@@ -13,11 +13,13 @@ interface Props {
 export function WorkflowRunner({ workflow, onClose }: Props) {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [forged, setForged] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (workflow) {
       setChecked({});
       setForged(false);
+      setIsOpen(true);
     }
   }, [workflow?.id]);
 
@@ -28,16 +30,23 @@ export function WorkflowRunner({ workflow, onClose }: Props) {
   );
   const progress = total > 0 ? (done / total) * 100 : 0;
 
+  const handleClose = () => {
+    setIsOpen(false);
+    window.setTimeout(() => {
+      onClose();
+    }, 250);
+  };
+
   useEffect(() => {
     if (!workflow || total === 0) return;
     if (done === total && !forged) {
       setForged(true);
       const t = window.setTimeout(() => {
-        onClose();
+        handleClose();
       }, 1500);
       return () => window.clearTimeout(t);
     }
-  }, [done, total, workflow, forged, onClose]);
+  }, [done, total, workflow, forged]);
 
   if (!workflow) return null;
 
