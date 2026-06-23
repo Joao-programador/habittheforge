@@ -23,6 +23,10 @@ export function WorkflowRunner({ workflow, onClose }: Props) {
     }
   }, [workflow?.id]);
 
+  useEffect(() => {
+    console.log("state changed - isOpen:", isOpen, "workflow:", workflow?.title);
+  }, [isOpen, workflow]);
+
   const total = workflow?.steps.length ?? 0;
   const done = useMemo(
     () => (workflow ? workflow.steps.filter((s) => checked[s.id]).length : 0),
