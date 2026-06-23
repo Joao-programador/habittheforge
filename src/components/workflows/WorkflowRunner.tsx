@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Workflow } from "@/hooks/useWorkflows";
 import { Button } from "@/components/ui/button";
@@ -14,18 +14,16 @@ export function WorkflowRunner({ workflow, onClose }: Props) {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [forged, setForged] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const hasScheduledClose = useRef(false);
 
   useEffect(() => {
     if (workflow) {
       setChecked({});
       setForged(false);
       setIsOpen(true);
+      hasScheduledClose.current = false;
     }
   }, [workflow?.id]);
-
-  useEffect(() => {
-    console.log("state changed - isOpen:", isOpen, "workflow:", workflow?.title);
-  }, [isOpen, workflow]);
 
   const total = workflow?.steps.length ?? 0;
   const done = useMemo(
@@ -34,25 +32,24 @@ export function WorkflowRunner({ workflow, onClose }: Props) {
   );
   const progress = total > 0 ? (done / total) * 100 : 0;
 
-  const handleClose = () => {
-    console.log("handleClose called, current isOpen:", isOpen);
+  const handleClose = useCallback(() => {
     setIsOpen(false);
     window.setTimeout(() => {
-      console.log("calling onClose");
       onClose();
     }, 250);
-  };
+  }, [onClose]);
 
   useEffect(() => {
     if (!workflow || total === 0) return;
-    if (done === total && !forged) {
+    if (done === total && !hasScheduledClose.current) {
+      hasScheduledClose.current = true;
       setForged(true);
       const t = window.setTimeout(() => {
         handleClose();
       }, 1500);
       return () => window.clearTimeout(t);
     }
-  }, [done, total, workflow, forged]);
+  }, [done, total, workflow, handleClose]);
 
   const toggle = (id: string) =>
     setChecked((c) => ({ ...c, [id]: !c[id] }));
