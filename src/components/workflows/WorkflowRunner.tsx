@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Workflow } from "@/hooks/useWorkflows";
 import { Button } from "@/components/ui/button";
@@ -13,11 +13,15 @@ interface Props {
 export function WorkflowRunner({ workflow, onClose }: Props) {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [forged, setForged] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const hasScheduledClose = useRef(false);
 
   useEffect(() => {
     if (workflow) {
       setChecked({});
       setForged(false);
+      setIsOpen(true);
+      hasScheduledClose.current = false;
     }
   }, [workflow?.id]);
 
@@ -28,32 +32,39 @@ export function WorkflowRunner({ workflow, onClose }: Props) {
   );
   const progress = total > 0 ? (done / total) * 100 : 0;
 
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    window.setTimeout(() => {
+      onClose();
+    }, 250);
+  }, [onClose]);
+
   useEffect(() => {
     if (!workflow || total === 0) return;
-    if (done === total && !forged) {
+    if (done === total && !hasScheduledClose.current) {
+      hasScheduledClose.current = true;
       setForged(true);
       const t = window.setTimeout(() => {
-        onClose();
+        handleClose();
       }, 1500);
       return () => window.clearTimeout(t);
     }
-  }, [done, total, workflow, forged, onClose]);
-
-  if (!workflow) return null;
+  }, [done, total, workflow, handleClose]);
 
   const toggle = (id: string) =>
     setChecked((c) => ({ ...c, [id]: !c[id] }));
 
   return (
     <AnimatePresence>
-      <motion.div
-        key="runner"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-xl overflow-y-auto"
-      >
+      {isOpen && workflow && (
+        <motion.div
+          key="runner"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-xl overflow-y-auto"
+        >
         <div className="min-h-full flex flex-col">
           {/* Header */}
           <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border/40">
@@ -70,7 +81,7 @@ export function WorkflowRunner({ workflow, onClose }: Props) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="shrink-0"
                   aria-label="Fechar"
                 >
@@ -228,6 +239,7 @@ export function WorkflowRunner({ workflow, onClose }: Props) {
           )}
         </AnimatePresence>
       </motion.div>
+      )}
     </AnimatePresence>
   );
 }
