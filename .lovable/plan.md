@@ -1,36 +1,40 @@
-## Trocar imagem do overlay por pool aleatória de wojaks
+# Sincronizar entre computador e celular
 
-Substituir o `wojak-motivacional.png` gerado por uma **pool das 8 imagens que você enviou**. A cada disparo de lembrete, o overlay sorteia uma imagem diferente.
+Hoje tudo fica salvo só no navegador do aparelho. Para o mesmo app funcionar no PC e no celular com os mesmos dados, os dados passam a viver na nuvem, protegidos por login.
 
-### O que vai acontecer
+## Como vai funcionar
 
-1. **Upload das 8 imagens como assets CDN** via `lovable-assets` (mantém o repo leve, sem binários grandes em `src/assets/`):
-   - `its_okay_to_feel_sad_sometimes.jpg`
-   - `unblocked_games_doc.jpg`
-   - `690176711649773349.jpg`
-   - `pobreza_extrema_sogra_pobreza_brasil_Wojak.jpg`
-   - `wojak.jpg` (o clássico)
-   - `634515035045141468.jpg` (npc crowd)
-   - `98797785569967922.jpg` (ITS OVER)
-   - `430727151863943085.jpg` (velho enrugado)
-   
-   Cada uma vira um `.asset.json` em `src/assets/wojaks/`.
+1. Ao abrir o app, aparece uma tela de entrada: e-mail + senha, ou "Entrar com Google".
+2. Depois de entrar, tudo (hábitos, checks, badges, planner, to-dos, lembretes, algoritmos, tema) é salvo na nuvem.
+3. No celular, basta abrir o mesmo link e entrar com a mesma conta — os dados aparecem iguais.
+4. A sessão fica salva: você entra uma vez por aparelho e continua logado.
 
-2. **Novo `src/assets/wojaks/index.ts`** que exporta um array com as URLs das 8 imagens e uma função `pickRandomWojak()`.
+Como você indicou que pode começar limpo, não haverá migração dos dados atuais do navegador.
 
-3. **`ReminderOverlay.tsx`** sorteia uma imagem por disparo:
-   - `useMemo(() => pickRandomWojak(), [pending?.firedAt])` — garante imagem nova a cada lembrete diferente, mas estável durante o tempo que o overlay fica aberto.
-   - Remove o import do `wojak-motivacional.png` antigo.
+## O que muda na tela
 
-4. **Apagar** `src/assets/wojak-motivacional.png` (não usado mais).
+- Nova tela `/auth` (entrar / criar conta), com o mesmo visual Midnight Indigo e tom disciplinar.
+- Todas as rotas passam a exigir login; sem sessão, redireciona para `/auth`.
+- Botão "Sair" no rodapé do menu lateral.
 
-### Detalhe visual
+## Detalhes técnicos
 
-A imagem "ITS OVER" já vem com texto embutido — vai conviver bem com o headline "VOCÊ É ISSO AQUI:" do overlay. Mantenho o tamanho atual (`w-64 h-64 md:w-80 md:h-80 object-contain`) e o glow primary; todas as 8 renderizam consistentes nesse box.
+Banco (Lovable Cloud). Já existem `habits`, `completions`, `badges`, `user_settings` com RLS por `auth.uid()`. Migração nova cria, cada uma com `user_id`, GRANTs para `authenticated` + `service_role`, RLS habilitada e políticas de dono:
 
-### Fora de escopo
+- `planner_events` (title, emoji, color, date, start_minutes, duration_minutes, habit_id, notes, recurrence jsonb)
+- `todos` (title, notes, due_date, completed, completed_at, color)
+- `reminders` (title, message, mode, interval_minutes, times text[], active, last_fired_at, habit_id)
+- `workflows` (title, steps jsonb)
 
-- Não vou adicionar UI pra você gerenciar a pool (adicionar/remover wojaks). Se quiser depois, fácil de fazer.
-- Não vou pesar imagem por contexto (ex: "ITS OVER" em horário específico). É random uniforme.
+Front-end:
+- `src/hooks/useAuth.tsx` — provider com `onAuthStateChange` + `getSession`, e `ProtectedRoute`.
+- `src/pages/Auth.tsx` — login/cadastro por e-mail/senha (`emailRedirectTo: window.location.origin`) e Google OAuth.
+- Reescrever `useHabitsData`, `usePlanner`, `useTodos`, `useReminders`, `useWorkflows` para ler/gravar no Supabase, mantendo exatamente as mesmas assinaturas para não mexer nas telas. Estratégia: fetch inicial + cache em memória + atualização otimista; assinatura realtime opcional por tabela para refletir mudanças feitas no outro aparelho.
+- `SettingsContext` passa a persistir em `user_settings`.
+- Sem tabela de perfis (não há nome de usuário/avatar no app).
+- Provedor Google configurado no mesmo passo, para o primeiro login não falhar.
+- Confirmação de e-mail: fica ativa por padrão (você recebe um link antes de entrar). Se preferir entrar na hora sem confirmar, digo como ativar isso.
 
-Posso seguir?
+## Observação
+
+Esta mudança substitui a decisão anterior de "somente armazenamento local", conforme sua escolha de aceitar login e senha.
