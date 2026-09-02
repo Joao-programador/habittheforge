@@ -1,12 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { format, isAfter, isBefore, parseISO, startOfDay } from "date-fns";
+import { createCloudStore } from "@/lib/cloudStore";
 
 export type RecurrenceType = "none" | "daily" | "weekly" | "custom";
 
 export interface RecurrenceRule {
   type: RecurrenceType;
-  // For "weekly": single day-of-week derived from start date
-  // For "custom": list of day-of-week numbers (0=Sun..6=Sat)
   daysOfWeek?: number[];
   until?: string | null; // YYYY-MM-DD inclusive, null = forever
 }
@@ -25,25 +24,39 @@ export interface PlannerEvent {
   created_at: string;
 }
 
-const KEY_EVENTS = "forge-planner-events";
-
-function load<T>(key: string, fallback: T): T {
-  try {
-    const v = localStorage.getItem(key);
-    return v ? (JSON.parse(v) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-function save<T>(key: string, v: T) {
-  localStorage.setItem(key, JSON.stringify(v));
-}
-const uid = () => crypto.randomUUID();
 const fmt = (d: Date) => format(d, "yyyy-MM-dd");
 
-let _events: PlannerEvent[] = load(KEY_EVENTS, []);
-const listeners = new Set<() => void>();
-const notify = () => listeners.forEach((l) => l());
+const store = createCloudStore<PlannerEvent>(
+  "planner_events",
+  (r) => ({
+    id: r.id,
+    title: r.title,
+    emoji: r.emoji ?? undefined,
+    color: r.color,
+    date: r.date,
+    startMinutes: r.start_minutes,
+    durationMinutes: r.duration_minutes,
+    habit_id: r.habit_id,
+    notes: r.notes ?? undefined,
+    recurrence: (r.recurrence ?? { type: "none" }) as RecurrenceRule,
+    created_at: r.created_at,
+  }),
+  { column: "start_minutes", ascending: true }
+);
+
+function toDb(e: Partial<PlannerEvent>): Record<string, unknown> {
+  const db: Record<string, unknown> = {};
+  if (e.title !== undefined) db.title = e.title;
+  if (e.emoji !== undefined) db.emoji = e.emoji;
+  if (e.color !== undefined) db.color = e.color;
+  if (e.date !== undefined) db.date = e.date;
+  if (e.startMinutes !== undefined) db.start_minutes = e.startMinutes;
+  if (e.durationMinutes !== undefined) db.duration_minutes = e.durationMinutes;
+  if (e.habit_id !== undefined) db.habit_id = e.habit_id || null;
+  if (e.notes !== undefined) db.notes = e.notes;
+  if (e.recurrence !== undefined) db.recurrence = e.recurrence;
+  return db;
+}
 
 /** Returns true if event occurs on given date (expanding recurrence) */
 export function eventOccursOn(ev: PlannerEvent, date: Date): boolean {
@@ -88,34 +101,19 @@ export function getEventsForDay(events: PlannerEvent[], day: Date) {
 }
 
 export function usePlanner() {
-  const [, force] = useState(0);
-  useEffect(() => {
-    const l = () => force((x) => x + 1);
-    listeners.add(l);
-    return () => {
-      listeners.delete(l);
-    };
-  }, []);
+  const events = store.useItems();
 
   const addEvent = useCallback((e: Omit<PlannerEvent, "id" | "created_at">) => {
-    const ev: PlannerEvent = { ...e, id: uid(), created_at: new Date().toISOString() };
-    _events = [..._events, ev];
-    save(KEY_EVENTS, _events);
-    notify();
-    return ev;
+    void store.insert(toDb(e));
   }, []);
 
   const updateEvent = useCallback((id: string, patch: Partial<PlannerEvent>) => {
-    _events = _events.map((e) => (e.id === id ? { ...e, ...patch } : e));
-    save(KEY_EVENTS, _events);
-    notify();
+    void store.update(id, toDb(patch), patch);
   }, []);
 
   const deleteEvent = useCallback((id: string) => {
-    _events = _events.filter((e) => e.id !== id);
-    save(KEY_EVENTS, _events);
-    notify();
+    void store.remove(id);
   }, []);
 
-  return { events: _events, addEvent, updateEvent, deleteEvent };
+  return { events, addEvent, updateEvent, deleteEvent };
 }
