@@ -108,6 +108,154 @@ export type Database = {
         }
         Relationships: []
       }
+      planner_events: {
+        Row: {
+          color: string
+          created_at: string
+          date: string
+          duration_minutes: number
+          emoji: string | null
+          habit_id: string | null
+          id: string
+          notes: string | null
+          recurrence: Json
+          start_minutes: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          date: string
+          duration_minutes?: number
+          emoji?: string | null
+          habit_id?: string | null
+          id?: string
+          notes?: string | null
+          recurrence?: Json
+          start_minutes?: number
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          date?: string
+          duration_minutes?: number
+          emoji?: string | null
+          habit_id?: string | null
+          id?: string
+          notes?: string | null
+          recurrence?: Json
+          start_minutes?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planner_events_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reminders: {
+        Row: {
+          active: boolean
+          created_at: string
+          habit_id: string | null
+          id: string
+          interval_minutes: number | null
+          last_fired_at: string | null
+          message: string
+          mode: string
+          times: string[]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          habit_id?: string | null
+          id?: string
+          interval_minutes?: number | null
+          last_fired_at?: string | null
+          message?: string
+          mode?: string
+          times?: string[]
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          habit_id?: string | null
+          id?: string
+          interval_minutes?: number | null
+          last_fired_at?: string | null
+          message?: string
+          mode?: string
+          times?: string[]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminders_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      todos: {
+        Row: {
+          color: string
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          notes: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           accent_color: string
@@ -127,6 +275,33 @@ export type Database = {
           accent_color?: string
           dark_mode?: boolean
           primary_color?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      workflows: {
+        Row: {
+          created_at: string
+          id: string
+          steps: Json
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          steps?: Json
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          steps?: Json
+          title?: string
           updated_at?: string
           user_id?: string
         }
