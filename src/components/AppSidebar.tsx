@@ -1,6 +1,9 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
-import { LayoutDashboard, Trophy, Settings, Flame, CalendarRange, ListChecks, BellRing, Workflow } from "lucide-react";
+import { LayoutDashboard, Trophy, Settings, Flame, CalendarRange, ListChecks, BellRing, Workflow, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
