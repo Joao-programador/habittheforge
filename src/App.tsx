@@ -1,9 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SettingsProvider } from "@/context/SettingsContext";
+import { AuthProvider, ProtectedRoute } from "@/hooks/useAuth";
+import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import Achievements from "./pages/Achievements";
@@ -18,22 +20,28 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
-      <SettingsProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner position="top-right" richColors />
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/planner" element={<Planner />} />
-            <Route path="/todos" element={<Todos />} />
-            <Route path="/reminders" element={<Reminders />} />
-            <Route path="/workflows" element={<Workflows />} />
-            <Route path="/achievements" element={<Achievements />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </TooltipProvider>
-      </SettingsProvider>
+      <AuthProvider>
+        <SettingsProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner position="top-right" richColors />
+            <Routes>
+              {/* Public route */}
+              <Route path="/auth" element={<Auth />} />
+
+              {/* Protected routes — redirects to /auth if not logged in */}
+              <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/planner" element={<ProtectedRoute><Planner /></ProtectedRoute>} />
+              <Route path="/todos" element={<ProtectedRoute><Todos /></ProtectedRoute>} />
+              <Route path="/reminders" element={<ProtectedRoute><Reminders /></ProtectedRoute>} />
+              <Route path="/workflows" element={<ProtectedRoute><Workflows /></ProtectedRoute>} />
+              <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </TooltipProvider>
+        </SettingsProvider>
+      </AuthProvider>
     </BrowserRouter>
   </QueryClientProvider>
 );
