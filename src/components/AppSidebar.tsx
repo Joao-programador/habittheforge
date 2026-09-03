@@ -68,13 +68,26 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-3">
+      <SidebarFooter className="p-3 gap-2">
+        {!collapsed && user?.email && (
+          <div className="px-2 text-[10px] text-muted-foreground truncate">{user.email}</div>
+        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleSignOut}
+          className="justify-start gap-3 text-muted-foreground hover:text-foreground"
+        >
+          <LogOut className="w-4 h-4 shrink-0" />
+          {!collapsed && <span>Sair</span>}
+        </Button>
         {!collapsed && (
-          <div className="px-2 py-1 text-[10px] text-muted-foreground italic leading-snug">
-            Dados salvos localmente neste navegador.
+          <div className="px-2 text-[10px] text-muted-foreground italic leading-snug">
+            Dados sincronizados na nuvem.
           </div>
         )}
       </SidebarFooter>
+
     </Sidebar>
   );
 }
