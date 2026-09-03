@@ -12,7 +12,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <header className="h-14 border-b border-border/40 flex items-center px-3 sticky top-0 z-30 bg-background/70 backdrop-blur-xl">
             <SidebarTrigger />
           </header>
