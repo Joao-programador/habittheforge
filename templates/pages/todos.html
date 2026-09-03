@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div x-data="todosData()" x-init="$watch('filtered', () => { setTimeout(() => window.lucide && window.lucide.createIcons(), 10) })" class="space-y-5">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h1 class="font-display text-3xl tracking-tight">To-Do</h1>
+      <p class="text-sm text-muted-foreground">
+        <span x-text="openCount"></span> abertas<template x-if="overdue > 0"><span x-text="` · ${overdue} atrasadas`"></span></template>. Prazo = compromisso.
+      </p>
+    </div>
+    <button @click="openNew()" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-primary text-primary-foreground hover:bg-primary/90 glow-primary gap-2 h-10 px-4 py-2">
+      <i data-lucide="plus" class="w-4 h-4"></i> Nova tarefa
+    </button>
+  </div>
+
+  <div class="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
+    <button @click="filter = 'open'" :class="{'bg-background text-foreground shadow-sm': filter === 'open'}" class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">Abertas</button>
+    <button @click="filter = 'done'" :class="{'bg-background text-foreground shadow-sm': filter === 'done'}" class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">Feitas</button>
+    <button @click="filter = 'all'" :class="{'bg-background text-foreground shadow-sm': filter === 'all'}" class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">Todas</button>
+  </div>
+
+  <div class="space-y-2">
+    <template x-if="filtered.length === 0">
+      <div class="surface-card p-10 text-center">
+        <i data-lucide="flag" class="w-8 h-8 mx-auto text-muted-foreground mb-3"></i>
+        <p class="font-display text-lg tracking-tight">Nada na fila.</p>
+        <p class="text-sm text-muted-foreground">Liste o que precisa morrer hoje.</p>
+      </div>
+    </template>
+    
+    <template x-for="t in filtered" :key="t.id">
+      <div
+        :class="['surface-card p-3.5 flex items-start gap-3 group transition hover:border-border/80', t.completed ? 'opacity-60' : '']"
+        :style="`border-left: 3px solid ${t.color}`"
+      >
+        <button
+            @click="toggleTodo(t.id)"
+            :class="t.completed ? 'bg-primary text-primary-foreground' : ''"
+            class="peer mt-1 h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
+        >
+            <i data-lucide="check" x-show="t.completed" class="h-3 w-3"></i>
+        </button>
+        <button @click="openEdit(t)" class="flex-1 min-w-0 text-left">
+          <div :class="['font-semibold leading-tight', t.completed ? 'line-through' : '']" x-text="t.title"></div>
+          <template x-if="t.notes">
+            <div class="text-xs text-muted-foreground mt-1 line-clamp-2" x-text="t.notes"></div>
+          </template>
+          <div class="flex items-center gap-2 mt-2">
+            <span
+              :class="[
+                'inline-flex items-center gap-1 text-[10px] font-mono uppercase px-1.5 py-0.5 rounded',
+                getDueTone(t) === 'primary' ? 'bg-primary/15 text-primary' : '',
+                getDueTone(t) === 'warn' ? 'bg-amber-500/15 text-amber-400' : '',
+                getDueTone(t) === 'danger' ? 'bg-destructive/15 text-destructive' : '',
+                getDueTone(t) === 'muted' ? 'bg-secondary/60 text-muted-foreground' : ''
+              ]"
+            >
+              <i data-lucide="calendar" class="w-3 h-3"></i>
+              <span x-text="getDueText(t)"></span>
+            </span>
+          </div>
+        </button>
+        <button
+          @click="deleteTodo(t.id)"
+          class="opacity-0 group-hover:opacity-100 transition p-1.5 text-muted-foreground hover:text-destructive"
+        >
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </template>
+  </div>
+
+  <!-- Dialog -->
+  <div x-show="open" class="relative z-50" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div x-show="open" x-transition.opacity class="fixed inset-0 z-50 bg-black/80"></div>
+    <div class="fixed inset-0 z-50 overflow-y-auto">
+      <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+        <div x-show="open" @click.away="open = false" x-transition class="relative transform overflow-hidden rounded-lg border bg-background text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md w-full p-6">
+          <div class="flex flex-col space-y-1.5 text-center sm:text-left mb-4">
+            <h2 class="font-display text-2xl tracking-tight" id="modal-title" x-text="editing ? 'Editar tarefa' : 'Nova tarefa'"></h2>
+          </div>
+          <div class="space-y-4 pt-2">
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Título</label>
+              <input
+                x-model="form.title"
+                placeholder="O que precisa ser feito?"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Prazo (opcional)</label>
+              <input
+                type="date"
+                x-model="form.due_date"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+              <p class="text-[11px] text-muted-foreground">
+                Com prazo, aparece automaticamente no Planner mensal.
+              </p>
+            </div>
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Notas</label>
+              <textarea
+                x-model="form.notes"
+                rows="3"
+                placeholder="Detalhes, contexto..."
+                class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              ></textarea>
+            </div>
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Cor</label>
+              <div class="flex gap-2 flex-wrap">
+                <template x-for="c in colorOptions" :key="c">
+                  <button
+                    type="button"
+                    @click="form.color = c"
+                    :class="[
+                      'w-8 h-8 rounded-full transition-all hover:scale-110',
+                      form.color === c ? 'ring-2 ring-offset-2 ring-offset-background ring-foreground' : ''
+                    ]"
+                    :style="`background: ${c}`"
+                  ></button>
+                </template>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 mt-6">
+            <button @click="open = false" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-2 sm:mt-0">Cancelar</button>
+            <button @click="save()" :disabled="!form.title.trim()" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">Salvar</button>
+          </div>
+          <button @click="open = false" class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none hover:bg-accent hover:text-accent-foreground p-1">
+            <i data-lucide="x" class="h-4 w-4"></i>
+            <span class="sr-only">Close</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('todosData', () => ({
+        todos: {{ todos_json | tojson | safe }},
+        filter: 'open',
+        open: false,
+        editing: null,
+        form: { title: '', notes: '', due_date: '', color: '#818cf8' },
+        colorOptions: ["#818cf8", "#4f46e5", "#ec4899", "#f43f5e", "#f59e0b", "#10b981", "#06b6d4"],
+        
+        get filtered() {
+            let list = this.todos.filter(t => {
+                if (this.filter === 'open') return !t.completed;
+                if (this.filter === 'done') return t.completed;
+                return true;
+            });
+            return list.sort((a, b) => {
+                if (a.completed !== b.completed) return a.completed ? 1 : -1;
+                const aD = a.due_date ? new Date(a.due_date + 'T00:00:00').getTime() : Infinity;
+                const bD = b.due_date ? new Date(b.due_date + 'T00:00:00').getTime() : Infinity;
+                return aD - bD;
+            });
+        },
+        get openCount() {
+            return this.todos.filter(t => !t.completed).length;
+        },
+        get overdue() {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            return this.todos.filter(t => {
+                if (t.completed || !t.due_date) return false;
+                const d = new Date(t.due_date + 'T00:00:00');
+                d.setHours(0,0,0,0);
+                return d < today;
+            }).length;
+        },
+        openNew() {
+            this.editing = null;
+            this.form = { title: '', notes: '', due_date: '', color: this.colorOptions[0] };
+            this.open = true;
+        },
+        openEdit(t) {
+            this.editing = t;
+            this.form = { title: t.title, notes: t.notes || '', due_date: t.due_date || '', color: t.color };
+            this.open = true;
+        },
+        async save() {
+            if (!this.form.title.trim()) return;
+            if (this.editing) {
+                const res = await fetch(`/api/todos/${this.editing.id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(this.form)
+                });
+                if(res.ok) {
+                    const updated = await res.json();
+                    const idx = this.todos.findIndex(t => t.id === this.editing.id);
+                    if(idx !== -1) this.todos[idx] = updated;
+                }
+            } else {
+                const res = await fetch('/api/todos', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(this.form)
+                });
+                if(res.ok) {
+                    const created = await res.json();
+                    this.todos.push(created);
+                }
+            }
+            this.open = false;
+        },
+        async toggleTodo(id) {
+            const t = this.todos.find(t => t.id === id);
+            if(t) {
+                const newState = !t.completed;
+                t.completed = newState; // optimistic update
+                await fetch(`/api/todos/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({completed: newState})
+                });
+            }
+        },
+        async deleteTodo(id) {
+            this.todos = this.todos.filter(t => t.id !== id); // optimistic update
+            await fetch(`/api/todos/${id}`, { method: 'DELETE' });
+        },
+        getDueText(t) {
+            if (!t.due_date) return "Sem prazo";
+            const parsed = new Date(t.due_date + 'T00:00:00'); 
+            
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            if (parsed.getTime() === today.getTime()) return "Hoje";
+            if (parsed < today && !t.completed) {
+                const diffTime = Math.abs(today - parsed);
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                return `Atrasada ${diffDays}d`;
+            }
+            const diffTime = parsed - today;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays > 0 && diffDays <= 7) return `Em ${diffDays}d`;
+            
+            return parsed.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+        },
+        getDueTone(t) {
+            if (!t.due_date) return "muted";
+            const parsed = new Date(t.due_date + 'T00:00:00');
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            if (parsed.getTime() === today.getTime()) return "primary";
+            if (parsed < today && !t.completed) return "danger";
+            
+            const diffTime = parsed - today;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays > 0 && diffDays <= 7) return "warn";
+            
+            return "muted";
+        }
+    }));
+});
+</script>
+{% endblock %}

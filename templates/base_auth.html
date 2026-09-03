@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="pt-BR" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title | default('Forge — Habit Tracker para Quem Não Recua') }}</title>
+    <meta name="description" content="Construa disciplina inabalável. Rastreie hábitos, conquiste streaks e forje a melhor versão de si.">
+    <meta name="author" content="Forge" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Hind:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Configuration and Custom CSS -->
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              border: "hsl(var(--border))",
+              input: "hsl(var(--input))",
+              ring: "hsl(var(--ring))",
+              background: "hsl(var(--background))",
+              foreground: "hsl(var(--foreground))",
+              primary: {
+                DEFAULT: "hsl(var(--primary))",
+                foreground: "hsl(var(--primary-foreground))",
+              },
+              secondary: {
+                DEFAULT: "hsl(var(--secondary))",
+                foreground: "hsl(var(--secondary-foreground))",
+              },
+              destructive: {
+                DEFAULT: "hsl(var(--destructive))",
+                foreground: "hsl(var(--destructive-foreground))",
+              },
+              muted: {
+                DEFAULT: "hsl(var(--muted))",
+                foreground: "hsl(var(--muted-foreground))",
+              },
+              accent: {
+                DEFAULT: "hsl(var(--accent))",
+                foreground: "hsl(var(--accent-foreground))",
+              },
+              popover: {
+                DEFAULT: "hsl(var(--popover))",
+                foreground: "hsl(var(--popover-foreground))",
+              },
+              card: {
+                DEFAULT: "hsl(var(--card))",
+                foreground: "hsl(var(--card-foreground))",
+              },
+            },
+            borderRadius: {
+              lg: "var(--radius)",
+              md: "calc(var(--radius) - 2px)",
+              sm: "calc(var(--radius) - 4px)",
+            },
+            keyframes: {
+              "accordion-down": {
+                from: { height: "0" },
+                to: { height: "var(--radix-accordion-content-height)" },
+              },
+              "accordion-up": {
+                from: { height: "var(--radix-accordion-content-height)" },
+                to: { height: "0" },
+              },
+            },
+            animation: {
+              "accordion-down": "accordion-down 0.2s ease-out",
+              "accordion-up": "accordion-up 0.2s ease-out",
+            },
+          },
+        },
+      }
+    </script>
+    
+    <style type="text/tailwindcss">
+      @layer base {
+        :root {
+          --background: 240 60% 6%;
+          --foreground: 230 30% 96%;
+          --card: 235 50% 11%;
+          --card-foreground: 230 30% 96%;
+          --popover: 235 50% 13%;
+          --popover-foreground: 230 30% 96%;
+          --primary: 238 84% 60%;
+          --primary-foreground: 230 30% 98%;
+          --secondary: 235 40% 18%;
+          --secondary-foreground: 230 30% 96%;
+          --muted: 235 30% 16%;
+          --muted-foreground: 230 15% 65%;
+          --accent: 238 84% 60%;
+          --accent-foreground: 230 30% 98%;
+          --destructive: 0 75% 60%;
+          --destructive-foreground: 0 0% 100%;
+          --border: 235 30% 20%;
+          --input: 235 30% 20%;
+          --ring: 238 84% 60%;
+          --radius: 1rem;
+          --gradient-hero: radial-gradient(ellipse at top, hsl(238 84% 30% / 0.4), transparent 70%);
+        }
+        
+        * {
+          @apply border-border;
+        }
+        html {
+          font-family: 'Hind', system-ui, sans-serif;
+        }
+        body {
+          @apply bg-background text-foreground antialiased;
+          font-feature-settings: "ss01", "cv11";
+          background-image: var(--gradient-hero);
+          background-attachment: fixed;
+          min-height: 100vh;
+        }
+        h1, h2, h3, h4, h5, .font-display {
+          font-family: 'Archivo Black', system-ui, sans-serif;
+          letter-spacing: -0.02em;
+          font-weight: 900;
+        }
+        .font-mono {
+          font-family: 'JetBrains Mono', monospace;
+        }
+      }
+      
+      @layer components {
+        .glass {
+          @apply bg-card/60 backdrop-blur-xl border border-border/50;
+        }
+        .surface-card {
+          background: linear-gradient(180deg, hsl(235 50% 13%), hsl(235 50% 9%));
+          box-shadow: 0 4px 24px -8px hsl(240 60% 2% / 0.6);
+          @apply border border-border/40 rounded-2xl;
+        }
+      }
+    </style>
+  </head>
+  <body class="min-h-screen">
+    <!-- Main Content -->
+    <main id="main-content">
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+      lucide.createIcons();
+      document.body.addEventListener('htmx:afterSwap', function() {
+        lucide.createIcons();
+      });
+    </script>
+  </body>
+</html>

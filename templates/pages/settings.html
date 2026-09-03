@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-3xl space-y-6">
+  <div>
+    <h1 class="font-display text-4xl tracking-tight">Configurações</h1>
+    <p class="text-muted-foreground mt-1">Personalize sua forja.</p>
+  </div>
+
+  <!-- Theme -->
+  <div class="surface-card p-6" x-data="{ dark_mode: true }">
+    <div class="flex items-center justify-between mb-2">
+      <div class="flex items-center gap-3">
+        <template x-if="dark_mode">
+          <i data-lucide="moon" class="w-5 h-5 text-primary"></i>
+        </template>
+        <template x-if="!dark_mode">
+          <i data-lucide="sun" class="w-5 h-5 text-primary"></i>
+        </template>
+        <div>
+          <label class="font-display text-lg">Tema <span x-text="dark_mode ? 'escuro' : 'claro'"></span></label>
+          <p class="text-xs text-muted-foreground">Alterne entre modo escuro e claro</p>
+        </div>
+      </div>
+      <button type="button" role="switch" :aria-checked="dark_mode.toString()" @click="dark_mode = !dark_mode" 
+        :class="dark_mode ? 'bg-primary' : 'bg-input'"
+        class="peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50">
+        <span :class="dark_mode ? 'translate-x-5' : 'translate-x-0'" class="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Colors -->
+  <div class="surface-card p-6 space-y-5" x-data="{ 
+      primary_colors: ['#4f46e5', '#7c3aed', '#ec4899', '#f43f5e', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6'],
+      accent_colors: ['#818cf8', '#a78bfa', '#f472b6', '#fb7185', '#fbbf24', '#34d399', '#22d3ee', '#60a5fa'],
+      primary_color: '#4f46e5',
+      accent_color: '#818cf8'
+  }">
+    <div class="flex items-center gap-3">
+      <i data-lucide="palette" class="w-5 h-5 text-primary"></i>
+      <div>
+        <label class="font-display text-lg">Cores</label>
+        <p class="text-xs text-muted-foreground">Personalize as cores principais da interface</p>
+      </div>
+    </div>
+
+    <div>
+      <label class="text-xs uppercase tracking-widest text-muted-foreground mb-3 block">Cor primária</label>
+      <div class="flex gap-2 flex-wrap">
+        <template x-for="c in primary_colors" :key="c">
+          <button
+            @click="primary_color = c"
+            :class="primary_color === c ? 'ring-2 ring-offset-2 ring-offset-background ring-foreground' : ''"
+            class="w-10 h-10 rounded-xl transition-all hover:scale-110"
+            :style="`background: ${c}`"
+          ></button>
+        </template>
+      </div>
+    </div>
+
+    <div>
+      <label class="text-xs uppercase tracking-widest text-muted-foreground mb-3 block">Cor de destaque</label>
+      <div class="flex gap-2 flex-wrap">
+        <template x-for="c in accent_colors" :key="c">
+          <button
+            @click="accent_color = c"
+            :class="accent_color === c ? 'ring-2 ring-offset-2 ring-offset-background ring-foreground' : ''"
+            class="w-10 h-10 rounded-xl transition-all hover:scale-110"
+            :style="`background: ${c}`"
+          ></button>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <!-- Habits management -->
+  <div class="surface-card p-6" x-data="{
+    habits: [
+      { id: 1, name: '50 flexões diárias', emoji: '💪', color: '#4f46e5' },
+      { id: 2, name: 'Ler 20 páginas', emoji: '📚', color: '#ec4899' }
+    ],
+    deleteDialog: { open: false, habit: null },
+    addDialog: { 
+      open: false, 
+      name: '', 
+      emoji: '💪', 
+      color: '#4f46e5',
+      emojiOptions: ['💪', '📚', '🏃', '🧘', '💧', '🥗', '😴', '✍️', '🎯', '🧠', '☀️', '🚿', '🙏', '💼', '🎸', '🌱', '🔥', '⚡', '🏆', '✨'],
+      colorOptions: ['#4f46e5', '#8b5cf6', '#ec4899', '#f43f5e', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#facc15', '#ef4444'],
+      reset() { this.name = ''; this.emoji = '💪'; this.color = '#4f46e5'; }
+    },
+    confirmDelete() {
+      if(this.deleteDialog.habit) {
+        this.habits = this.habits.filter(h => h.id !== this.deleteDialog.habit.id);
+      }
+      this.deleteDialog.open = false;
+    },
+    addHabit() {
+      if (!this.addDialog.name.trim()) return;
+      this.habits.push({
+        id: Date.now(),
+        name: this.addDialog.name.trim(),
+        emoji: this.addDialog.emoji,
+        color: this.addDialog.color
+      });
+      this.addDialog.open = false;
+      this.addDialog.reset();
+    }
+  }">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <label class="font-display text-lg">Hábitos (<span x-text="habits.length"></span>)</label>
+        <p class="text-xs text-muted-foreground">Gerencie seus hábitos</p>
+      </div>
+      
+      <!-- Trigger for Add Dialog -->
+      <button @click="addDialog.open = true" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-primary glow-primary gap-2 h-10 px-4 py-2 text-primary-foreground">
+        <i data-lucide="plus" class="w-4 h-4"></i> Novo Hábito
+      </button>
+    </div>
+
+    <div class="space-y-2">
+      <template x-if="habits.length === 0">
+        <p class="text-sm text-muted-foreground italic text-center py-6">
+          Nenhum hábito ainda. Adicione o primeiro acima.
+        </p>
+      </template>
+      <template x-for="h in habits" :key="h.id">
+        <div class="flex items-center gap-3 p-3 bg-secondary/40 rounded-xl">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
+               :style="`background: ${h.color}25; border: 1px solid ${h.color}55`"
+               x-text="h.emoji">
+          </div>
+          <span class="flex-1 font-medium" x-text="h.name"></span>
+          
+          <button @click="deleteDialog.habit = h; deleteDialog.open = true" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 text-muted-foreground hover:text-destructive">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </template>
+    </div>
+
+    <!-- AlertDialog Delete -->
+    <div x-show="deleteDialog.open" class="relative z-50" aria-labelledby="alert-dialog-title" role="dialog" aria-modal="true" style="display: none;">
+      <div x-show="deleteDialog.open" x-transition.opacity class="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"></div>
+      <div class="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center sm:p-0">
+        <div x-show="deleteDialog.open" 
+             @click.away="deleteDialog.open = false"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             class="grid w-full max-w-lg translate-y-0 sm:scale-100 gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg">
+          <div class="flex flex-col space-y-2 text-center sm:text-left">
+            <h2 id="alert-dialog-title" class="text-lg font-semibold" x-text="`Apagar &quot;${deleteDialog.habit?.name}&quot;?`"></h2>
+            <p class="text-sm text-muted-foreground">O histórico será perdido permanentemente.</p>
+          </div>
+          <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+            <button @click="deleteDialog.open = false" class="mt-2 sm:mt-0 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">Cancelar</button>
+            <button @click="confirmDelete()" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 px-4 py-2">Apagar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dialog Add Habit -->
+    <div x-show="addDialog.open" class="relative z-50" aria-labelledby="dialog-title" role="dialog" aria-modal="true" style="display: none;">
+      <div x-show="addDialog.open" x-transition.opacity class="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"></div>
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div x-show="addDialog.open"
+             @click.away="addDialog.open = false"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="grid w-full max-w-md gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg">
+          <div class="flex flex-col space-y-1.5 text-center sm:text-left">
+            <h2 id="dialog-title" class="font-display text-2xl font-semibold leading-none tracking-tight">Forjar novo hábito</h2>
+          </div>
+          
+          <div class="space-y-5 pt-2">
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Nome</label>
+              <input type="text" x-model="addDialog.name" @keydown.enter="addHabit()" placeholder="Ex: 50 flexões diárias" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Emoji</label>
+              <div class="grid grid-cols-10 gap-2">
+                <template x-for="e in addDialog.emojiOptions" :key="e">
+                  <button type="button" @click="addDialog.emoji = e" 
+                    :class="addDialog.emoji === e ? 'bg-primary/20 ring-2 ring-primary' : 'bg-secondary hover:bg-secondary/70'"
+                    class="aspect-square rounded-lg text-xl transition-all hover:scale-110" x-text="e"></button>
+                </template>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Cor</label>
+              <div class="flex gap-2 flex-wrap">
+                <template x-for="c in addDialog.colorOptions" :key="c">
+                  <button type="button" @click="addDialog.color = c"
+                    :class="addDialog.color === c ? 'ring-2 ring-offset-2 ring-offset-background ring-foreground' : ''"
+                    class="w-9 h-9 rounded-full transition-all hover:scale-110" :style="`background: ${c}`"></button>
+                </template>
+              </div>
+            </div>
+
+            <button type="button" @click="addHabit()" :disabled="!addDialog.name.trim()" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-primary-foreground w-full bg-gradient-primary h-11 font-semibold">
+              Forjar Hábito
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

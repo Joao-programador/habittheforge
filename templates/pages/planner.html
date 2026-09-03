@@ -1,0 +1,435 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div x-data="planner()" x-init="init()" class="space-y-5">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="font-display text-3xl tracking-tight">Planner</h1>
+      <p class="text-sm text-muted-foreground">Forje seu tempo. Bloqueie. Execute.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button @click="goToday()" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 gap-1.5">
+        <i data-lucide="calendar-days" class="w-3.5 h-3.5"></i> Hoje
+      </button>
+      <button @click="openNew()" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 bg-gradient-primary glow-primary gap-2 text-primary-foreground">
+        <i data-lucide="plus" class="w-4 h-4"></i> Novo bloco
+      </button>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <button @click="navigate(-1)" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9">
+        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+      </button>
+      <div class="px-3 min-w-[200px] text-center font-display text-lg tracking-tight capitalize" x-text="headerLabel()"></div>
+      <button @click="navigate(1)" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9">
+        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <div class="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
+      <button @click="view = 'day'" :class="{'bg-background text-foreground shadow-sm': view === 'day'}" class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">Dia</button>
+      <button @click="view = 'week'" :class="{'bg-background text-foreground shadow-sm': view === 'week'}" class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">Semana</button>
+      <button @click="view = 'month'" :class="{'bg-background text-foreground shadow-sm': view === 'month'}" class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">Mês</button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-5">
+    <div class="min-w-0">
+      
+      <!-- Day View -->
+      <template x-if="view === 'day'">
+        <div class="surface-card overflow-hidden">
+          <div class="border-b border-border/40 bg-card/95 backdrop-blur-md z-20 py-2 text-center sticky top-0 bg-primary/10">
+            <div class="text-[10px] uppercase tracking-widest text-muted-foreground" x-text="formatDayOfWeek(cursor)"></div>
+            <div class="font-display text-xl leading-none mt-1 text-primary" x-text="cursor.getDate()"></div>
+          </div>
+          <div class="overflow-y-auto max-h-[calc(100vh-280px)]">
+             <div class="grid grid-cols-[64px_1fr]" style="height: 1344px;">
+                <div class="relative border-r border-border/40">
+                   <template x-for="h in 24" :key="h">
+                      <div style="height: 56px" class="text-[10px] font-mono text-muted-foreground text-right pr-2 pt-0.5" x-text="`${String(h-1).padStart(2, '0')}:00`"></div>
+                   </template>
+                </div>
+                <div class="relative border-l border-border/30">
+                    <template x-for="h in 24" :key="h">
+                        <div :style="`height: 56px; top: ${(h-1) * 56}px`" class="absolute left-0 right-0 border-t border-border/30 hover:bg-primary/5 cursor-pointer" @click="handleSlotClick(cursor, (h-1) * 60)"></div>
+                    </template>
+                    <template x-for="ev in getEventsForDay(cursor)" :key="ev.id">
+                        <div class="absolute z-[5] px-0.5" :style="`top: ${(ev.startMinutes/60)*56}px; height: ${Math.max(22, (ev.durationMinutes/60)*56 - 2)}px; left: 4px; width: calc(100% - 6px)`">
+                            <button
+                              type="button"
+                              @click.stop="openEdit(ev)"
+                              :style="`background: linear-gradient(135deg, ${ev.color}33, ${ev.color}1a); border-left: 3px solid ${ev.color}`"
+                              :class="{'opacity-60': isHabitCompleted(ev.habit_id, cursor)}"
+                              class="group w-full h-full text-left rounded-md px-2 py-1 overflow-hidden transition-all hover:brightness-125 hover:scale-[1.01] backdrop-blur-sm text-xs"
+                            >
+                              <div class="flex items-start gap-1.5 min-w-0">
+                                <template x-if="ev.habit_id">
+                                  <span
+                                    @click.stop="toggleHabit(ev.habit_id, cursor)"
+                                    :class="isHabitCompleted(ev.habit_id, cursor) ? 'bg-[#10b981] border-[#10b981]' : 'border-foreground/40 hover:border-foreground'"
+                                    class="shrink-0 mt-0.5 w-3.5 h-3.5 rounded-[4px] border flex items-center justify-center cursor-pointer transition"
+                                  >
+                                    <i data-lucide="check" class="w-2.5 h-2.5 text-background" style="stroke-width: 4;" x-show="isHabitCompleted(ev.habit_id, cursor)"></i>
+                                  </span>
+                                </template>
+                                <div class="min-w-0 flex-1">
+                                  <div class="font-semibold truncate" :class="{'line-through': isHabitCompleted(ev.habit_id, cursor)}">
+                                    <span class="mr-1" x-show="ev.emoji" x-text="ev.emoji"></span>
+                                    <span x-text="ev.title"></span>
+                                  </div>
+                                  <div class="text-[10px] opacity-70 font-mono" x-show="ev.durationMinutes >= 30" x-text="formatTimeRange(ev.startMinutes, ev.durationMinutes)"></div>
+                                </div>
+                              </div>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+             </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- Week View -->
+      <template x-if="view === 'week'">
+        <div class="surface-card overflow-hidden">
+          <div class="grid grid-cols-[56px_repeat(7,minmax(0,1fr))] border-b border-border/40 sticky top-0 bg-card/95 backdrop-blur-md z-20">
+            <div></div>
+            <template x-for="d in getWeekDays(cursor)" :key="d.toISOString()">
+               <div :class="{'bg-primary/10': isToday(d)}" class="py-2 text-center border-l border-border/30">
+                  <div class="text-[10px] uppercase tracking-widest text-muted-foreground" x-text="formatDayOfWeek(d)"></div>
+                  <div class="font-display text-xl leading-none mt-1" :class="{'text-primary': isToday(d)}" x-text="d.getDate()"></div>
+               </div>
+            </template>
+          </div>
+          
+          <div class="overflow-y-auto max-h-[calc(100vh-280px)]">
+             <div class="grid grid-cols-[56px_repeat(7,minmax(0,1fr))]" style="height: 1056px;">
+                <div class="relative border-r border-border/40">
+                   <template x-for="h in 24" :key="h">
+                      <div style="height: 44px" class="text-[10px] font-mono text-muted-foreground text-right pr-2 pt-0.5" x-text="String(h-1).padStart(2, '0')"></div>
+                   </template>
+                </div>
+                <template x-for="d in getWeekDays(cursor)" :key="d.toISOString()">
+                   <div class="relative border-l border-border/30">
+                      <template x-for="h in 24" :key="h">
+                          <div :style="`height: 44px; top: ${(h-1) * 44}px`" class="absolute left-0 right-0 border-t border-border/20 hover:bg-primary/5 cursor-pointer" @click="handleSlotClick(d, (h-1) * 60)"></div>
+                      </template>
+                      <template x-for="ev in getEventsForDay(d)" :key="ev.id">
+                          <div class="absolute z-[5]" :style="`top: ${(ev.startMinutes/60)*44}px; height: ${Math.max(20, (ev.durationMinutes/60)*44 - 2)}px; left: 1px; width: calc(100% - 2px)`">
+                            <button
+                              type="button"
+                              @click.stop="openEdit(ev)"
+                              :style="`background: linear-gradient(135deg, ${ev.color}33, ${ev.color}1a); border-left: 3px solid ${ev.color}`"
+                              :class="{'opacity-60': isHabitCompleted(ev.habit_id, d)}"
+                              class="group w-full h-full text-left rounded-md px-1.5 py-1 overflow-hidden transition-all hover:brightness-125 hover:scale-[1.01] backdrop-blur-sm text-[10px] leading-tight"
+                            >
+                              <div class="flex items-start gap-1 min-w-0">
+                                <template x-if="ev.habit_id">
+                                  <span
+                                    @click.stop="toggleHabit(ev.habit_id, d)"
+                                    :class="isHabitCompleted(ev.habit_id, d) ? 'bg-[#10b981] border-[#10b981]' : 'border-foreground/40 hover:border-foreground'"
+                                    class="shrink-0 mt-0.5 w-3 h-3 rounded-[3px] border flex items-center justify-center cursor-pointer transition"
+                                  >
+                                    <i data-lucide="check" class="w-2 h-2 text-background" style="stroke-width: 4;" x-show="isHabitCompleted(ev.habit_id, d)"></i>
+                                  </span>
+                                </template>
+                                <div class="min-w-0 flex-1">
+                                  <div class="font-semibold truncate" :class="{'line-through': isHabitCompleted(ev.habit_id, d)}">
+                                    <span class="mr-0.5" x-show="ev.emoji" x-text="ev.emoji"></span>
+                                    <span x-text="ev.title"></span>
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          </div>
+                      </template>
+                   </div>
+                </template>
+             </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- Month View -->
+      <template x-if="view === 'month'">
+        <div class="surface-card overflow-hidden">
+          <div class="grid grid-cols-7 border-b border-border/40">
+            <template x-for="day in ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']">
+              <div class="py-2 text-center text-[10px] uppercase tracking-widest text-muted-foreground font-medium" x-text="day"></div>
+            </template>
+          </div>
+          <div class="grid grid-cols-7 auto-rows-fr">
+             <template x-for="d in getMonthDays(cursor)" :key="d.toISOString()">
+                <div class="min-h-[110px] cursor-pointer text-left p-1.5 border-r border-b border-border/20 transition hover:bg-primary/5 flex flex-col gap-1"
+                     :class="{'opacity-40': d.getMonth() !== cursor.getMonth(), 'bg-primary/10': isToday(d)}"
+                     @click="handleDayClick(d)">
+                   <div class="text-xs font-mono flex items-center justify-between" :class="{'text-primary font-bold': isToday(d)}">
+                      <span x-text="String(d.getDate()).padStart(2, '0')"></span>
+                   </div>
+                   <div class="space-y-0.5 overflow-hidden flex-1">
+                      <template x-for="ev in getEventsForDay(d).slice(0, 3)" :key="ev.id">
+                         <div class="text-[10px] px-1.5 py-0.5 rounded truncate font-medium"
+                              :class="{'opacity-50 line-through': isHabitCompleted(ev.habit_id, d)}"
+                              :style="`background-color: ${ev.color}33; border-left: 2px solid ${ev.color}`"
+                              @click.stop="openEdit(ev)">
+                             <span x-show="ev.emoji" x-text="ev.emoji + ' '"></span><span x-text="ev.title"></span>
+                         </div>
+                      </template>
+                      <template x-if="getEventsForDay(d).length > 3">
+                          <div class="text-[10px] text-muted-foreground pl-1" x-text="`+${getEventsForDay(d).length - 3} mais`"></div>
+                      </template>
+                   </div>
+                </div>
+             </template>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <!-- Habit Quick Panel -->
+    <div class="space-y-4">
+      <div class="surface-card p-4">
+        <h3 class="font-display text-sm mb-3">Hábitos Rápidos</h3>
+        <div class="space-y-2">
+           <template x-for="h in habits" :key="h.id">
+              <button class="w-full flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 transition-colors border border-transparent hover:border-border/50 text-left text-sm" @click="handlePickHabit(h.id)">
+                 <div class="w-6 h-6 rounded flex items-center justify-center text-xs" :style="`background-color: ${h.color}20; color: ${h.color}`" x-text="h.emoji"></div>
+                 <span class="font-medium text-foreground truncate" x-text="h.name"></span>
+              </button>
+           </template>
+           <div x-show="habits.length === 0" class="text-xs text-muted-foreground italic p-2 text-center">
+               Nenhum hábito cadastrado.
+           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Event Dialog -->
+  <div x-show="dialogOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center">
+      <div class="fixed inset-0 bg-background/80 backdrop-blur-sm" @click="dialogOpen = false"></div>
+      <div class="fixed z-50 grid w-full max-w-lg scale-100 gap-4 border bg-background p-6 opacity-100 shadow-lg sm:rounded-lg">
+          <div class="flex flex-col space-y-1.5 text-center sm:text-left">
+              <h2 class="text-lg font-semibold leading-none tracking-tight" x-text="draft?.id ? 'Editar Bloco' : 'Novo Bloco'"></h2>
+          </div>
+          <div class="grid gap-4 py-4">
+              <div class="grid gap-2">
+                 <label class="text-sm font-medium leading-none">Título</label>
+                 <input type="text" x-model="draft.title" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Nome do evento">
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                 <div class="grid gap-2">
+                    <label class="text-sm font-medium leading-none">Emoji</label>
+                    <input type="text" x-model="draft.emoji" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                 </div>
+                 <div class="grid gap-2">
+                    <label class="text-sm font-medium leading-none">Cor</label>
+                    <input type="color" x-model="draft.color" class="flex h-10 w-full rounded-md border border-input bg-background px-1 py-1 cursor-pointer">
+                 </div>
+              </div>
+          </div>
+          <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+              <button @click="dialogOpen = false" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-2 sm:mt-0">Cancelar</button>
+              <button @click="handleSave()" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">Salvar</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<script>
+function planner() {
+  return {
+    view: 'week',
+    cursor: new Date(),
+    dialogOpen: false,
+    draft: {},
+    events: [], // Fetch or set via Alpine
+    habits: [], // Fetch or set via Alpine
+    completedHabits: {}, // Track habit completion
+    
+    init() {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+      this.$watch('view', () => {
+        this.$nextTick(() => {
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+      });
+      // Placeholder data
+      this.events = [
+          { id: '1', title: 'Reunião', emoji: '📅', color: '#3b82f6', date: new Date().toISOString().split('T')[0], startMinutes: 600, durationMinutes: 60 },
+          { id: '2', title: 'Leitura', emoji: '📚', color: '#10b981', date: new Date().toISOString().split('T')[0], startMinutes: 480, durationMinutes: 30, habit_id: '1' }
+      ];
+      this.habits = [
+          { id: '1', name: 'Leitura', emoji: '📚', color: '#10b981' },
+          { id: '2', name: 'Exercício', emoji: '💪', color: '#f59e0b' }
+      ];
+    },
+    
+    isHabitCompleted(habitId, d) {
+        if (!habitId) return false;
+        const dateStr = typeof d === 'string' ? d : `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        return !!this.completedHabits[`${habitId}_${dateStr}`];
+    },
+    
+    toggleHabit(habitId, d) {
+        if (!habitId) return;
+        const dateStr = typeof d === 'string' ? d : `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const key = `${habitId}_${dateStr}`;
+        if (this.completedHabits[key]) {
+            delete this.completedHabits[key];
+        } else {
+            this.completedHabits[key] = true;
+        }
+        if (typeof lucide !== 'undefined') {
+            this.$nextTick(() => lucide.createIcons());
+        }
+    },
+    
+    goToday() {
+      this.cursor = new Date();
+    },
+    
+    navigate(dir) {
+      let d = new Date(this.cursor);
+      if (this.view === 'day') {
+        d.setDate(d.getDate() + dir);
+      } else if (this.view === 'week') {
+        d.setDate(d.getDate() + (dir * 7));
+      } else {
+        d.setMonth(d.getMonth() + dir);
+      }
+      this.cursor = d;
+    },
+    
+    headerLabel() {
+      const ptBR_months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      if (this.view === 'day') {
+        return `${this.cursor.getDate()} de ${ptBR_months[this.cursor.getMonth()]} ${this.cursor.getFullYear()}`;
+      } else if (this.view === 'week') {
+        let s = new Date(this.cursor);
+        s.setDate(s.getDate() - s.getDay());
+        let e = new Date(s);
+        e.setDate(s.getDate() + 6);
+        const formatShort = (date) => `${String(date.getDate()).padStart(2, '0')} ${ptBR_months[date.getMonth()].substring(0,3)}`;
+        return `${formatShort(s)} - ${formatShort(e)} ${this.cursor.getFullYear()}`;
+      }
+      return `${ptBR_months[this.cursor.getMonth()]} ${this.cursor.getFullYear()}`;
+    },
+    
+    formatDayOfWeek(d) {
+      return ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][d.getDay()];
+    },
+    
+    isToday(d) {
+      let t = new Date();
+      return d.getDate() === t.getDate() && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear();
+    },
+    
+    getWeekDays(d) {
+      let s = new Date(d);
+      s.setDate(s.getDate() - s.getDay());
+      let days = [];
+      for(let i=0; i<7; i++) {
+         let nx = new Date(s);
+         nx.setDate(s.getDate() + i);
+         days.push(nx);
+      }
+      return days;
+    },
+    
+    getMonthDays(d) {
+      let first = new Date(d.getFullYear(), d.getMonth(), 1);
+      let s = new Date(first);
+      s.setDate(s.getDate() - s.getDay());
+      let days = [];
+      for(let i=0; i<42; i++) {
+        let nx = new Date(s);
+        nx.setDate(s.getDate() + i);
+        days.push(nx);
+      }
+      return days;
+    },
+    
+    getEventsForDay(d) {
+       const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+       return this.events.filter(e => e.date === dateStr);
+    },
+    
+    formatTimeRange(startMins, durMins) {
+       const formatMin = (m) => `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+       return `${formatMin(startMins)} - ${formatMin(startMins + durMins)}`;
+    },
+    
+    openNew() {
+       this.draft = { 
+           id: null,
+           title: '', 
+           emoji: '🗓️',
+           color: '#3b82f6',
+           date: `${this.cursor.getFullYear()}-${String(this.cursor.getMonth()+1).padStart(2,'0')}-${String(this.cursor.getDate()).padStart(2,'0')}`, 
+           startMinutes: 480, 
+           durationMinutes: 60 
+       };
+       this.dialogOpen = true;
+    },
+    
+    openEdit(ev) {
+       this.draft = JSON.parse(JSON.stringify(ev));
+       this.dialogOpen = true;
+    },
+    
+    handleSlotClick(d, mins) {
+       this.cursor = d;
+       this.draft = { 
+           id: null,
+           title: '', 
+           emoji: '🗓️',
+           color: '#3b82f6',
+           date: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`, 
+           startMinutes: mins, 
+           durationMinutes: 60 
+       };
+       this.dialogOpen = true;
+    },
+    
+    handleDayClick(d) {
+       this.cursor = d;
+       this.view = 'day';
+    },
+    
+    handlePickHabit(id) {
+       const h = this.habits.find(x => x.id === id);
+       if (h) {
+          this.draft = { 
+              id: null,
+              title: h.name, 
+              emoji: h.emoji, 
+              color: h.color, 
+              habit_id: id, 
+              date: `${this.cursor.getFullYear()}-${String(this.cursor.getMonth()+1).padStart(2,'0')}-${String(this.cursor.getDate()).padStart(2,'0')}`, 
+              startMinutes: 480, 
+              durationMinutes: 60 
+          };
+          this.dialogOpen = true;
+       }
+    },
+    
+    handleSave() {
+       if (this.draft.id) {
+           const idx = this.events.findIndex(e => e.id === this.draft.id);
+           if (idx !== -1) this.events[idx] = this.draft;
+       } else {
+           this.draft.id = String(Date.now());
+           this.events.push(this.draft);
+       }
+       this.dialogOpen = false;
+    }
+  }
+}
+</script>
+{% endblock %}

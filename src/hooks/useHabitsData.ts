@@ -28,15 +28,23 @@ const fmtDate = (d: Date) => format(d, "yyyy-MM-dd");
 
 const habitsStore = createCloudStore<Habit>(
   "habits",
-  (r) => ({
-    id: r.id,
-    name: r.name,
-    emoji: r.emoji,
-    color: r.color,
-    position: r.position,
-    created_at: r.created_at,
-  }),
-  { column: "position", ascending: true },
+  (r) => {
+    let meta: { emoji?: string; color?: string } = {};
+    if (r.description) {
+      try {
+        meta = JSON.parse(r.description);
+      } catch (e) {}
+    }
+    return {
+      id: r.id,
+      name: r.name ?? r.title ?? "",
+      emoji: r.emoji ?? meta.emoji ?? "💪",
+      color: r.color ?? meta.color ?? "#4f46e5",
+      position: r.position ?? 0,
+      created_at: r.created_at,
+    };
+  },
+  { column: "created_at", ascending: true },
   (a, b) => a.position - b.position
 );
 
@@ -58,7 +66,10 @@ export function useHabitsData() {
   const badges = badgesStore.useItems();
 
   const addHabit = useCallback(async (h: { name: string; emoji: string; color: string }) => {
+    const desc = JSON.stringify({ emoji: h.emoji, color: h.color });
     return habitsStore.insert({
+      title: h.name,
+      description: desc,
       name: h.name,
       emoji: h.emoji,
       color: h.color,
@@ -67,8 +78,12 @@ export function useHabitsData() {
   }, []);
 
   const updateHabit = useCallback(async (id: string, patch: Partial<Habit>) => {
-    const { id: _omit, created_at: _omit2, ...db } = patch as Habit;
-    await habitsStore.update(id, db as Record<string, unknown>, patch);
+    const db: Record<string, unknown> = {};
+    if (patch.name) db.title = patch.name;
+    if (patch.emoji || patch.color) {
+      db.description = JSON.stringify({ emoji: patch.emoji, color: patch.color });
+    }
+    await habitsStore.update(id, db, patch);
   }, []);
 
   const deleteHabit = useCallback(async (id: string) => {
