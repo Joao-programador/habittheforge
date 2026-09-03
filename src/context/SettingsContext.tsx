@@ -66,7 +66,11 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
       if (data) setSettings({ ...DEFAULTS, ...data });
     };
     void load(getCurrentUserId());
-    return onUserChange((uid) => void load(uid));
+    const off = onUserChange((uid) => void load(uid));
+    return () => {
+      off();
+    };
+
   }, []);
 
   useEffect(() => {
