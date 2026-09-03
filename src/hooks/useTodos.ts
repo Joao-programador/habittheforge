@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
-import { format, parseISO, isSameDay } from "date-fns";
+import { useCallback } from "react";
+import { parseISO, isSameDay } from "date-fns";
+import { createCloudStore } from "@/lib/cloudStore";
 
 export interface Todo {
   id: string;
@@ -12,79 +13,64 @@ export interface Todo {
   completed_at?: string | null;
 }
 
-const KEY = "forge-todos";
-
-function load(): Todo[] {
-  try {
-    const v = localStorage.getItem(KEY);
-    return v ? (JSON.parse(v) as Todo[]) : [];
-  } catch {
-    return [];
-  }
-}
-function persist(v: Todo[]) {
-  localStorage.setItem(KEY, JSON.stringify(v));
-}
-const uid = () => crypto.randomUUID();
-
-let _todos: Todo[] = load();
-const listeners = new Set<() => void>();
-const notify = () => listeners.forEach((l) => l());
+const store = createCloudStore<Todo>(
+  "todos",
+  (r) => ({
+    id: r.id,
+    title: r.title,
+    notes: r.notes ?? undefined,
+    due_date: r.due_date,
+    completed: r.completed,
+    color: r.color,
+    created_at: r.created_at,
+    completed_at: r.completed_at,
+  }),
+  { column: "created_at", ascending: false },
+  (a, b) => (a.created_at < b.created_at ? 1 : -1)
+);
 
 export function getTodosForDay(todos: Todo[], date: Date): Todo[] {
   return todos.filter((t) => t.due_date && isSameDay(parseISO(t.due_date), date));
 }
 
 export function useTodos() {
-  const [, force] = useState(0);
-  useEffect(() => {
-    const l = () => force((x) => x + 1);
-    listeners.add(l);
-    return () => {
-      listeners.delete(l);
-    };
-  }, []);
+  const todos = store.useItems();
 
   const addTodo = useCallback(
     (data: { title: string; due_date?: string | null; notes?: string; color?: string }) => {
-      const t: Todo = {
-        id: uid(),
+      void store.insert({
         title: data.title.trim(),
-        notes: data.notes,
+        notes: data.notes ?? null,
         due_date: data.due_date ?? null,
-        completed: false,
         color: data.color ?? "#818cf8",
-        created_at: new Date().toISOString(),
-      };
-      _todos = [t, ..._todos];
-      persist(_todos);
-      notify();
-      return t;
+        completed: false,
+      });
     },
     []
   );
 
   const updateTodo = useCallback((id: string, patch: Partial<Todo>) => {
-    _todos = _todos.map((t) => (t.id === id ? { ...t, ...patch } : t));
-    persist(_todos);
-    notify();
+    const db: Record<string, unknown> = {};
+    if (patch.title !== undefined) db.title = patch.title;
+    if (patch.notes !== undefined) db.notes = patch.notes ?? null;
+    if (patch.due_date !== undefined) db.due_date = patch.due_date;
+    if (patch.color !== undefined) db.color = patch.color;
+    if (patch.completed !== undefined) db.completed = patch.completed;
+    if (patch.completed_at !== undefined) db.completed_at = patch.completed_at;
+    void store.update(id, db, patch);
   }, []);
 
   const toggleTodo = useCallback((id: string) => {
-    _todos = _todos.map((t) =>
-      t.id === id
-        ? { ...t, completed: !t.completed, completed_at: !t.completed ? new Date().toISOString() : null }
-        : t
-    );
-    persist(_todos);
-    notify();
+    const t = store.get().find((x) => x.id === id);
+    if (!t) return;
+    const completed = !t.completed;
+    const completed_at = completed ? new Date().toISOString() : null;
+    void store.update(id, { completed, completed_at }, { completed, completed_at });
   }, []);
 
   const deleteTodo = useCallback((id: string) => {
-    _todos = _todos.filter((t) => t.id !== id);
-    persist(_todos);
-    notify();
+    void store.remove(id);
   }, []);
 
-  return { todos: _todos, addTodo, updateTodo, toggleTodo, deleteTodo };
+  return { todos, addTodo, updateTodo, toggleTodo, deleteTodo };
 }

@@ -1,6 +1,9 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
-import { LayoutDashboard, Trophy, Settings, Flame, CalendarRange, ListChecks, BellRing, Workflow } from "lucide-react";
+import { LayoutDashboard, Trophy, Settings, Flame, CalendarRange, ListChecks, BellRing, Workflow, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -16,6 +19,14 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth", { replace: true });
+  };
+
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border/60">
@@ -57,13 +68,26 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-3">
+      <SidebarFooter className="p-3 gap-2">
+        {!collapsed && user?.email && (
+          <div className="px-2 text-[10px] text-muted-foreground truncate">{user.email}</div>
+        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleSignOut}
+          className="justify-start gap-3 text-muted-foreground hover:text-foreground"
+        >
+          <LogOut className="w-4 h-4 shrink-0" />
+          {!collapsed && <span>Sair</span>}
+        </Button>
         {!collapsed && (
-          <div className="px-2 py-1 text-[10px] text-muted-foreground italic leading-snug">
-            Dados salvos localmente neste navegador.
+          <div className="px-2 text-[10px] text-muted-foreground italic leading-snug">
+            Dados sincronizados na nuvem.
           </div>
         )}
       </SidebarFooter>
+
     </Sidebar>
   );
 }

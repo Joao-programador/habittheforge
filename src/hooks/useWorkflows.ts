@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
+import { useCallback } from "react";
+import { createCloudStore } from "@/lib/cloudStore";
 
 export interface WorkflowStep {
   id: string;
@@ -15,22 +16,6 @@ export interface Workflow {
   updatedAt: number;
 }
 
-const KEY = "forge:workflows:v1";
-
-function load(): Workflow[] {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as Workflow[];
-  } catch {
-    return [];
-  }
-}
-
-function save(list: Workflow[]) {
-  localStorage.setItem(KEY, JSON.stringify(list));
-}
-
 const uid = () =>
   (typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
@@ -40,42 +25,38 @@ export function newStep(partial?: Partial<WorkflowStep>): WorkflowStep {
   return { id: uid(), title: "", ...partial };
 }
 
+const store = createCloudStore<Workflow>(
+  "workflows",
+  (r) => ({
+    id: r.id,
+    title: r.title,
+    steps: (r.steps ?? []) as WorkflowStep[],
+    createdAt: new Date(r.created_at).getTime(),
+    updatedAt: new Date(r.updated_at).getTime(),
+  }),
+  { column: "updated_at", ascending: false },
+  (a, b) => b.updatedAt - a.updatedAt
+);
+
 export function useWorkflows() {
-  const [workflows, setWorkflows] = useState<Workflow[]>(() => load());
+  const workflows = store.useItems();
 
-  useEffect(() => {
-    save(workflows);
-  }, [workflows]);
-
-  const createWorkflow = useCallback(
-    (data: { title: string; steps: WorkflowStep[] }) => {
-      const now = Date.now();
-      const wf: Workflow = {
-        id: uid(),
-        title: data.title.trim() || "Sem título",
-        steps: data.steps,
-        createdAt: now,
-        updatedAt: now,
-      };
-      setWorkflows((prev) => [wf, ...prev]);
-      return wf;
-    },
-    [],
-  );
+  const createWorkflow = useCallback((data: { title: string; steps: WorkflowStep[] }) => {
+    void store.insert({ title: data.title.trim() || "Sem título", steps: data.steps });
+  }, []);
 
   const updateWorkflow = useCallback(
     (id: string, patch: Partial<Pick<Workflow, "title" | "steps">>) => {
-      setWorkflows((prev) =>
-        prev.map((w) =>
-          w.id === id ? { ...w, ...patch, updatedAt: Date.now() } : w,
-        ),
-      );
+      void store.update(id, patch as Record<string, unknown>, {
+        ...patch,
+        updatedAt: Date.now(),
+      });
     },
-    [],
+    []
   );
 
   const deleteWorkflow = useCallback((id: string) => {
-    setWorkflows((prev) => prev.filter((w) => w.id !== id));
+    void store.remove(id);
   }, []);
 
   return { workflows, createWorkflow, updateWorkflow, deleteWorkflow };
