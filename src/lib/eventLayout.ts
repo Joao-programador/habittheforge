@@ -40,3 +40,26 @@ export function layoutDayEvents(events: PlannerEvent[]): LaidOutEvent[] {
   if (cluster.length) flush();
   return result;
 }
+
+export function groupDayEvents(events: PlannerEvent[]): PlannerEvent[][] {
+  const sorted = [...events].sort(
+    (a, b) => a.startMinutes - b.startMinutes || b.durationMinutes - a.durationMinutes
+  );
+  const result: PlannerEvent[][] = [];
+  let cluster: PlannerEvent[] = [];
+  let clusterMaxEnd = 0;
+
+  for (const ev of sorted) {
+    const end = ev.startMinutes + ev.durationMinutes;
+    if (cluster.length && ev.startMinutes >= clusterMaxEnd) {
+      result.push(cluster);
+      cluster = [];
+      clusterMaxEnd = 0;
+    }
+    cluster.push(ev);
+    clusterMaxEnd = Math.max(clusterMaxEnd, end);
+  }
+  if (cluster.length) result.push(cluster);
+  return result;
+}
+

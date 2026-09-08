@@ -2,9 +2,10 @@ import { useMemo } from "react";
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { EventBlock } from "./EventBlock";
+import { EventCluster } from "./EventCluster";
 import { getEventsForDay, type PlannerEvent } from "@/hooks/usePlanner";
 import { useTodos, getTodosForDay } from "@/hooks/useTodos";
-import { layoutDayEvents } from "@/lib/eventLayout";
+import { layoutDayEvents, groupDayEvents } from "@/lib/eventLayout";
 import { cn } from "@/lib/utils";
 
 const HOUR_PX = 44;
@@ -89,7 +90,7 @@ export function WeekView({ date, events, isHabitCompleted, onSlotClick, onEventC
           </div>
           {days.map((d) => {
             const dayEvents = getEventsForDay(events, d);
-            const laidOut = layoutDayEvents(dayEvents);
+            const clusters = groupDayEvents(dayEvents);
             const isToday = isSameDay(d, today);
             const nowMin = isToday ? today.getHours() * 60 + today.getMinutes() : -1;
             return (
@@ -104,30 +105,30 @@ export function WeekView({ date, events, isHabitCompleted, onSlotClick, onEventC
                     <div className="h-px bg-primary" />
                   </div>
                 )}
-                {laidOut.map(({ event: ev, col, cols }) => {
-                  const top = (ev.startMinutes / 60) * HOUR_PX;
-                  const height = Math.max(20, (ev.durationMinutes / 60) * HOUR_PX - 2);
-                  const completed = ev.habit_id ? isHabitCompleted(ev.habit_id, d) : false;
-                  const widthPct = 100 / cols;
+                {clusters.map((cluster) => {
+                  const startMin = Math.min(...cluster.map(e => e.startMinutes));
+                  const maxEnd = Math.max(...cluster.map(e => e.startMinutes + e.durationMinutes));
+                  const top = (startMin / 60) * HOUR_PX;
+                  const height = Math.max(20, ((maxEnd - startMin) / 60) * HOUR_PX - 2);
+
                   return (
                     <div
-                      key={ev.id + d.toISOString()}
+                      key={"cluster-" + cluster[0].id + d.toISOString()}
                       className="absolute z-[5]"
                       style={{
                         top,
                         height,
-                        left: `calc(${col * widthPct}% + 1px)`,
-                        width: `calc(${widthPct}% - 2px)`,
+                        left: `2px`,
+                        width: `calc(100% - 4px)`,
                       }}
                     >
-                      <EventBlock
-                        event={ev}
-                        date={format(d, "yyyy-MM-dd")}
-                        completed={completed}
-                        compact
-                        style={{ height: "100%" }}
-                        onClick={() => onEventClick(ev)}
-                        onToggleComplete={ev.habit_id ? () => onToggleHabit(ev.habit_id!, d) : undefined}
+                      <EventCluster
+                        cluster={cluster}
+                        dateObj={d}
+                        isHabitCompleted={isHabitCompleted}
+                        onEventClick={onEventClick}
+                        onToggleHabit={onToggleHabit}
+                        compact={true}
                       />
                     </div>
                   );

@@ -2,9 +2,10 @@ import { useMemo, useRef } from "react";
 import { format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { EventBlock } from "./EventBlock";
+import { EventCluster } from "./EventCluster";
 import { getEventsForDay, type PlannerEvent } from "@/hooks/usePlanner";
 import { useTodos, getTodosForDay, type Todo } from "@/hooks/useTodos";
-import { layoutDayEvents } from "@/lib/eventLayout";
+import { groupDayEvents } from "@/lib/eventLayout";
 import { Check, ListChecks } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +23,7 @@ interface Props {
 
 export function DayView({ date, events, isHabitCompleted, onSlotClick, onEventClick, onToggleHabit }: Props) {
   const dayEvents = useMemo(() => getEventsForDay(events, date), [events, date]);
-  const laidOut = useMemo(() => layoutDayEvents(dayEvents), [dayEvents]);
+  const clusters = useMemo(() => groupDayEvents(dayEvents), [dayEvents]);
   const { todos, toggleTodo } = useTodos();
   const dayTodos = useMemo(() => getTodosForDay(todos, date), [todos, date]);
   const today = isSameDay(date, new Date());
@@ -81,30 +82,30 @@ export function DayView({ date, events, isHabitCompleted, onSlotClick, onEventCl
                 <div className="absolute -left-1 -top-1 w-2 h-2 rounded-full bg-primary" />
               </div>
             )}
-            {laidOut.map(({ event: ev, col, cols }) => {
-              const top = (ev.startMinutes / 60) * HOUR_PX;
-              const height = Math.max(22, (ev.durationMinutes / 60) * HOUR_PX - 2);
-              const completed = ev.habit_id ? isHabitCompleted(ev.habit_id, date) : false;
-              const widthPct = 100 / cols;
+            {clusters.map((cluster) => {
+              const startMin = Math.min(...cluster.map(e => e.startMinutes));
+              const maxEnd = Math.max(...cluster.map(e => e.startMinutes + e.durationMinutes));
+              const top = (startMin / 60) * HOUR_PX;
+              const height = Math.max(22, ((maxEnd - startMin) / 60) * HOUR_PX - 2);
+
               return (
                 <div
-                  key={ev.id + format(date, "yyyy-MM-dd")}
+                  key={"cluster-" + cluster[0].id + format(date, "yyyy-MM-dd")}
                   className="absolute z-[5] px-0.5"
                   style={{
                     top,
                     height,
-                    left: `calc(${col * widthPct}% + 4px)`,
-                    width: `calc(${widthPct}% - 6px)`,
+                    left: `4px`,
+                    width: `calc(100% - 8px)`,
                   }}
                 >
-                  <EventBlock
-                    event={ev}
-                    date={format(date, "yyyy-MM-dd")}
-                    completed={completed}
-                    compact={cols > 2}
-                    style={{ height: "100%" }}
-                    onClick={() => onEventClick(ev)}
-                    onToggleComplete={ev.habit_id ? () => onToggleHabit(ev.habit_id!, date) : undefined}
+                  <EventCluster
+                    cluster={cluster}
+                    dateObj={date}
+                    isHabitCompleted={isHabitCompleted}
+                    onEventClick={onEventClick}
+                    onToggleHabit={onToggleHabit}
+                    compact={false}
                   />
                 </div>
               );
