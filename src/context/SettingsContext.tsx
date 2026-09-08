@@ -1,6 +1,4 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { getCurrentUserId, onUserChange } from "@/lib/cloudStore";
 
 interface Settings {
   dark_mode: boolean;
@@ -18,6 +16,7 @@ const DEFAULTS: Settings = {
   accent_color: "#818cf8",
 };
 
+const KEY = "forge-settings";
 const SettingsContext = createContext<SettingsContextValue | undefined>(undefined);
 
 function hexToHslString(hex: string): string {
@@ -50,28 +49,14 @@ function hexToHslString(hex: string): string {
 }
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
-  const [settings, setSettings] = useState<Settings>(DEFAULTS);
-
-  useEffect(() => {
-    const load = async (uid: string | null) => {
-      if (!uid) {
-        setSettings(DEFAULTS);
-        return;
-      }
-      const { data } = await supabase
-        .from("user_settings")
-        .select("dark_mode, primary_color, accent_color")
-        .eq("user_id", uid)
-        .maybeSingle();
-      if (data) setSettings({ ...DEFAULTS, ...data });
-    };
-    void load(getCurrentUserId());
-    const off = onUserChange((uid) => void load(uid));
-    return () => {
-      off();
-    };
-
-  }, []);
+  const [settings, setSettings] = useState<Settings>(() => {
+    try {
+      const v = localStorage.getItem(KEY);
+      return v ? { ...DEFAULTS, ...JSON.parse(v) } : DEFAULTS;
+    } catch {
+      return DEFAULTS;
+    }
+  });
 
   useEffect(() => {
     const root = document.documentElement;
@@ -87,15 +72,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const update = useCallback((patch: Partial<Settings>) => {
     setSettings((prev) => {
       const next = { ...prev, ...patch };
-      const uid = getCurrentUserId();
-      if (uid) {
-        void supabase
-          .from("user_settings")
-          .upsert({ user_id: uid, ...next }, { onConflict: "user_id" })
-          .then(({ error }) => {
-            if (error) console.error("[user_settings] save error", error.message);
-          });
-      }
+      localStorage.setItem(KEY, JSON.stringify(next));
       return next;
     });
   }, []);
