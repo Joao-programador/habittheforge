@@ -56,7 +56,12 @@ const completionsStore = createCloudStore<Completion>(
 
 const badgesStore = createCloudStore<BadgeRow>(
   "badges",
-  (r) => ({ id: r.id, badge_key: r.badge_key, habit_id: r.habit_id, unlocked_at: r.unlocked_at }),
+  (r) => ({ 
+    id: r.id, 
+    badge_key: r.badge_key, 
+    habit_id: r.habit_id, 
+    unlocked_at: r.unlocked_at ?? r.created_at ?? new Date().toISOString() 
+  }),
   { column: "unlocked_at", ascending: true }
 );
 
