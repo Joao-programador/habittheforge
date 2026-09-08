@@ -32,7 +32,7 @@ export function EventBlock({ event, completed, compact, style, onClick, onToggle
         borderLeft: `3px solid ${event.color}`,
       }}
       className={cn(
-        "group text-left rounded-md px-2 py-1 overflow-hidden transition-all hover:brightness-125 hover:scale-[1.01] backdrop-blur-sm",
+        "w-full block group text-left rounded-md px-2 py-1 overflow-hidden transition-all hover:brightness-125 hover:scale-[1.01] backdrop-blur-sm",
         completed && "opacity-60",
         compact ? "text-[10px] leading-tight" : "text-xs"
       )}
