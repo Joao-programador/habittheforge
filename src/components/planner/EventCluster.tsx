@@ -4,6 +4,8 @@ import { EventBlock } from "./EventBlock";
 import type { PlannerEvent } from "@/hooks/usePlanner";
 import { format } from "date-fns";
 
+import { Layers } from "lucide-react";
+
 interface Props {
   cluster: PlannerEvent[];
   dateObj: Date;
@@ -72,8 +74,8 @@ export function EventCluster({ cluster, dateObj, isHabitCompleted, onEventClick,
               );
             })}
             <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-              <span className="bg-background/90 text-foreground text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm backdrop-blur-md">
-                {cluster.length} blocos
+              <span className="flex items-center gap-1 bg-background/90 text-foreground text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm backdrop-blur-md">
+                <Layers className="w-3 h-3 text-primary" /> {cluster.length}
               </span>
             </div>
           </motion.div>

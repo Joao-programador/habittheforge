@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function HabitGrid({ currentMonth }: Props) {
-  const { habits, isCompleted, toggleCompletion, addHabit, deleteHabit, completions } = useHabitsData();
+  const { habits, isCompleted, toggleCompletion, addHabit, updateHabit, deleteHabit, completions } = useHabitsData();
   const days = getMonthDays(currentMonth);
   const today = new Date();
 
@@ -76,16 +76,25 @@ export function HabitGrid({ currentMonth }: Props) {
                 transition={{ delay: i * 0.04 }}
                 className="flex items-center border-b border-border/30 hover:bg-secondary/30 transition-colors"
               >
-                <div className="w-56 shrink-0 p-4 flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
-                    style={{ background: `${habit.color}25`, border: `1px solid ${habit.color}55` }}
-                  >
-                    {habit.emoji}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-semibold truncate text-sm">{habit.name}</div>
-                  </div>
+                <div className="w-56 shrink-0 p-4">
+                  <AddHabitDialog
+                    habitToEdit={habit}
+                    onUpdate={updateHabit}
+                    trigger={
+                      <button className="flex items-center gap-3 w-full text-left hover:opacity-75 transition group">
+                        <div
+                          className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 transition-transform group-hover:scale-105"
+                          style={{ background: `${habit.color}25`, border: `1px solid ${habit.color}55` }}
+                        >
+                          {habit.emoji}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-semibold truncate text-sm">{habit.name}</div>
+                          <div className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition">Editar hábito</div>
+                        </div>
+                      </button>
+                    }
+                  />
                 </div>
                 <div className="flex">
                   {days.map((d) => {

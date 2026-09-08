@@ -1,39 +1,70 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
+import { Plus, BellRing } from "lucide-react";
 import { useReminders } from "@/hooks/useReminders";
 
-const EMOJI_OPTIONS = ["💪", "📚", "🏃", "🧘", "💧", "🥗", "😴", "✍️", "🎯", "🧠", "☀️", "🚿", "🙏", "💼", "🎸", "🌱", "🔥", "⚡", "🏆", "✨"];
+const EMOJI_OPTIONS = ["💪", "🏃", "💧", "🧘", "📚", "🧠", "🥗", "🏋️‍♂️", "💤", "💻", "🎸", "💸", "🧹", "☀️", "🌙", "💊", "🥦", "🔥", "🤝", "🎨"];
 const COLOR_OPTIONS = ["#4f46e5", "#8b5cf6", "#ec4899", "#f43f5e", "#f59e0b", "#10b981", "#06b6d4", "#3b82f6", "#facc15", "#ef4444"];
 
+interface Habit {
+  id?: string;
+  name: string;
+  emoji: string;
+  color: string;
+}
+
 interface Props {
-  onAdd: (h: { name: string; emoji: string; color: string }) => Promise<any> | any;
+  habitToEdit?: Habit;
+  onAdd?: (h: Habit) => Promise<any> | any;
+  onUpdate?: (id: string, h: Partial<Habit>) => Promise<any> | any;
   trigger?: React.ReactNode;
 }
 
-export function AddHabitDialog({ onAdd, trigger }: Props) {
+export function AddHabitDialog({ onAdd, onUpdate, habitToEdit, trigger }: Props) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [emoji, setEmoji] = useState("💪");
   const [color, setColor] = useState("#4f46e5");
+  const [createReminder, setCreateReminder] = useState(false);
   const { addReminder } = useReminders();
+
+  const isEditing = !!habitToEdit;
+
+  useEffect(() => {
+    if (open && habitToEdit) {
+      setName(habitToEdit.name);
+      setEmoji(habitToEdit.emoji);
+      setColor(habitToEdit.color);
+      setCreateReminder(false);
+    } else if (open && !habitToEdit) {
+      setName("");
+      setEmoji("💪");
+      setColor("#4f46e5");
+      setCreateReminder(false);
+    }
+  }, [open, habitToEdit]);
 
   const submit = async () => {
     if (!name.trim()) return;
-    const created = await onAdd({ name: name.trim(), emoji, color });
-    if (created?.id) {
-      addReminder({
-        title: `${emoji} ${name.trim()}`,
-        message: "Hora de forjar esse hábito. Não negocia.",
-        mode: "times",
-        times: ["20:00"],
-        habitId: created.id,
-      });
+    
+    if (isEditing && onUpdate && habitToEdit.id) {
+      await onUpdate(habitToEdit.id, { name: name.trim(), emoji, color });
+    } else if (onAdd) {
+      const created = await onAdd({ name: name.trim(), emoji, color });
+      if (created?.id && createReminder) {
+        addReminder({
+          title: `${emoji} ${name.trim()}`,
+          message: "Hora de forjar esse hábito. Não negocia.",
+          mode: "times",
+          times: ["20:00"],
+          habitId: created.id,
+        });
+      }
     }
-    setName(""); setEmoji("💪"); setColor("#4f46e5"); setOpen(false);
+    setOpen(false);
   };
 
   return (
@@ -47,7 +78,9 @@ export function AddHabitDialog({ onAdd, trigger }: Props) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-2xl">Forjar novo hábito</DialogTitle>
+          <DialogTitle className="font-display text-2xl">
+            {isEditing ? "Editar hábito" : "Forjar novo hábito"}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5 pt-2">
@@ -97,8 +130,23 @@ export function AddHabitDialog({ onAdd, trigger }: Props) {
             </div>
           </div>
 
+          {!isEditing && (
+            <label className="flex items-center gap-3 cursor-pointer bg-secondary/30 p-3 rounded-lg border border-border/40 hover:bg-secondary/50 transition">
+              <input 
+                type="checkbox" 
+                checked={createReminder} 
+                onChange={(e) => setCreateReminder(e.target.checked)} 
+                className="w-4 h-4 rounded border-primary/50 text-primary focus:ring-primary"
+              />
+              <div className="flex items-center gap-2">
+                <BellRing className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">Criar lembrete diário às 20h</span>
+              </div>
+            </label>
+          )}
+
           <Button onClick={submit} className="w-full bg-gradient-primary h-11 font-semibold" disabled={!name.trim()}>
-            Forjar Hábito
+            {isEditing ? "Salvar alterações" : "Forjar Hábito"}
           </Button>
         </div>
       </DialogContent>
