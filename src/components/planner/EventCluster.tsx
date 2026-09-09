@@ -57,10 +57,11 @@ export function EventCluster({ cluster, dateObj, isHabitCompleted, onEventClick,
           >
             {cluster.slice(0, 3).reverse().map((ev, i, arr) => {
               const idx = arr.length - 1 - i;
+              const isFront = idx === 0;
               return (
                 <div
                   key={ev.id}
-                  className="absolute inset-0 rounded-md shadow-sm border border-background/20 backdrop-blur-sm"
+                  className={`absolute inset-0 rounded-md shadow-sm border border-background/20 backdrop-blur-sm ${isFront ? "overflow-hidden" : ""}`}
                   style={{
                     background: `linear-gradient(135deg, ${ev.color}50, ${ev.color}20)`,
                     borderLeft: `3px solid ${ev.color}`,
@@ -70,12 +71,25 @@ export function EventCluster({ cluster, dateObj, isHabitCompleted, onEventClick,
                     bottom: -idx * 4,
                     zIndex: 10 - idx,
                   }}
-                />
+                >
+                  {isFront && (
+                    <div className="w-full h-full pointer-events-none opacity-95">
+                      <EventBlock
+                        event={ev}
+                        date={dateStr}
+                        completed={ev.habit_id ? isHabitCompleted(ev.habit_id, dateObj) : false}
+                        compact={compact}
+                        style={{ height: "100%", background: "transparent", borderLeft: "none" }}
+                        onClick={() => {}}
+                      />
+                    </div>
+                  )}
+                </div>
               );
             })}
-            <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-              <span className="flex items-center gap-1 bg-background/90 text-foreground text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm backdrop-blur-md">
-                <Layers className="w-3 h-3 text-primary" /> {cluster.length}
+            <div className="absolute top-1 right-1 z-20 pointer-events-none">
+              <span className="flex items-center gap-1 bg-background/95 text-foreground text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm border border-border/50">
+                <Layers className="w-3 h-3 text-primary" /> +{cluster.length - 1}
               </span>
             </div>
           </motion.div>
