@@ -1,7 +1,7 @@
 import { useHabitsData } from "@/hooks/useHabitsData";
 import { getCompletionPercentage, getDailyCompletionRate, getMonthCompletionsAll, getStreak } from "@/lib/stats";
 import { motion } from "framer-motion";
-import { Flame, Trophy, TrendingUp, Target } from "lucide-react";
+import { Flame, Trophy, TrendingUp, Target, Activity } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
 
 interface Props { currentMonth: Date; }
@@ -88,7 +88,7 @@ export function StatsPanel({ currentMonth }: Props) {
                 dataKey="rate"
                 stroke="hsl(var(--primary))"
                 strokeWidth={2.5}
-                fill="url(#grad)"
+                fill="url(#colorPerc)"
                 animationDuration={800}
               />
             </AreaChart>
