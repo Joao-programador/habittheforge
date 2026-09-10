@@ -96,7 +96,7 @@ export function EventCluster({ cluster, dateObj, isHabitCompleted, onEventClick,
         ) : (
           <motion.div
             layoutId={`cluster-${cluster[0].id}-${dateStr}`}
-            className="absolute z-[100] top-0 left-0 w-[220px] bg-card/95 backdrop-blur-xl border border-border/50 shadow-2xl rounded-xl p-2 flex flex-col gap-2"
+            className="absolute z-[100] top-0 left-0 w-[min(220px,80vw)] bg-card/95 backdrop-blur-xl border border-border/50 shadow-2xl rounded-xl p-2 flex flex-col gap-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

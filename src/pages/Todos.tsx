@@ -159,7 +159,7 @@ export default function Todos() {
                     deleteTodo(t.id);
                     toast.success("Tarefa removida");
                   }}
-                  className="opacity-0 group-hover:opacity-100 transition p-1.5 text-muted-foreground hover:text-destructive"
+                  className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition p-2 -m-0.5 text-muted-foreground hover:text-destructive"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

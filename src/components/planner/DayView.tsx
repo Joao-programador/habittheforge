@@ -58,7 +58,7 @@ export function DayView({ date, events, isHabitCompleted, onSlotClick, onEventCl
         </div>
       )}
 
-      <div className="relative overflow-y-auto max-h-[calc(100vh-280px)]">
+      <div className="relative overflow-y-auto max-h-[calc(100dvh-420px)] md:max-h-[calc(100dvh-280px)]">
         <div ref={gridRef} className="relative grid grid-cols-[64px_1fr]" style={{ height: HOUR_PX * 24 }}>
           <div className="border-r border-border/40">
             {HOURS.map((h) => (

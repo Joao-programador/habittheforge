@@ -29,7 +29,7 @@ export default function Achievements() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className={`surface-card p-6 text-center transition-all ${
+                className={`surface-card p-4 sm:p-6 text-center transition-all ${
                   unlocked ? "glow-primary" : "opacity-50 grayscale"
                 }`}
               >

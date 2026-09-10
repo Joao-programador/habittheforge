@@ -113,13 +113,13 @@ export default function Planner() {
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => navigate(-1)} className="h-9 w-9">
+            <Button variant="outline" size="icon" onClick={() => navigate(-1)} className="h-11 w-11 md:h-9 md:w-9">
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <div className="px-3 min-w-[200px] text-center font-display text-lg tracking-tight capitalize">
+            <div className="px-3 min-w-[140px] md:min-w-[200px] text-center font-display text-lg tracking-tight capitalize">
               {headerLabel()}
             </div>
-            <Button variant="outline" size="icon" onClick={() => navigate(1)} className="h-9 w-9">
+            <Button variant="outline" size="icon" onClick={() => navigate(1)} className="h-11 w-11 md:h-9 md:w-9">
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>

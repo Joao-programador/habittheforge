@@ -25,7 +25,7 @@ export default function Settings() {
         </div>
 
         {/* Theme */}
-        <div className="surface-card p-6">
+        <div className="surface-card p-4 sm:p-6">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
               {dark_mode ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-primary" />}
@@ -55,7 +55,7 @@ export default function Settings() {
                 <button
                   key={c}
                   onClick={() => update({ primary_color: c })}
-                  className={`w-10 h-10 rounded-xl transition-all hover:scale-110 ${primary_color === c ? "ring-2 ring-offset-2 ring-offset-background ring-foreground" : ""}`}
+                  className={`w-11 h-11 sm:w-10 sm:h-10 rounded-xl transition-all hover:scale-110 ${primary_color === c ? "ring-2 ring-offset-2 ring-offset-background ring-foreground" : ""}`}
                   style={{ background: c }}
                 />
               ))}
@@ -69,7 +69,7 @@ export default function Settings() {
                 <button
                   key={c}
                   onClick={() => update({ accent_color: c })}
-                  className={`w-10 h-10 rounded-xl transition-all hover:scale-110 ${accent_color === c ? "ring-2 ring-offset-2 ring-offset-background ring-foreground" : ""}`}
+                  className={`w-11 h-11 sm:w-10 sm:h-10 rounded-xl transition-all hover:scale-110 ${accent_color === c ? "ring-2 ring-offset-2 ring-offset-background ring-foreground" : ""}`}
                   style={{ background: c }}
                 />
               ))}
@@ -78,7 +78,7 @@ export default function Settings() {
         </div>
 
         {/* Habits management */}
-        <div className="surface-card p-6">
+        <div className="surface-card p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <Label className="font-display text-lg">Hábitos ({habits.length})</Label>

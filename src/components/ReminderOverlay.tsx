@@ -36,7 +36,7 @@ export function ReminderOverlay({ pending, onDismiss, remaining }: Props) {
 
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-2xl flex items-center justify-center animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-2xl flex items-center justify-center overflow-y-auto animate-in fade-in duration-300">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
 
       <button
@@ -48,17 +48,17 @@ export function ReminderOverlay({ pending, onDismiss, remaining }: Props) {
       </button>
 
       {remaining > 1 && (
-        <div className="absolute top-6 left-6 text-xs uppercase tracking-[0.25em] text-muted-foreground">
+        <div className="absolute top-6 left-6 text-xs uppercase tracking-[0.25em] text-muted-foreground z-10">
           +{remaining - 1} na fila
         </div>
       )}
 
-      <div className="relative max-w-2xl w-full px-6 text-center flex flex-col items-center gap-8">
+      <div className="relative max-w-2xl w-full px-6 py-10 md:py-0 text-center flex flex-col items-center gap-5 md:gap-8">
         <div className="text-xs uppercase tracking-[0.4em] text-primary font-bold">
           Lembrete · {new Date(pending.firedAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
         </div>
 
-        <h1 className="font-display text-5xl md:text-7xl tracking-tight leading-[0.9] uppercase">
+        <h1 className="font-display text-3xl sm:text-4xl md:text-7xl tracking-tight leading-[0.95] md:leading-[0.9] uppercase">
           Você é isso<br />
           <span className="text-primary" style={{ textShadow: "0 0 40px hsl(var(--primary) / 0.6)" }}>
             aqui:
@@ -72,7 +72,7 @@ export function ReminderOverlay({ pending, onDismiss, remaining }: Props) {
             alt="Wojak"
             width={320}
             height={320}
-            className="relative w-64 h-64 md:w-80 md:h-80 object-contain drop-shadow-2xl"
+            className="relative w-36 h-36 sm:w-56 sm:h-56 md:w-80 md:h-80 object-contain drop-shadow-2xl"
             style={{ filter: "drop-shadow(0 0 24px hsl(var(--primary) / 0.4))" }}
           />
         </div>

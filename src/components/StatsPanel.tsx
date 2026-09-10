@@ -46,26 +46,34 @@ export function StatsPanel({ currentMonth }: Props) {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="surface-card p-5"
+        className="surface-card p-4 md:p-5 flex flex-col justify-center"
       >
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="font-display text-lg">Evolução do mês</h3>
-            <p className="text-xs text-muted-foreground uppercase tracking-widest">% de hábitos por dia</p>
-          </div>
-        </div>
-        <div className="h-56">
+        <h3 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase flex items-center gap-2 mb-4">
+          <Activity className="w-4 h-4" /> Desempenho
+        </h3>
+        <div className="h-[200px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -28 }}>
+            <AreaChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
               <defs>
-                <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.55} />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                <linearGradient id="colorPerc" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} domain={[0, 100]} />
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(v) => v.split("-")[2]}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                tickLine={false}
+                axisLine={false}
+                domain={[0, 100]}
+                width={32}
+              />
               <Tooltip
                 contentStyle={{
                   background: "hsl(var(--popover))",

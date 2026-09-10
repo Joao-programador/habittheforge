@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { memo } from "react";
+import { cn } from "@/lib/utils";
 
 interface Props {
   done: boolean;
@@ -18,7 +19,10 @@ function HabitCheckImpl({ done, onClick, color, size = "md", disabled }: Props) 
       whileHover={{ scale: disabled ? 1 : 1.08 }}
       onClick={onClick}
       disabled={disabled}
-      className={`${dim} rounded-lg flex items-center justify-center border-2 transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed`}
+      className={cn(
+        `relative ${dim} rounded-lg flex items-center justify-center border-2 transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed`,
+        "before:content-[''] before:absolute before:-inset-2 before:md:hidden"
+      )}
       style={{
         background: done ? color : "transparent",
         borderColor: done ? color : "hsl(var(--border))",

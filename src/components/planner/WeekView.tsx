@@ -51,7 +51,7 @@ export function WeekView({ date, events, isHabitCompleted, onSlotClick, onEventC
       </div>
 
       {hasAnyTodo && (
-        <div className="grid grid-cols-[56px_repeat(7,minmax(0,1fr))] border-b border-border/40 bg-secondary/20">
+        <div className="grid grid-cols-[56px_repeat(7,minmax(92px,1fr))] border-b border-border/40 bg-secondary/20">
           <div className="text-[9px] uppercase tracking-widest text-muted-foreground font-mono text-right pr-2 pt-1.5">
             Prazos
           </div>

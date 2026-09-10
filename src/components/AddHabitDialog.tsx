@@ -97,13 +97,13 @@ export function AddHabitDialog({ onAdd, onUpdate, habitToEdit, trigger }: Props)
 
           <div className="space-y-2">
             <Label>Emoji</Label>
-            <div className="grid grid-cols-10 gap-2">
+            <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2">
               {EMOJI_OPTIONS.map((e) => (
                 <button
                   key={e}
                   type="button"
                   onClick={() => setEmoji(e)}
-                  className={`aspect-square rounded-lg text-xl transition-all hover:scale-110 ${
+                  className={`aspect-square min-h-[44px] md:min-h-0 rounded-lg text-xl transition-all hover:scale-110 ${
                     emoji === e ? "bg-primary/20 ring-2 ring-primary" : "bg-secondary hover:bg-secondary/70"
                   }`}
                 >
@@ -121,7 +121,7 @@ export function AddHabitDialog({ onAdd, onUpdate, habitToEdit, trigger }: Props)
                   key={c}
                   type="button"
                   onClick={() => setColor(c)}
-                  className={`w-9 h-9 rounded-full transition-all hover:scale-110 ${
+                  className={`w-11 h-11 md:w-9 md:h-9 rounded-full transition-all hover:scale-110 ${
                     color === c ? "ring-2 ring-offset-2 ring-offset-background ring-foreground" : ""
                   }`}
                   style={{ background: c }}

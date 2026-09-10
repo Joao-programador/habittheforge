@@ -117,11 +117,11 @@ export default function Reminders() {
         ) : (
           <div className="space-y-2">
             {reminders.map((r) => (
-              <div key={r.id} className="surface-card p-4 flex items-center gap-4">
+              <div key={r.id} className="surface-card p-4 flex flex-wrap items-center gap-3">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${r.active ? "bg-primary/15 text-primary" : "bg-secondary/40 text-muted-foreground"}`}>
                   <BellRing className="w-5 h-5" />
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-[160px]">
                   <div className="font-display text-lg tracking-tight uppercase truncate">
                     {r.title || "Sem título"}
                   </div>

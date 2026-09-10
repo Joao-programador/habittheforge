@@ -96,7 +96,7 @@ export function EventDialog({ open, onOpenChange, draft, onSave, onDelete }: Pro
             <Input value={d.title} onChange={(e) => update({ title: e.target.value })} placeholder="O que vai forjar?" autoFocus />
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="space-y-2">
               <Label>Data</Label>
               <Input type="date" value={d.date} onChange={(e) => update({ date: e.target.value })} />
@@ -116,7 +116,7 @@ export function EventDialog({ open, onOpenChange, draft, onSave, onDelete }: Pro
             <div className="flex gap-2 flex-wrap">
               {COLOR_OPTIONS.map((c) => (
                 <button key={c} type="button" onClick={() => update({ color: c })}
-                  className={`w-8 h-8 rounded-full transition-all hover:scale-110 ${d.color === c ? "ring-2 ring-offset-2 ring-offset-background ring-foreground" : ""}`}
+                  className={`w-10 h-10 sm:w-8 sm:h-8 rounded-full transition-all hover:scale-110 ${d.color === c ? "ring-2 ring-offset-2 ring-offset-background ring-foreground" : ""}`}
                   style={{ background: c }} />
               ))}
             </div>
@@ -143,7 +143,7 @@ export function EventDialog({ open, onOpenChange, draft, onSave, onDelete }: Pro
                       onClick={() => update({
                         recurrenceDays: active ? d.recurrenceDays.filter((x) => x !== i) : [...d.recurrenceDays, i].sort()
                       })}
-                      className={`flex-1 h-9 rounded-md text-xs font-semibold transition ${active ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:bg-secondary/70"}`}>
+                      className={`flex-1 h-11 sm:h-9 rounded-md text-xs font-semibold transition ${active ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:bg-secondary/70"}`}>
                       {lbl}
                     </button>
                   );

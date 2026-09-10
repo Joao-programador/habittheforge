@@ -32,10 +32,10 @@ export function HabitGrid({ currentMonth }: Props) {
   return (
     <div className="surface-card overflow-hidden">
       {/* Header row with day numbers */}
-      <div className="overflow-x-auto scrollbar-hide">
+      <div className="overflow-x-auto scrollbar-hide overscroll-x-contain [-webkit-overflow-scrolling:touch]">
         <div className="min-w-max">
-          <div className="flex items-center sticky top-0 z-10 bg-card/80 backdrop-blur-md border-b border-border/50">
-            <div className="w-56 shrink-0 p-4 font-display text-xs uppercase tracking-widest text-muted-foreground">
+          <div className="flex items-center sticky top-0 z-20 bg-card/80 backdrop-blur-md border-b border-border/50">
+            <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 font-display text-xs uppercase tracking-widest text-muted-foreground sticky left-0 z-20 bg-card">
               Hábito
             </div>
             <div className="flex">
@@ -44,7 +44,7 @@ export function HabitGrid({ currentMonth }: Props) {
                 return (
                   <div
                     key={d.toISOString()}
-                    className={`w-10 h-14 flex flex-col items-center justify-center text-xs font-mono ${
+                    className={`w-10 md:w-10 h-14 flex flex-col items-center justify-center text-xs font-mono ${
                       isTodayDay ? "text-primary font-bold" : "text-muted-foreground"
                     }`}
                   >
@@ -56,10 +56,10 @@ export function HabitGrid({ currentMonth }: Props) {
                 );
               })}
             </div>
-            <div className="w-28 shrink-0 p-4 text-center font-display text-xs uppercase tracking-widest text-muted-foreground">
+            <div className="hidden sm:block w-28 shrink-0 p-4 text-center font-display text-xs uppercase tracking-widest text-muted-foreground">
               Streak
             </div>
-            <div className="w-20 shrink-0 p-4 text-center font-display text-xs uppercase tracking-widest text-muted-foreground">
+            <div className="hidden sm:block w-20 shrink-0 p-4 text-center font-display text-xs uppercase tracking-widest text-muted-foreground">
               Mês
             </div>
             <div className="w-12 shrink-0" />
@@ -76,20 +76,20 @@ export function HabitGrid({ currentMonth }: Props) {
                 transition={{ delay: i * 0.04 }}
                 className="flex items-center border-b border-border/30 hover:bg-secondary/30 transition-colors"
               >
-                <div className="w-56 shrink-0 p-4">
+                <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 sticky left-0 z-10 bg-card group-hover:bg-secondary/30">
                   <AddHabitDialog
                     habitToEdit={habit}
                     onUpdate={updateHabit}
                     trigger={
                       <button className="flex items-center gap-3 w-full text-left hover:opacity-75 transition group">
                         <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 transition-transform group-hover:scale-105"
+                          className="w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center text-lg md:text-xl shrink-0 transition-transform group-hover:scale-105"
                           style={{ background: `${habit.color}25`, border: `1px solid ${habit.color}55` }}
                         >
                           {habit.emoji}
                         </div>
                         <div className="min-w-0">
-                          <div className="font-semibold truncate text-sm">{habit.name}</div>
+                          <div className="font-semibold truncate text-xs md:text-sm">{habit.name}</div>
                           <div className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition">Editar hábito</div>
                         </div>
                       </button>
@@ -113,14 +113,14 @@ export function HabitGrid({ currentMonth }: Props) {
                     );
                   })}
                 </div>
-                <div className="w-28 shrink-0 px-4 text-center">
+                <div className="hidden sm:block w-28 shrink-0 px-4 text-center">
                   <div className="inline-flex items-center gap-1 font-mono">
                     {streak > 0 && <Flame className="w-3.5 h-3.5 text-orange-400" />}
                     <span className="font-bold">{streak}</span>
                     <span className="text-xs text-muted-foreground">d</span>
                   </div>
                 </div>
-                <div className="w-20 shrink-0 px-4 text-center">
+                <div className="hidden sm:block w-20 shrink-0 px-4 text-center">
                   <span className="font-mono font-bold" style={{ color: habit.color }}>
                     {monthCount}
                   </span>

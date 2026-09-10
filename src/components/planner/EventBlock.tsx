@@ -42,7 +42,8 @@ export function EventBlock({ event, completed, compact, style, onClick, onToggle
           <span
             onClick={(e) => { e.stopPropagation(); onToggleComplete(e); }}
             className={cn(
-              "shrink-0 mt-0.5 w-3.5 h-3.5 rounded-[4px] border flex items-center justify-center cursor-pointer transition",
+              "relative shrink-0 mt-0.5 w-3.5 h-3.5 rounded-[4px] border flex items-center justify-center cursor-pointer transition",
+              "before:content-[''] before:absolute before:-inset-2.5 before:md:hidden",
               completed ? "bg-success border-success" : "border-foreground/40 hover:border-foreground"
             )}
           >
