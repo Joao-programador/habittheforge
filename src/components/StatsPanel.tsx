@@ -65,7 +65,6 @@ export function StatsPanel({ currentMonth }: Props) {
                 tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(v) => v.split("-")[2]}
               />
               <YAxis
                 tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
