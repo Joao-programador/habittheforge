@@ -1,72 +1,74 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ============================================
-   FORGE — Midnight Indigo Design System
+   FORGE - VisionOS Design System
    All colors HSL. Dark-first.
    ============================================ */
 
 @layer base {
   :root {
-    /* Midnight Indigo palette */
-    --background: 240 60% 6%;          /* #0a0a1a */
-    --foreground: 230 30% 96%;
+    /* VisionOS Dark Palette */
+    --background: 240 10% 4%;          /* #09090b */
+    --foreground: 0 0% 100%;           /* pure white */
 
-    --surface: 235 50% 11%;             /* #141432 */
-    --surface-elevated: 235 45% 15%;    /* slightly lighter card */
-    --surface-glow: 238 50% 22%;        /* #1e1e5a-ish */
+    --surface: 240 5% 10%;             /* slightly lighter */
+    --surface-elevated: 240 5% 15%;    
+    --surface-glow: 240 5% 20%;        
 
-    --card: 235 50% 11%;
-    --card-foreground: 230 30% 96%;
+    --card: 240 5% 10%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 235 50% 13%;
-    --popover-foreground: 230 30% 96%;
+    --popover: 240 5% 10%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 238 84% 60%;             /* #4f46e5 indigo */
-    --primary-foreground: 230 30% 98%;
-    --primary-glow: 234 89% 74%;        /* #818cf8 */
+    --primary: 211 100% 50%;           /* #007AFF iOS Blue */
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 211 100% 65%;      
 
-    --secondary: 235 40% 18%;
-    --secondary-foreground: 230 30% 96%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 235 30% 16%;
-    --muted-foreground: 230 15% 65%;
+    --muted: 240 5% 15%;
+    --muted-foreground: 240 5% 65%;
 
-    --accent: 238 84% 60%;
-    --accent-foreground: 230 30% 98%;
+    --accent: 241 62% 59%;             /* #5856D6 iOS Purple */
+    --accent-foreground: 0 0% 100%;
 
-    --success: 152 76% 50%;
-    --warning: 38 92% 60%;
-    --destructive: 0 75% 60%;
+    --success: 135 59% 49%;            /* #34C759 iOS Green */
+    --warning: 32 95% 54%;             /* iOS Orange */
+    --destructive: 3 100% 59%;         /* #FF3B30 iOS Red */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 235 30% 20%;
-    --input: 235 30% 20%;
-    --ring: 238 84% 60%;
+    --border: 240 5% 20%;
+    --input: 240 5% 20%;
+    --ring: 211 100% 50%;
 
-    --radius: 1rem;
+    --radius: 1.25rem;
 
     /* Sidebar */
-    --sidebar-background: 240 60% 5%;
-    --sidebar-foreground: 230 20% 80%;
-    --sidebar-primary: 238 84% 60%;
+    --sidebar-background: 240 10% 4%;
+    --sidebar-foreground: 240 5% 85%;
+    --sidebar-primary: 211 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 235 40% 14%;
-    --sidebar-accent-foreground: 230 30% 96%;
-    --sidebar-border: 235 30% 18%;
-    --sidebar-ring: 238 84% 60%;
+    --sidebar-accent: 240 5% 15%;
+    --sidebar-accent-foreground: 240 5% 95%;
+    --sidebar-border: 240 5% 15%;
+    --sidebar-ring: 211 100% 50%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(238 84% 60%), hsl(265 84% 65%));
-    --gradient-glow: radial-gradient(circle at 30% 20%, hsl(238 84% 60% / 0.25), transparent 60%);
-    --gradient-surface: linear-gradient(180deg, hsl(235 50% 13%), hsl(235 50% 9%));
-    --gradient-hero: radial-gradient(ellipse at top, hsl(238 84% 30% / 0.4), transparent 70%);
+    --gradient-primary: linear-gradient(135deg, hsl(211 100% 50%), hsl(241 62% 59%));
+    --gradient-glow: radial-gradient(circle at 50% 50%, hsl(211 100% 50% / 0.15), transparent 70%);
+    --gradient-surface: linear-gradient(180deg, hsl(240 5% 12% / 0.4), hsl(240 5% 8% / 0.6));
+    --gradient-hero: radial-gradient(ellipse at top, hsl(240 5% 15% / 0.3), transparent 80%);
 
     /* Shadows */
-    --shadow-glow: 0 0 40px hsl(238 84% 60% / 0.35);
-    --shadow-elevated: 0 20px 50px -20px hsl(240 60% 2% / 0.8);
-    --shadow-card: 0 4px 24px -8px hsl(240 60% 2% / 0.6);
+    --shadow-glow: 0 0 30px hsl(211 100% 50% / 0.2);
+    --shadow-elevated: 0 24px 60px -15px hsl(0 0% 0% / 0.5);
+    --shadow-card: 0 8px 30px -10px hsl(0 0% 0% / 0.4);
 
     /* Motion */
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -74,47 +76,52 @@
   }
 
   .light {
-    --background: 230 40% 98%;
-    --foreground: 240 60% 8%;
+    --background: 0 0% 98%;            /* #fafafa */
+    --foreground: 240 10% 4%;
 
     --surface: 0 0% 100%;
-    --surface-elevated: 230 30% 96%;
-    --surface-glow: 235 60% 92%;
+    --surface-elevated: 0 0% 100%;
+    --surface-glow: 0 0% 95%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 60% 8%;
+    --card-foreground: 240 10% 4%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 60% 8%;
+    --popover-foreground: 240 10% 4%;
 
-    --primary: 238 84% 55%;
+    --primary: 211 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 234 89% 66%;
+    --primary-glow: 211 100% 65%;
 
-    --secondary: 230 30% 94%;
-    --secondary-foreground: 240 60% 8%;
+    --secondary: 240 5% 92%;
+    --secondary-foreground: 240 10% 4%;
 
-    --muted: 230 30% 94%;
-    --muted-foreground: 235 15% 40%;
+    --muted: 240 5% 92%;
+    --muted-foreground: 240 5% 40%;
 
-    --accent: 238 84% 55%;
+    --accent: 241 62% 59%;
     --accent-foreground: 0 0% 100%;
 
-    --border: 230 25% 88%;
-    --input: 230 25% 88%;
-    --ring: 238 84% 55%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 211 100% 50%;
 
-    --sidebar-background: 230 40% 96%;
-    --sidebar-foreground: 240 30% 25%;
-    --sidebar-primary: 238 84% 55%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5% 30%;
+    --sidebar-primary: 211 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 230 30% 92%;
-    --sidebar-accent-foreground: 240 60% 8%;
-    --sidebar-border: 230 25% 88%;
+    --sidebar-accent: 240 5% 92%;
+    --sidebar-accent-foreground: 240 10% 4%;
+    --sidebar-border: 240 6% 90%;
 
-    --shadow-glow: 0 0 40px hsl(238 84% 60% / 0.25);
-    --shadow-elevated: 0 20px 50px -20px hsl(240 30% 50% / 0.25);
-    --shadow-card: 0 4px 24px -8px hsl(240 30% 50% / 0.15);
+    --gradient-primary: linear-gradient(135deg, hsl(211 100% 50%), hsl(241 62% 59%));
+    --gradient-glow: radial-gradient(circle at 50% 50%, hsl(211 100% 50% / 0.1), transparent 70%);
+    --gradient-surface: linear-gradient(180deg, hsl(0 0% 100% / 0.6), hsl(0 0% 98% / 0.8));
+    --gradient-hero: radial-gradient(ellipse at top, hsl(0 0% 90% / 0.4), transparent 80%);
+
+    --shadow-glow: 0 0 30px hsl(211 100% 50% / 0.15);
+    --shadow-elevated: 0 24px 60px -15px hsl(240 5% 50% / 0.15);
+    --shadow-card: 0 8px 30px -10px hsl(240 5% 50% / 0.08);
   }
 }
 
@@ -123,7 +130,7 @@
     @apply border-border;
   }
   html {
-    font-family: 'Hind', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
   body {
     @apply bg-background text-foreground antialiased;
@@ -157,9 +164,9 @@
   }
 
   h1, h2, h3, h4, h5, .font-display {
-    font-family: 'Archivo Black', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     letter-spacing: -0.02em;
-    font-weight: 900;
+    font-weight: 700;
   }
   .font-mono {
     font-family: 'JetBrains Mono', monospace;
@@ -167,13 +174,20 @@
 }
 
 @layer components {
+  /* VisionOS Glassmorphism */
   .glass {
-    @apply bg-card/60 backdrop-blur-xl border border-border/50;
+    background: var(--gradient-surface);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    box-shadow: var(--shadow-card), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+    @apply border border-white/5 rounded-3xl;
   }
   .surface-card {
     background: var(--gradient-surface);
-    box-shadow: var(--shadow-card);
-    @apply border border-border/40 rounded-2xl;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: var(--shadow-card), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+    @apply border border-white/5 rounded-2xl;
   }
   .glow-primary {
     box-shadow: var(--shadow-glow);
@@ -191,21 +205,21 @@
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.5); }
-    50% { box-shadow: 0 0 0 12px hsl(var(--primary) / 0); }
+    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4); }
+    50% { box-shadow: 0 0 0 10px hsl(var(--primary) / 0); }
   }
   .animate-pulse-glow { animation: pulse-glow 2s ease-out infinite; }
 
   @keyframes badge-pop {
     0% { transform: scale(0) rotate(-180deg); opacity: 0; }
-    60% { transform: scale(1.2) rotate(10deg); opacity: 1; }
+    60% { transform: scale(1.1) rotate(5deg); opacity: 1; }
     100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
-  .animate-badge-pop { animation: badge-pop 0.7s var(--ease-spring) both; }
+  .animate-badge-pop { animation: badge-pop 0.6s var(--ease-spring) both; }
 
   @keyframes check-in {
     0% { transform: scale(0); opacity: 0; }
-    60% { transform: scale(1.3); }
+    60% { transform: scale(1.2); }
     100% { transform: scale(1); opacity: 1; }
   }
   .animate-check { animation: check-in 0.4s var(--ease-spring) both; }
@@ -215,7 +229,7 @@
     100% { background-position: 1000px 0; }
   }
   .animate-shimmer {
-    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.15), transparent);
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.1), transparent);
     background-size: 1000px 100%;
     animation: shimmer 2.5s linear infinite;
   }
