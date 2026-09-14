@@ -132,6 +132,30 @@
     background-attachment: fixed;
     min-height: 100vh;
   }
+  
+  /* Custom Scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border) / 0.5) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border) / 0.6);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.6);
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
   h1, h2, h3, h4, h5, .font-display {
     font-family: 'Archivo Black', system-ui, sans-serif;
     letter-spacing: -0.02em;
