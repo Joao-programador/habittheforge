@@ -101,7 +101,7 @@ export function WeekView({ date, events, isHabitCompleted, onSlotClick, onEventC
                     onClick={() => onSlotClick(d, h * 60)} />
                 ))}
                 {nowMin >= 0 && (
-                  <div className="absolute left-0 right-0 z-10 pointer-events-none" style={{ top: (nowMin / 60) * HOUR_PX }}>
+                  <div className="absolute left-0 right-0 z-20 pointer-events-none" style={{ top: (nowMin / 60) * HOUR_PX }}>
                     <div className="h-px bg-primary" />
                   </div>
                 )}
@@ -114,7 +114,7 @@ export function WeekView({ date, events, isHabitCompleted, onSlotClick, onEventC
                   return (
                     <div
                       key={"cluster-" + cluster[0].id + d.toISOString()}
-                      className="absolute z-[5]"
+                      className="absolute"
                       style={{
                         top,
                         height,

@@ -77,7 +77,7 @@ export function DayView({ date, events, isHabitCompleted, onSlotClick, onEventCl
               />
             ))}
             {today && nowMinutes >= 0 && (
-              <div className="absolute left-0 right-0 z-10 pointer-events-none" style={{ top: (nowMinutes / 60) * HOUR_PX }}>
+              <div className="absolute left-0 right-0 z-20 pointer-events-none" style={{ top: (nowMinutes / 60) * HOUR_PX }}>
                 <div className="h-px bg-primary glow-primary" />
                 <div className="absolute -left-1 -top-1 w-2 h-2 rounded-full bg-primary" />
               </div>
@@ -91,7 +91,7 @@ export function DayView({ date, events, isHabitCompleted, onSlotClick, onEventCl
               return (
                 <div
                   key={"cluster-" + cluster[0].id + format(date, "yyyy-MM-dd")}
-                  className="absolute z-[5] px-0.5"
+                  className="absolute px-0.5"
                   style={{
                     top,
                     height,
