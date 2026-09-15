@@ -35,7 +35,7 @@ export function HabitGrid({ currentMonth }: Props) {
       <div className="overflow-x-auto scrollbar-hide overscroll-x-contain [-webkit-overflow-scrolling:touch]">
         <div className="min-w-max">
           <div className="flex items-center sticky top-0 z-20 bg-card/80 backdrop-blur-md border-b border-border/50">
-            <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 font-display text-xs uppercase tracking-widest text-muted-foreground sticky left-0 z-20 bg-card">
+            <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 font-display text-xs uppercase tracking-widest text-muted-foreground sticky left-0 z-20 bg-card/60 backdrop-blur-md border-r border-border/50">
               Hábito
             </div>
             <div className="flex">
@@ -74,9 +74,9 @@ export function HabitGrid({ currentMonth }: Props) {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.04 }}
-                className="flex items-center border-b border-border/30 hover:bg-secondary/30 transition-colors"
+                className="flex items-center border-b border-border/30 hover:bg-secondary/30 transition-colors group"
               >
-                <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 sticky left-0 z-10 bg-card group-hover:bg-secondary/30">
+                <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 sticky left-0 z-10 bg-card/60 backdrop-blur-md border-r border-border/30 group-hover:bg-secondary/40 transition-colors">
                   <AddHabitDialog
                     habitToEdit={habit}
                     onUpdate={updateHabit}
