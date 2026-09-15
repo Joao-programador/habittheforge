@@ -34,8 +34,8 @@ export function HabitGrid({ currentMonth }: Props) {
       {/* Header row with day numbers */}
       <div className="overflow-x-auto scrollbar-hide overscroll-x-contain [-webkit-overflow-scrolling:touch]">
         <div className="min-w-max">
-          <div className="flex items-center sticky top-0 z-20 bg-transparent backdrop-blur-2xl border-b border-border/20">
-            <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 font-display text-xs uppercase tracking-widest text-muted-foreground sticky left-0 z-20 bg-transparent backdrop-blur-2xl border-r border-border/20">
+          <div className="flex items-center sticky top-0 z-20 bg-background border-b border-border/20">
+            <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 font-display text-xs uppercase tracking-widest text-muted-foreground sticky left-0 z-20 bg-background border-r border-border/20">
               Hábito
             </div>
             <div className="flex">
@@ -76,7 +76,7 @@ export function HabitGrid({ currentMonth }: Props) {
                 transition={{ delay: i * 0.04 }}
                 className="flex items-center border-b border-border/30 hover:bg-secondary/30 transition-colors group"
               >
-                <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 sticky left-0 z-10 bg-transparent backdrop-blur-2xl border-r border-border/20 group-hover:bg-secondary/20 transition-colors">
+                <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 sticky left-0 z-10 bg-background border-r border-border/20 group-hover:bg-secondary/20 transition-colors">
                   <AddHabitDialog
                     habitToEdit={habit}
                     onUpdate={updateHabit}
