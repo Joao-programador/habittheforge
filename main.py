@@ -76,8 +76,14 @@ async def login(response: Response, request: Request, email: str = Form(...), pa
             # Em aplicações reais, usaríamos JWT cookies. 
             # Como é ambiente desktop, usaremos um redirecionamento simples via HTMX.
             res = Response(status_code=200)
-            res.set_cookie(key="sb-access-token", value=auth_response.session.access_token, httponly=True)
-            res.headers['HX-Redirect'] = '/' # HTMX fará o window.location.href
+            res.set_cookie(
+                key="sb-access-token", 
+                value=auth_response.session.access_token, 
+                httponly=True,
+                secure=True,
+                samesite="strict"
+            )
+            res.headers['HX-Redirect'] = '/'
             return res
     except Exception as e:
         return f'<div id="auth-error" class="text-destructive text-sm text-center mt-2">Erro: {str(e)}</div>'
@@ -202,25 +208,33 @@ async def delete_habit(habit_id: str, user_id: Optional[str] = Depends(get_user_
     return {"success": True}
 
 @app.get("/workflows", response_class=HTMLResponse)
-async def workflows(request: Request):
+async def workflows(request: Request, user_id: Optional[str] = Depends(get_user_id)):
+    if not user_id:
+        return RedirectResponse(url="/auth", status_code=302)
     return templates.TemplateResponse(
         request=request, name="pages/workflows.html", context={"title": "Workflows - Habit Forge"}
     )
 
 @app.get("/achievements", response_class=HTMLResponse)
-async def achievements(request: Request):
+async def achievements(request: Request, user_id: Optional[str] = Depends(get_user_id)):
+    if not user_id:
+        return RedirectResponse(url="/auth", status_code=302)
     return templates.TemplateResponse(
         request=request, name="pages/achievements.html", context={"title": "Conquistas - Habit Forge"}
     )
 
 @app.get("/settings", response_class=HTMLResponse)
-async def settings(request: Request):
+async def settings(request: Request, user_id: Optional[str] = Depends(get_user_id)):
+    if not user_id:
+        return RedirectResponse(url="/auth", status_code=302)
     return templates.TemplateResponse(
         request=request, name="pages/settings.html", context={"title": "Configurações - Habit Forge"}
     )
 
 @app.get("/reminders", response_class=HTMLResponse)
-async def reminders(request: Request):
+async def reminders(request: Request, user_id: Optional[str] = Depends(get_user_id)):
+    if not user_id:
+        return RedirectResponse(url="/auth", status_code=302)
     return templates.TemplateResponse(
         request=request, name="pages/reminders.html", context={"title": "Lembretes - Habit Forge"}
     )
