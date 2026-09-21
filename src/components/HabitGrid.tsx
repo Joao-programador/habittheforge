@@ -74,9 +74,9 @@ export function HabitGrid({ currentMonth }: Props) {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.04 }}
-                className="flex items-center border-b border-border/30 bg-background hover:bg-secondary/30 transition-colors group"
+                className="flex items-center border-b border-border/30 bg-background hover:bg-surface-elevated transition-colors group"
               >
-                <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 sticky left-0 z-10 bg-background border-r border-border/20 group-hover:bg-secondary/20 transition-colors">
+                <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 sticky left-0 z-30 bg-background border-r border-border/20 group-hover:bg-surface-elevated transition-colors">
                   <AddHabitDialog
                     habitToEdit={habit}
                     onUpdate={updateHabit}

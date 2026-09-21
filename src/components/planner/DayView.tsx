@@ -127,7 +127,7 @@ function TodoChip({ todo, onToggle }: { todo: Todo; onToggle: () => void }) {
           ? "opacity-50 line-through border-border/40 bg-secondary/40"
           : "border-border/60 bg-card hover:border-primary/60"
       )}
-      style={{ borderLeftColor: todo.color, borderLeftWidth: 3 }}
+      style={{ borderColor: `${todo.color}40` }}
     >
       <span
         className={cn(

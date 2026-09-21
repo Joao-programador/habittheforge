@@ -77,7 +77,7 @@ export function MonthView({ date, events, isHabitCompleted, onDayClick, onEventC
                           "text-[10px] px-1.5 py-0.5 rounded truncate font-medium",
                           t.completed && "opacity-50 line-through"
                         )}
-                        style={{ background: `${t.color}26`, borderLeft: `2px dashed ${t.color}` }}
+                        style={{ background: `${t.color}20`, border: `1px dashed ${t.color}40` }}
                         title={t.title}
                       >
                         ◇ {t.title}
@@ -91,7 +91,7 @@ export function MonthView({ date, events, isHabitCompleted, onDayClick, onEventC
                       key={"e" + ev.id + idx}
                       onClick={(e) => { e.stopPropagation(); onEventClick(ev); }}
                       className={cn("text-[10px] px-1.5 py-0.5 rounded truncate font-medium", completed && "opacity-50 line-through")}
-                      style={{ background: `${ev.color}33`, borderLeft: `2px solid ${ev.color}` }}
+                      style={{ background: `${ev.color}25`, border: `1px solid ${ev.color}40` }}
                     >
                       {ev.emoji ? `${ev.emoji} ` : ""}{ev.title}
                     </div>

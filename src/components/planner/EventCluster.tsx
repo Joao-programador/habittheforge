@@ -63,8 +63,8 @@ export function EventCluster({ cluster, dateObj, isHabitCompleted, onEventClick,
                   key={ev.id}
                   className={`absolute inset-0 rounded-md shadow-sm border border-background/20 backdrop-blur-sm ${isFront ? "overflow-hidden" : ""}`}
                   style={{
-                    background: `linear-gradient(135deg, ${ev.color}50, ${ev.color}20)`,
-                    borderLeft: `3px solid ${ev.color}`,
+                    background: `linear-gradient(135deg, ${ev.color}40, ${ev.color}18)`,
+                    border: `1px solid ${ev.color}40`,
                     top: idx * 4,
                     left: idx * 4,
                     right: -idx * 4,
@@ -79,7 +79,7 @@ export function EventCluster({ cluster, dateObj, isHabitCompleted, onEventClick,
                         date={dateStr}
                         completed={ev.habit_id ? isHabitCompleted(ev.habit_id, dateObj) : false}
                         compact={compact}
-                        style={{ height: "100%", background: "transparent", borderLeft: "none" }}
+                        style={{ height: "100%", background: "transparent", border: "none" }}
                         onClick={() => {}}
                       />
                     </div>

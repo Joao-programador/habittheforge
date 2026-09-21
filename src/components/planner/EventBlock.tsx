@@ -28,11 +28,11 @@ export function EventBlock({ event, completed, compact, style, onClick, onToggle
       onClick={onClick}
       style={{
         ...style,
-        background: `linear-gradient(135deg, ${event.color}33, ${event.color}1a)`,
-        borderLeft: `3px solid ${event.color}`,
+        background: `linear-gradient(135deg, ${event.color}25, ${event.color}12)`,
+        border: `1px solid ${event.color}40`,
       }}
       className={cn(
-        "w-full block group text-left rounded-md px-2 py-1 overflow-hidden transition-all hover:brightness-125 hover:scale-[1.01] backdrop-blur-sm",
+        "w-full block group text-left rounded-lg px-2.5 py-1.5 overflow-hidden transition-all hover:brightness-110 hover:scale-[1.01] backdrop-blur-sm shadow-sm",
         completed && "opacity-60",
         compact ? "text-[10px] leading-tight" : "text-xs"
       )}

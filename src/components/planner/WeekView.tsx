@@ -64,10 +64,10 @@ export function WeekView({ date, events, isHabitCompleted, onSlotClick, onEventC
                     key={t.id}
                     onClick={() => toggleTodo(t.id)}
                     className={cn(
-                      "w-full text-left text-[10px] px-1.5 py-0.5 rounded truncate font-medium transition hover:brightness-125",
+                      "w-full text-left text-[10px] px-1.5 py-0.5 rounded truncate font-medium transition hover:brightness-110",
                       t.completed && "line-through opacity-50"
                     )}
-                    style={{ background: `${t.color}33`, borderLeft: `2px solid ${t.color}` }}
+                    style={{ background: `${t.color}20`, border: `1px solid ${t.color}35` }}
                     title={t.title}
                   >
                     ◇ {t.title}

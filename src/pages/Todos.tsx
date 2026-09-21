@@ -125,7 +125,7 @@ export default function Todos() {
                   "surface-card p-3.5 flex items-start gap-3 group transition hover:border-border/80",
                   t.completed && "opacity-60"
                 )}
-                style={{ borderLeft: `3px solid ${t.color}` }}
+                style={{ borderColor: `${t.color}35` }}
               >
                 <Checkbox
                   checked={t.completed}
