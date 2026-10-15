@@ -3,6 +3,7 @@ import { getCompletionPercentage, getDailyCompletionRate, getMonthCompletionsAll
 import { motion } from "framer-motion";
 import { Flame, Trophy, TrendingUp, Target, Activity } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
+import { cn } from "@/lib/utils";
 
 interface Props { currentMonth: Date; }
 
