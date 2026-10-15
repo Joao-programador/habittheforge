@@ -123,9 +123,14 @@ export function checkHasStreakPenalty(
 ): boolean {
   if (!habits.length) return false;
 
+  // Evita penalizar usuários que criaram hábitos há menos de 2 dias
+  const d2Date = subDays(today, 2);
+  const hasOlderHabits = habits.some((h) => h.created_at && new Date(h.created_at) <= d2Date);
+  if (!hasOlderHabits && completions.length === 0) return false;
+
   const fmt = (d: Date) => format(d, "yyyy-MM-dd");
   const d1 = fmt(subDays(today, 1));
-  const d2 = fmt(subDays(today, 2));
+  const d2 = fmt(d2Date);
 
   const habitIds = new Set(habits.map((h) => h.id));
   const d1Count = completions.filter((c) => c.date === d1 && habitIds.has(c.habit_id)).length;

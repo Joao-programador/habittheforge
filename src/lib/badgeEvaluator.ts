@@ -19,13 +19,16 @@ export async function evaluateAndUnlockBadges(
     toUnlock.push("first_check");
   }
 
-  // Group completions by date (filtering valid active habits)
+  // Group unique completed habits by date (filtering valid active habits)
   const habitIdSet = new Set(habits.map((h) => h.id));
-  const validCompletions = completions.filter((c) => habitIdSet.has(c.habit_id));
-
-  const completionsByDate = new Map<string, number>();
-  for (const c of validCompletions) {
-    completionsByDate.set(c.date, (completionsByDate.get(c.date) || 0) + 1);
+  const completionsByDate = new Map<string, Set<string>>();
+  for (const c of completions) {
+    if (habitIdSet.has(c.habit_id)) {
+      if (!completionsByDate.has(c.date)) {
+        completionsByDate.set(c.date, new Set());
+      }
+      completionsByDate.get(c.date)!.add(c.habit_id);
+    }
   }
 
   const activeDates = Array.from(completionsByDate.keys())
@@ -53,8 +56,8 @@ export async function evaluateAndUnlockBadges(
     const threshold80 = Math.ceil(habits.length * 0.8);
     const monthHighDays = new Map<string, number>();
 
-    for (const [dateStr, count] of completionsByDate.entries()) {
-      if (count >= threshold80) {
+    for (const [dateStr, habitSet] of completionsByDate.entries()) {
+      if (habitSet.size >= threshold80) {
         const monthKey = dateStr.slice(0, 7); // YYYY-MM
         monthHighDays.set(monthKey, (monthHighDays.get(monthKey) || 0) + 1);
       }
@@ -70,7 +73,7 @@ export async function evaluateAndUnlockBadges(
 
   // 4. zero_consoom & perfect_day: 100% completion on a single day
   const perfectDays = Array.from(completionsByDate.entries())
-    .filter(([_, count]) => count >= habits.length)
+    .filter(([_, habitSet]) => habitSet.size >= habits.length)
     .map(([dateStr]) => parseISO(dateStr))
     .sort((a, b) => a.getTime() - b.getTime());
 
@@ -119,9 +122,11 @@ export async function evaluateAndUnlockBadges(
   // 7. month_warrior: 100 checks in a single month
   if (!unlockedKeys.has("month_warrior")) {
     const monthTotals = new Map<string, number>();
-    for (const c of validCompletions) {
-      const monthKey = c.date.slice(0, 7);
-      monthTotals.set(monthKey, (monthTotals.get(monthKey) || 0) + 1);
+    for (const c of completions) {
+      if (habitIdSet.has(c.habit_id)) {
+        const monthKey = c.date.slice(0, 7);
+        monthTotals.set(monthKey, (monthTotals.get(monthKey) || 0) + 1);
+      }
     }
     for (const total of monthTotals.values()) {
       if (total >= 100) {
@@ -131,14 +136,17 @@ export async function evaluateAndUnlockBadges(
     }
   }
 
-  // Unlock all detected badges
+  // Unlock all detected badges with slight delay to avoid overlapping toasts
   for (const badgeKey of toUnlock) {
     try {
-      await unlockBadge(badgeKey);
-      const def = BADGE_DEFS[badgeKey];
-      toast.success(`🏆 Conquista Desbloqueada: ${def?.name || badgeKey}!`, {
-        description: def?.description,
-      });
+      const inserted = await unlockBadge(badgeKey);
+      if (inserted) {
+        const def = BADGE_DEFS[badgeKey];
+        toast.success(`🏆 Conquista Desbloqueada: ${def?.name || badgeKey}!`, {
+          description: def?.description,
+        });
+        await new Promise((resolve) => setTimeout(resolve, 350));
+      }
     } catch (e) {
       // Ignored if already unlocked
     }

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
-import { Dices, AlertTriangle, Sparkles, Flame } from "lucide-react";
+import { Dices, AlertTriangle, Sparkles, Flame, PlusCircle } from "lucide-react";
 import { useHabitsData } from "@/hooks/useHabitsData";
 import { getWojakStage, checkHasStreakPenalty, type WojakStage } from "@/lib/wojakLore";
 import { cn } from "@/lib/utils";
@@ -37,8 +37,16 @@ export function WojakStatusBanner() {
     return getWojakStage(percentage, isPenaltyActive);
   }, [percentage, isPenaltyActive]);
 
+  // Dynamic habits needed to break streak penalty
+  const habitsNeededFor50 = useMemo(() => {
+    if (!isPenaltyActive || totalHabits === 0) return 0;
+    const target = Math.ceil(totalHabits * 0.5);
+    return Math.max(1, target - completedCount);
+  }, [isPenaltyActive, totalHabits, completedCount]);
+
   // Quote rotation per stage
   const [quoteIndex, setQuoteIndex] = useState(0);
+  const [isRolling, setIsRolling] = useState(false);
 
   // Reset or pick random quote on stage change
   useEffect(() => {
@@ -50,6 +58,9 @@ export function WojakStatusBanner() {
 
   const handleShuffleQuote = () => {
     if (currentStage.quotes.length <= 1) return;
+    setIsRolling(true);
+    setTimeout(() => setIsRolling(false), 350);
+
     setQuoteIndex((prev) => {
       let next = Math.floor(Math.random() * currentStage.quotes.length);
       if (next === prev) {
@@ -59,10 +70,13 @@ export function WojakStatusBanner() {
     });
   };
 
-  const currentQuote = currentStage.quotes[quoteIndex] || currentStage.quotes[0] || "";
-
   const isDoomer = currentStage.id === "doomer";
   const isChad = currentStage.id === "gigachad";
+  const isColdStart = totalHabits === 0;
+
+  const currentQuote = isColdStart
+    ? "A jornada de mil quilômetros começa com o primeiro hábito forjado. Rejeite o comodismo."
+    : currentStage.quotes[quoteIndex] || currentStage.quotes[0] || "";
 
   return (
     <motion.div
@@ -71,15 +85,20 @@ export function WojakStatusBanner() {
       transition={{ duration: 0.5 }}
       className={cn(
         "relative overflow-hidden surface-card p-4 sm:p-5 md:p-6 transition-all duration-700",
-        currentStage.borderClass,
-        isChad && "animate-pulse-glow"
+        isColdStart
+          ? "border-primary/30"
+          : isChad
+          ? "border-amber-400/60 shadow-[0_0_35px_rgba(251,191,36,0.25)]"
+          : currentStage.borderClass
       )}
     >
       {/* Dynamic Glow Shift ambient background */}
       <div
         className={cn(
           "absolute inset-0 bg-gradient-to-br pointer-events-none transition-all duration-1000",
-          currentStage.glowClass
+          isColdStart
+            ? "from-primary/15 via-accent/10 to-transparent"
+            : currentStage.glowClass
         )}
       />
       {isChad && <div className="absolute inset-0 opacity-20 animate-shimmer pointer-events-none" />}
@@ -92,14 +111,14 @@ export function WojakStatusBanner() {
               "w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden",
               "bg-background/60 backdrop-blur-xl border flex items-center justify-center shadow-lg transition-all duration-500",
               isChad ? "border-amber-400/50 shadow-amber-500/10" : "border-white/10",
-              isDoomer && percentage === 0 && "grayscale opacity-85"
+              !isColdStart && isDoomer && percentage === 0 && "grayscale opacity-85"
             )}
           >
             <AnimatePresence mode="wait">
               <motion.img
-                key={currentStage.id}
-                src={currentStage.imageUrl}
-                alt={currentStage.title}
+                key={isColdStart ? "cold-start" : currentStage.id}
+                src={isColdStart ? "/assets/wojaks/wojak.png" : currentStage.imageUrl}
+                alt={isColdStart ? "Pronto para Forjar" : currentStage.title}
                 initial={{ scale: 0.75, opacity: 0, rotate: -6 }}
                 animate={{ scale: 1, opacity: 1, rotate: 0 }}
                 exit={{ scale: 0.8, opacity: 0 }}
@@ -114,10 +133,12 @@ export function WojakStatusBanner() {
             <span
               className={cn(
                 "px-2 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-tight border shadow-sm backdrop-blur-md",
-                currentStage.badgeColor
+                isColdStart
+                  ? "bg-primary/20 text-primary-foreground border-primary/40"
+                  : currentStage.badgeColor
               )}
             >
-              {percentage}%
+              {isColdStart ? "NOVO" : `${percentage}%`}
             </span>
           </div>
         </div>
@@ -129,30 +150,45 @@ export function WojakStatusBanner() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="font-display text-lg sm:text-xl tracking-tight leading-none text-foreground">
-                  {currentStage.title}
+                  {isColdStart ? "Pronto para Forjar" : currentStage.title}
                 </h2>
-                {isChad && (
+                {isChad && !isColdStart && (
                   <span className="flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider text-amber-300 font-bold bg-amber-500/15 border border-amber-400/40 px-2 py-0.5 rounded-full">
                     <Sparkles className="w-3 h-3 text-amber-400" /> Aura Máxima
                   </span>
                 )}
+                {isColdStart && (
+                  <span className="flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider text-primary font-bold bg-primary/15 border border-primary/30 px-2 py-0.5 rounded-full">
+                    <PlusCircle className="w-3 h-3" /> Início
+                  </span>
+                )}
               </div>
-              <p className="text-xs text-muted-foreground mt-0.5">{currentStage.subtitle}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {isColdStart ? "Cadastre seu primeiro hábito abaixo para começar" : currentStage.subtitle}
+              </p>
             </div>
 
-            {/* Quick quote shuffle trigger */}
-            <button
-              onClick={handleShuffleQuote}
-              title="Girar frases deste estágio"
-              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground px-2.5 py-1 rounded-lg bg-surface-elevated/40 hover:bg-surface-elevated border border-white/5 transition-colors"
-            >
-              <Dices className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline text-[11px] font-medium">Trocar frase</span>
-            </button>
+            {/* Quick quote shuffle trigger with tactile micro-interaction */}
+            {!isColdStart && (
+              <button
+                onClick={handleShuffleQuote}
+                aria-label="Sortear nova frase deste estágio"
+                title="Girar frases deste estágio"
+                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg bg-surface-elevated/40 hover:bg-surface-elevated border border-white/5 active:scale-95 transition-all min-h-[36px]"
+              >
+                <Dices
+                  className={cn(
+                    "w-3.5 h-3.5 transition-transform duration-300",
+                    isRolling && "rotate-180 scale-110 text-primary"
+                  )}
+                />
+                <span className="hidden sm:inline text-[11px] font-medium">Trocar frase</span>
+              </button>
+            )}
           </div>
 
-          {/* Penalty Notice (if triggered) */}
-          {isPenaltyActive && (
+          {/* Dynamic Penalty Notice (if triggered) */}
+          {isPenaltyActive && !isColdStart && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -160,22 +196,25 @@ export function WojakStatusBanner() {
             >
               <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
               <span className="leading-tight font-medium">
-                <strong>PENALIDADE DE STREAK:</strong> 2 dias sem forjar hábitos. Conclua pelo menos 50% hoje para
-                destravar a evolução!
+                <strong>PENALIDADE DE STREAK:</strong> 2 dias sem forjar hábitos. Conclua mais{" "}
+                <strong className="underline text-red-300">
+                  {habitsNeededFor50} {habitsNeededFor50 === 1 ? "hábito" : "hábitos"}
+                </strong>{" "}
+                hoje para destravar a evolução!
               </span>
             </motion.div>
           )}
 
-          {/* Dynamic Meme Quote */}
-          <div className="my-2.5 min-h-[2.5rem] flex items-center">
+          {/* Dynamic Meme Quote (Refined Editorial Typography & CLS stability) */}
+          <div className="my-2 min-h-[3.25rem] sm:min-h-[2.5rem] flex items-center">
             <AnimatePresence mode="wait">
               <motion.p
-                key={`${currentStage.id}-${quoteIndex}`}
+                key={isColdStart ? "quote-cold" : `${currentStage.id}-${quoteIndex}`}
                 initial={{ opacity: 0, x: -6 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 6 }}
                 transition={{ duration: 0.25 }}
-                className="font-display text-sm sm:text-base tracking-tight text-foreground/90 italic leading-snug"
+                className="font-sans font-medium text-sm sm:text-base text-foreground/85 italic leading-relaxed tracking-normal"
               >
                 "{currentQuote}"
               </motion.p>
@@ -198,7 +237,7 @@ export function WojakStatusBanner() {
             <div className="h-2 w-full rounded-full bg-surface-elevated overflow-hidden p-0.5 border border-white/5">
               <motion.div
                 initial={false}
-                animate={{ width: `${percentage}%` }}
+                animate={{ width: isColdStart ? "0%" : `${percentage}%` }}
                 transition={{ type: "spring", stiffness: 120, damping: 20 }}
                 className={cn(
                   "h-full rounded-full transition-colors duration-500",
