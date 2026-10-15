@@ -20,8 +20,8 @@ export function MotivationalBanner() {
           <p className="font-display text-lg md:text-xl leading-tight tracking-tight">
             "{quote.text}"
           </p>
-          <p className="text-xs md:text-sm text-muted-foreground mt-2 uppercase tracking-[0.2em]">
-            — {quote.author}
+          <p className="text-xs md:text-sm text-muted-foreground mt-2 uppercase tracking-wider">
+            {quote.author}
           </p>
         </div>
       </div>

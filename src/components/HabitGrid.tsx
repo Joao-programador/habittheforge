@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Flame } from "lucide-react";
 import { AddHabitDialog } from "@/components/AddHabitDialog";
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface Props {
@@ -35,31 +36,51 @@ export function HabitGrid({ currentMonth }: Props) {
       <div className="overflow-x-auto scrollbar-hide overscroll-x-contain [-webkit-overflow-scrolling:touch]">
         <div className="min-w-max">
           <div className="flex items-center sticky top-0 z-20 bg-background border-b border-border/20">
-            <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 font-display text-xs uppercase tracking-widest text-muted-foreground sticky left-0 z-20 bg-background border-r border-border/20">
+            <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 font-semibold text-xs text-muted-foreground sticky left-0 z-20 bg-background border-r border-border/20 tracking-normal">
               Hábito
             </div>
             <div className="flex">
               {days.map((d) => {
                 const isTodayDay = isToday(d);
+                const dayOfWeek = d.getDay();
+                const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
                 return (
                   <div
                     key={d.toISOString()}
-                    className={`w-10 md:w-10 h-14 flex flex-col items-center justify-center text-xs font-mono ${
-                      isTodayDay ? "text-primary font-bold" : "text-muted-foreground"
-                    }`}
+                    className={cn(
+                      "w-10 md:w-10 h-14 flex flex-col items-center justify-center text-xs font-mono transition-colors",
+                      isWeekend && !isTodayDay && "bg-white/[0.015]"
+                    )}
                   >
-                    <span className="text-[10px] uppercase opacity-60">
+                    <span
+                      className={cn(
+                        "text-[10px] font-medium uppercase",
+                        isTodayDay
+                          ? "text-primary font-bold"
+                          : isWeekend
+                          ? "text-muted-foreground/40 font-semibold"
+                          : "text-muted-foreground/70"
+                      )}
+                    >
                       {format(d, "EEEEE", { locale: ptBR })}
                     </span>
-                    <span className={`mt-0.5 ${isTodayDay ? "text-base" : ""}`}>{format(d, "d")}</span>
+                    {isTodayDay ? (
+                      <span className="mt-0.5 w-6 h-6 rounded-full bg-primary text-primary-foreground font-bold flex items-center justify-center text-xs shadow-sm shadow-primary/40">
+                        {format(d, "d")}
+                      </span>
+                    ) : (
+                      <span className={cn("mt-0.5", isWeekend ? "text-foreground/75" : "text-foreground/90")}>
+                        {format(d, "d")}
+                      </span>
+                    )}
                   </div>
                 );
               })}
             </div>
-            <div className="hidden sm:block w-28 shrink-0 p-4 text-center font-display text-xs uppercase tracking-widest text-muted-foreground">
+            <div className="hidden sm:block w-28 shrink-0 p-4 text-center font-semibold text-xs text-muted-foreground tracking-normal">
               Streak
             </div>
-            <div className="hidden sm:block w-20 shrink-0 p-4 text-center font-display text-xs uppercase tracking-widest text-muted-foreground">
+            <div className="hidden sm:block w-20 shrink-0 p-4 text-center font-semibold text-xs text-muted-foreground tracking-normal">
               Mês
             </div>
             <div className="w-12 shrink-0" />
@@ -90,7 +111,7 @@ export function HabitGrid({ currentMonth }: Props) {
                         </div>
                         <div className="min-w-0">
                           <div className="font-semibold truncate text-xs md:text-sm">{habit.name}</div>
-                          <div className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition">Editar hábito</div>
+                          <div className="text-[11px] text-zinc-400 opacity-80 group-hover:opacity-100 transition">Editar hábito</div>
                         </div>
                       </button>
                     }

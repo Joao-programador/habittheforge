@@ -31,15 +31,25 @@ export function WeekView({ date, events, isHabitCompleted, onSlotClick, onEventC
     [days, todos]
   );
 
+  const hasAnyEvent = useMemo(
+    () => days.some((d) => getEventsForDay(events, d).length > 0),
+    [days, events]
+  );
+
   return (
     <div className="surface-card overflow-hidden">
+      {!hasAnyEvent && (
+        <div className="px-4 py-2 bg-primary/5 border-b border-border/40 text-xs text-muted-foreground flex items-center justify-between">
+          <span>Sem blocos agendados nesta semana. Clique em qualquer horário ou use o painel lateral para alocar seu tempo.</span>
+        </div>
+      )}
       <div className="grid grid-cols-[56px_repeat(7,minmax(0,1fr))] border-b border-border/40 sticky top-0 bg-card/95 backdrop-blur-md z-20">
         <div />
         {days.map((d) => {
           const isToday = isSameDay(d, today);
           return (
             <div key={d.toISOString()} className={cn("py-2 text-center border-l border-border/30", isToday && "bg-primary/10")}>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
                 {format(d, "EEE", { locale: ptBR })}
               </div>
               <div className={cn("font-display text-xl leading-none mt-1", isToday && "text-primary")}>
@@ -52,7 +62,7 @@ export function WeekView({ date, events, isHabitCompleted, onSlotClick, onEventC
 
       {hasAnyTodo && (
         <div className="grid grid-cols-[56px_repeat(7,minmax(92px,1fr))] border-b border-border/40 bg-secondary/20">
-          <div className="text-[9px] uppercase tracking-widest text-muted-foreground font-mono text-right pr-2 pt-1.5">
+          <div className="text-[9px] uppercase tracking-wide text-muted-foreground font-mono text-right pr-2 pt-1.5">
             Prazos
           </div>
           {days.map((d) => {

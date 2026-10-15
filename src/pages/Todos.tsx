@@ -64,7 +64,7 @@ export default function Todos() {
         due_date: form.due_date || null,
         color: form.color,
       });
-      toast.success("Tarefa criada — sem desculpas");
+      toast.success("Tarefa criada: sem desculpas");
     }
     setOpen(false);
   };
@@ -87,11 +87,11 @@ export default function Todos() {
 
   return (
     <AppLayout>
-      <div className="space-y-5">
+      <div className="space-y-6 max-w-4xl">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="font-display text-3xl tracking-tight">To-Do</h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-0.5">
               {openCount} abertas{overdue > 0 ? ` · ${overdue} atrasadas` : ""}. Prazo = compromisso.
             </p>
           </div>
@@ -101,19 +101,27 @@ export default function Todos() {
         </div>
 
         <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
-          <TabsList>
+          <TabsList className="bg-surface-elevated/60 border border-white/5">
             <TabsTrigger value="open">Abertas</TabsTrigger>
             <TabsTrigger value="done">Feitas</TabsTrigger>
             <TabsTrigger value="all">Todas</TabsTrigger>
           </TabsList>
         </Tabs>
 
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {filtered.length === 0 && (
-            <div className="surface-card p-10 text-center">
-              <Flag className="w-8 h-8 mx-auto text-muted-foreground mb-3" />
-              <p className="font-display text-lg tracking-tight">Nada na fila.</p>
-              <p className="text-sm text-muted-foreground">Liste o que precisa morrer hoje.</p>
+            <div className="surface-card p-12 text-center border-dashed border-white/10 rounded-2xl">
+              <div className="w-12 h-12 rounded-2xl bg-surface-elevated/60 border border-white/5 flex items-center justify-center mx-auto mb-3">
+                <Flag className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <p className="font-display text-lg tracking-tight">
+                {filter === "done" ? "Nenhuma tarefa concluída ainda" : "Tudo em dia por aqui"}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
+                {filter === "done"
+                  ? "Marque as caixas de tarefas à medida que for completando suas metas."
+                  : "Nenhuma tarefa pendente na fila. Aproveite o momento ou planeje a próxima entrega."}
+              </p>
             </div>
           )}
           {filtered.map((t) => {
@@ -122,30 +130,31 @@ export default function Todos() {
               <div
                 key={t.id}
                 className={cn(
-                  "surface-card p-3.5 flex items-start gap-3 group transition hover:border-border/80",
-                  t.completed && "opacity-60"
+                  "surface-card p-4 flex items-center gap-3.5 group transition-all duration-200 hover:border-border/80 rounded-xl",
+                  t.completed && "opacity-60",
+                  t.notes && "items-start"
                 )}
                 style={{ borderColor: `${t.color}35` }}
               >
                 <Checkbox
                   checked={t.completed}
                   onCheckedChange={() => toggleTodo(t.id)}
-                  className="mt-1"
+                  className={cn("mt-0.5", t.notes && "mt-1")}
                 />
                 <button onClick={() => openEdit(t)} className="flex-1 min-w-0 text-left">
-                  <div className={cn("font-semibold leading-tight", t.completed && "line-through")}>
+                  <div className={cn("font-medium text-sm sm:text-base leading-snug", t.completed && "line-through text-muted-foreground")}>
                     {t.title}
                   </div>
                   {t.notes && (
-                    <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{t.notes}</div>
+                    <div className="text-xs text-muted-foreground/80 mt-1 line-clamp-2 leading-relaxed">{t.notes}</div>
                   )}
                   <div className="flex items-center gap-2 mt-2">
                     <span
                       className={cn(
-                        "inline-flex items-center gap-1 text-[10px] font-mono uppercase px-1.5 py-0.5 rounded",
-                        due.tone === "primary" && "bg-primary/15 text-primary",
-                        due.tone === "warn" && "bg-amber-500/15 text-amber-400",
-                        due.tone === "danger" && "bg-destructive/15 text-destructive",
+                        "inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded-md",
+                        due.tone === "primary" && "bg-primary/15 text-primary border border-primary/20",
+                        due.tone === "warn" && "bg-amber-500/15 text-amber-400 border border-amber-500/20",
+                        due.tone === "danger" && "bg-destructive/15 text-destructive border border-destructive/20",
                         due.tone === "muted" && "bg-secondary/60 text-muted-foreground"
                       )}
                     >
@@ -160,6 +169,7 @@ export default function Todos() {
                     toast.success("Tarefa removida");
                   }}
                   className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition p-2 -m-0.5 text-muted-foreground hover:text-destructive"
+                  title="Excluir tarefa"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

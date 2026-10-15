@@ -138,7 +138,7 @@ export const WOJAK_STAGES: WojakStage[] = [
   {
     id: "gigachad",
     title: "Nordic GigaChad",
-    subtitle: "100% Concluído — Aura Máxima",
+    subtitle: "100% Concluído: Aura Máxima",
     minPercent: 100,
     maxPercent: 100,
     imageUrl: "/assets/wojaks/gigachad.png",

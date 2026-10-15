@@ -64,7 +64,7 @@ export const BADGE_DEFS: Record<string, BadgeDef> = {
   },
   streak_21: {
     key: "streak_21",
-    name: "21 Dias — Hábito Forjado",
+    name: "21 Dias: Hábito Forjado",
     description: "Ciência confirma: agora é parte de você.",
     icon: Target,
     color: "#fb923c",

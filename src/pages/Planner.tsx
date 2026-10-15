@@ -88,7 +88,7 @@ export default function Planner() {
     if (view === "week") {
       const s = startOfWeek(cursor, { weekStartsOn: 0 });
       const e = endOfWeek(cursor, { weekStartsOn: 0 });
-      return `${format(s, "dd MMM", { locale: ptBR })} – ${format(e, "dd MMM yyyy", { locale: ptBR })}`;
+      return `${format(s, "dd MMM", { locale: ptBR })} a ${format(e, "dd MMM yyyy", { locale: ptBR })}`;
     }
     return format(cursor, "MMMM yyyy", { locale: ptBR });
   };

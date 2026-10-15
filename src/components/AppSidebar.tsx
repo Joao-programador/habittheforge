@@ -82,8 +82,9 @@ export function AppSidebar() {
           {!collapsed && <span>Sair</span>}
         </Button>
         {!collapsed && (
-          <div className="px-2 text-[10px] text-muted-foreground italic leading-snug">
-            Dados sincronizados na nuvem.
+          <div className="px-2 text-[11px] text-zinc-400 leading-snug flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80 shrink-0" />
+            <span>Dados sincronizados na nuvem</span>
           </div>
         )}
       </SidebarFooter>
