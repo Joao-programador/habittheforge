@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { addMonths, format, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AppLayout } from "@/components/AppLayout";
-import { MotivationalBanner } from "@/components/MotivationalBanner";
+import { WojakStatusBanner } from "@/components/WojakStatusBanner";
 import { HabitGrid } from "@/components/HabitGrid";
 import { StatsPanel } from "@/components/StatsPanel";
 import { BadgesPanel } from "@/components/BadgesPanel";
@@ -31,7 +31,7 @@ export default function Dashboard() {
   return (
     <AppLayout>
       <div ref={captureRef} className="space-y-5">
-        <MotivationalBanner />
+        <WojakStatusBanner />
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">

@@ -1,4 +1,4 @@
-import { Trophy, Flame, Zap, Star, Crown, Target, Sparkles, Award } from "lucide-react";
+import { Trophy, Flame, Zap, Star, Crown, Target, Sparkles, Award, ShieldCheck, Sprout, Ban, Gem } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface BadgeDef {
@@ -17,6 +17,34 @@ export const BADGE_DEFS: Record<string, BadgeDef> = {
     description: "Sua primeira conclusão. A jornada começou.",
     icon: Sparkles,
     color: "#a78bfa",
+  },
+  cura_do_beto: {
+    key: "cura_do_beto",
+    name: "Cura do Beto",
+    description: "Concluiu pelo menos 1 hábito por 3 dias seguidos.",
+    icon: ShieldCheck,
+    color: "#10b981",
+  },
+  bloomer_grass: {
+    key: "bloomer_grass",
+    name: "Tocou na Grama (Bloomer)",
+    description: "Atingiu 80%+ de conclusão em 5 dias do mês.",
+    icon: Sprout,
+    color: "#06b6d4",
+  },
+  zero_consoom: {
+    key: "zero_consoom",
+    name: "Zero Consoom",
+    description: "Completou um dia inteiro em 100% pela primeira vez.",
+    icon: Ban,
+    color: "#8b5cf6",
+  },
+  gigachad_supremo: {
+    key: "gigachad_supremo",
+    name: "GigaChad Supremo",
+    description: "Manteve 100% de conclusão por 7 dias seguidos.",
+    icon: Gem,
+    color: "#f59e0b",
   },
   streak_7: {
     key: "streak_7",

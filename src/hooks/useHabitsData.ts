@@ -1,6 +1,7 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { createCloudStore } from "@/lib/cloudStore";
+import { evaluateAndUnlockBadges } from "@/lib/badgeEvaluator";
 
 export interface Habit {
   id: string;
@@ -119,6 +120,16 @@ export function useHabitsData() {
   const refresh = useCallback(async () => {
     await Promise.all([habitsStore.reload(), completionsStore.reload(), badgesStore.reload()]);
   }, []);
+
+  const evaluatedRef = useRef<string>("");
+  useEffect(() => {
+    if (!habitsStore.loaded() || !completionsStore.loaded() || !badgesStore.loaded()) return;
+    const key = `${habits.length}-${completions.length}-${badges.length}`;
+    if (evaluatedRef.current === key) return;
+    evaluatedRef.current = key;
+    const unlockedKeys = new Set(badges.map((b) => b.badge_key));
+    evaluateAndUnlockBadges(habits, completions, unlockedKeys, unlockBadge);
+  }, [habits, completions, badges, unlockBadge]);
 
   return {
     habits,
