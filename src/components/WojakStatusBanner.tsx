@@ -103,15 +103,17 @@ export function WojakStatusBanner() {
       />
       {isChad && <div className="absolute inset-0 opacity-20 animate-shimmer pointer-events-none" />}
 
-      <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
-        {/* Wojak Avatar Frame */}
+      <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6 md:gap-7">
+        {/* Wojak Avatar Frame - Solid White Background to restore line-art fills */}
         <div className="relative shrink-0">
           <div
             className={cn(
-              "w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden",
-              "bg-background/60 backdrop-blur-xl border flex items-center justify-center shadow-lg transition-all duration-500",
-              isChad ? "border-amber-400/50 shadow-amber-500/10" : "border-white/10",
-              !isColdStart && isDoomer && percentage === 0 && "grayscale opacity-85"
+              "w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-2xl overflow-hidden",
+              "bg-white border-2 flex items-center justify-center shadow-2xl transition-all duration-500",
+              isChad
+                ? "border-amber-400 shadow-amber-500/25 ring-2 ring-amber-400/30"
+                : "border-white/40 shadow-xl",
+              !isColdStart && isDoomer && percentage === 0 && "grayscale contrast-125"
             )}
           >
             <AnimatePresence mode="wait">
@@ -119,20 +121,23 @@ export function WojakStatusBanner() {
                 key={isColdStart ? "cold-start" : currentStage.id}
                 src={isColdStart ? "/assets/wojaks/wojak.png" : currentStage.imageUrl}
                 alt={isColdStart ? "Pronto para Forjar" : currentStage.title}
-                initial={{ scale: 0.75, opacity: 0, rotate: -6 }}
+                initial={{ scale: 0.8, opacity: 0, rotate: -6 }}
                 animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                exit={{ scale: 0.8, opacity: 0 }}
+                exit={{ scale: 0.85, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 350, damping: 22 }}
-                className="w-full h-full object-contain p-1.5 drop-shadow-md select-none"
+                className={cn(
+                  "w-full h-full select-none drop-shadow-sm",
+                  isChad ? "object-cover" : "object-contain p-2"
+                )}
               />
             </AnimatePresence>
           </div>
 
           {/* Level indicator pill on avatar bottom */}
-          <div className="absolute -bottom-2 inset-x-0 flex justify-center">
+          <div className="absolute -bottom-2.5 inset-x-0 flex justify-center z-10">
             <span
               className={cn(
-                "px-2 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-tight border shadow-sm backdrop-blur-md",
+                "px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-mono font-bold tracking-tight border shadow-md backdrop-blur-md",
                 isColdStart
                   ? "bg-primary/20 text-primary-foreground border-primary/40"
                   : currentStage.badgeColor
