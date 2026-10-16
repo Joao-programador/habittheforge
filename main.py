@@ -207,14 +207,6 @@ async def delete_habit(habit_id: str, user_id: Optional[str] = Depends(get_user_
     supabase.table("habits").delete().eq("id", habit_id).eq("user_id", user_id).execute()
     return {"success": True}
 
-@app.get("/workflows", response_class=HTMLResponse)
-async def workflows(request: Request, user_id: Optional[str] = Depends(get_user_id)):
-    if not user_id:
-        return RedirectResponse(url="/auth", status_code=302)
-    return templates.TemplateResponse(
-        request=request, name="pages/workflows.html", context={"title": "Workflows - Habit Forge"}
-    )
-
 @app.get("/achievements", response_class=HTMLResponse)
 async def achievements(request: Request, user_id: Optional[str] = Depends(get_user_id)):
     if not user_id:
@@ -229,14 +221,6 @@ async def settings(request: Request, user_id: Optional[str] = Depends(get_user_i
         return RedirectResponse(url="/auth", status_code=302)
     return templates.TemplateResponse(
         request=request, name="pages/settings.html", context={"title": "Configurações - Habit Forge"}
-    )
-
-@app.get("/reminders", response_class=HTMLResponse)
-async def reminders(request: Request, user_id: Optional[str] = Depends(get_user_id)):
-    if not user_id:
-        return RedirectResponse(url="/auth", status_code=302)
-    return templates.TemplateResponse(
-        request=request, name="pages/reminders.html", context={"title": "Lembretes - Habit Forge"}
     )
 
 if __name__ == "__main__":

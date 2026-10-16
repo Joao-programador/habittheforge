@@ -1,6 +1,6 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
-import { LayoutDashboard, Trophy, Settings, Flame, CalendarRange, ListChecks, BellRing, Workflow, LogOut } from "lucide-react";
+import { LayoutDashboard, Trophy, Settings, Flame, CalendarRange, ListChecks, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 
@@ -9,8 +9,6 @@ const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Planner", url: "/planner", icon: CalendarRange },
   { title: "To-Do", url: "/todos", icon: ListChecks },
-  { title: "Algoritmos", url: "/workflows", icon: Workflow },
-  { title: "Lembretes", url: "/reminders", icon: BellRing },
   { title: "Conquistas", url: "/achievements", icon: Trophy },
   { title: "Configurações", url: "/settings", icon: Settings },
 ];

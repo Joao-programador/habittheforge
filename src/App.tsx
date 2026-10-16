@@ -10,8 +10,6 @@ import Settings from "./pages/Settings";
 import Achievements from "./pages/Achievements";
 import Planner from "./pages/Planner";
 import Todos from "./pages/Todos";
-import Reminders from "./pages/Reminders";
-import Workflows from "./pages/Workflows";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -21,8 +19,6 @@ const protectedRoutes = [
   { path: "/", element: <Dashboard /> },
   { path: "/planner", element: <Planner /> },
   { path: "/todos", element: <Todos /> },
-  { path: "/reminders", element: <Reminders /> },
-  { path: "/workflows", element: <Workflows /> },
   { path: "/achievements", element: <Achievements /> },
   { path: "/settings", element: <Settings /> },
 ];

@@ -3,8 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, BellRing } from "lucide-react";
-import { useReminders } from "@/hooks/useReminders";
+import { Plus } from "lucide-react";
 
 const EMOJI_OPTIONS = ["💪", "🏃", "💧", "🧘", "📚", "🧠", "🥗", "🏋️‍♂️", "💤", "💻", "🎸", "💸", "🧹", "☀️", "🌙", "💊", "🥦", "🔥", "🤝", "🎨"];
 const COLOR_OPTIONS = ["#4f46e5", "#8b5cf6", "#ec4899", "#f43f5e", "#f59e0b", "#10b981", "#06b6d4", "#3b82f6", "#facc15", "#ef4444"];
@@ -28,8 +27,6 @@ export function AddHabitDialog({ onAdd, onUpdate, habitToEdit, trigger }: Props)
   const [name, setName] = useState("");
   const [emoji, setEmoji] = useState("💪");
   const [color, setColor] = useState("#4f46e5");
-  const [createReminder, setCreateReminder] = useState(false);
-  const { addReminder } = useReminders();
 
   const isEditing = !!habitToEdit;
 
@@ -38,12 +35,10 @@ export function AddHabitDialog({ onAdd, onUpdate, habitToEdit, trigger }: Props)
       setName(habitToEdit.name);
       setEmoji(habitToEdit.emoji);
       setColor(habitToEdit.color);
-      setCreateReminder(false);
     } else if (open && !habitToEdit) {
       setName("");
       setEmoji("💪");
       setColor("#4f46e5");
-      setCreateReminder(false);
     }
   }, [open, habitToEdit]);
 
@@ -53,16 +48,7 @@ export function AddHabitDialog({ onAdd, onUpdate, habitToEdit, trigger }: Props)
     if (isEditing && onUpdate && habitToEdit.id) {
       await onUpdate(habitToEdit.id, { name: name.trim(), emoji, color });
     } else if (onAdd) {
-      const created = await onAdd({ name: name.trim(), emoji, color });
-      if (created?.id && createReminder) {
-        addReminder({
-          title: `${emoji} ${name.trim()}`,
-          message: "Hora de forjar esse hábito. Não negocia.",
-          mode: "times",
-          times: ["20:00"],
-          habitId: created.id,
-        });
-      }
+      await onAdd({ name: name.trim(), emoji, color });
     }
     setOpen(false);
   };
@@ -129,21 +115,6 @@ export function AddHabitDialog({ onAdd, onUpdate, habitToEdit, trigger }: Props)
               ))}
             </div>
           </div>
-
-          {!isEditing && (
-            <label className="flex items-center gap-3 cursor-pointer bg-secondary/30 p-3 rounded-lg border border-border/40 hover:bg-secondary/50 transition">
-              <input 
-                type="checkbox" 
-                checked={createReminder} 
-                onChange={(e) => setCreateReminder(e.target.checked)} 
-                className="w-4 h-4 rounded border-primary/50 text-primary focus:ring-primary"
-              />
-              <div className="flex items-center gap-2">
-                <BellRing className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium">Criar lembrete diário às 20h</span>
-              </div>
-            </label>
-          )}
 
           <Button onClick={submit} className="w-full bg-gradient-primary h-11 font-semibold" disabled={!name.trim()}>
             {isEditing ? "Salvar alterações" : "Forjar Hábito"}
