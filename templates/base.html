@@ -213,6 +213,10 @@
               <i data-lucide="list-checks" class="w-4 h-4 shrink-0"></i>
               <span x-show="!collapsed" class="whitespace-nowrap">To-Do</span>
             </a>
+            <a href="/journal" :class="path === '/journal' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'" class="flex items-center gap-3 px-2 py-2 rounded-md text-sm font-medium transition-colors w-full">
+              <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i>
+              <span x-show="!collapsed" class="whitespace-nowrap">Diário</span>
+            </a>
             <a href="/achievements" :class="path === '/achievements' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'" class="flex items-center gap-3 px-2 py-2 rounded-md text-sm font-medium transition-colors w-full">
               <i data-lucide="trophy" class="w-4 h-4 shrink-0"></i>
               <span x-show="!collapsed" class="whitespace-nowrap">Conquistas</span>

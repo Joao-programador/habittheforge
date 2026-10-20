@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6" x-data="{
+  entries: JSON.parse(localStorage.getItem('forge_journal_v1') || '{}'),
+  searchQuery: '',
+  selectedStage: 'all',
+  get entriesList() {
+    return Object.values(this.entries).filter(e => e.content || e.winOfTheDay || e.betoExcuseDestroyed || (e.tags && e.tags.length > 0)).sort((a,b) => b.date.localeCompare(a.date));
+  },
+  get filteredEntries() {
+    let list = this.entriesList;
+    if (this.selectedStage !== 'all') {
+      list = list.filter(e => e.stageSnapshot === this.selectedStage);
+    }
+    if (this.searchQuery.trim()) {
+      const q = this.searchQuery.toLowerCase();
+      list = list.filter(e => (e.content || '').toLowerCase().includes(q) || (e.winOfTheDay || '').toLowerCase().includes(q) || (e.betoExcuseDestroyed || '').toLowerCase().includes(q) || (e.tags || []).some(t => t.toLowerCase().includes(q)));
+    }
+    return list;
+  }
+}">
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="text-xs uppercase tracking-wider font-mono text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
+          Mentalidade & Forja
+        </span>
+      </div>
+      <h1 class="font-display text-3xl sm:text-4xl tracking-tight">Diário de Bordo</h1>
+      <p class="text-sm text-muted-foreground mt-1">
+        Registre a guerra diária contra a procrastinação, identifique desculpas e celebre vitórias.
+      </p>
+    </div>
+
+    <div class="surface-card px-4 py-2 flex items-center gap-2.5">
+      <i data-lucide="book-open" class="w-4 h-4 text-primary"></i>
+      <div class="text-right">
+        <div class="font-display text-lg leading-none" x-text="entriesList.length"></div>
+        <div class="text-[10px] uppercase tracking-wide text-muted-foreground">Entradas Salvas</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="surface-card p-6">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+      <div class="relative flex-1 max-w-sm">
+        <input 
+          type="text" 
+          x-model="searchQuery" 
+          placeholder="Buscar no diário..." 
+          class="w-full bg-secondary/30 border border-border/40 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:border-primary"
+        />
+      </div>
+
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <template x-for="stage in ['all', 'doomer', 'soyjak', 'wojak', 'bloomer', 'gigachad']" :key="stage">
+          <button 
+            type="button"
+            @click="selectedStage = stage" 
+            :class="selectedStage === stage ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary/40 text-muted-foreground border-border/30'"
+            class="text-xs px-2.5 py-1 rounded-md border font-medium capitalize transition-all"
+            x-text="stage === 'all' ? 'Todos' : stage"
+          ></button>
+        </template>
+      </div>
+    </div>
+
+    <div class="space-y-3 mt-4">
+      <template x-if="filteredEntries.length === 0">
+        <div class="text-center py-12 text-muted-foreground">
+          <i data-lucide="book-open" class="w-8 h-8 mx-auto opacity-30 mb-2"></i>
+          <p class="text-sm">Nenhuma anotação encontrada com os filtros selecionados.</p>
+        </div>
+      </template>
+
+      <template x-for="entry in filteredEntries" :key="entry.date">
+        <div class="p-4 rounded-xl border border-border/40 bg-secondary/20 hover:bg-secondary/35 transition-all">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <span class="font-display text-sm text-foreground" x-text="entry.date"></span>
+            <span class="text-xs font-mono text-primary bg-primary/10 px-2 py-0.5 rounded" x-text="`${entry.completionSnapshot || 0}% feito`"></span>
+          </div>
+          <template x-if="entry.winOfTheDay">
+            <div class="text-xs text-amber-300 font-medium mb-1" x-text="`🏆 ${entry.winOfTheDay}`"></div>
+          </template>
+          <template x-if="entry.betoExcuseDestroyed">
+            <div class="text-xs text-red-300 font-medium mb-1" x-text="`💀 ${entry.betoExcuseDestroyed}`"></div>
+          </template>
+          <p class="text-sm text-muted-foreground mt-1 leading-relaxed" x-text="entry.content"></p>
+        </div>
+      </template>
+    </div>
+  </div>
+</div>
+{% endblock %}

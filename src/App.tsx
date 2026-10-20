@@ -10,6 +10,7 @@ import Settings from "./pages/Settings";
 import Achievements from "./pages/Achievements";
 import Planner from "./pages/Planner";
 import Todos from "./pages/Todos";
+import Journal from "./pages/Journal";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -19,6 +20,7 @@ const protectedRoutes = [
   { path: "/", element: <Dashboard /> },
   { path: "/planner", element: <Planner /> },
   { path: "/todos", element: <Todos /> },
+  { path: "/journal", element: <Journal /> },
   { path: "/achievements", element: <Achievements /> },
   { path: "/settings", element: <Settings /> },
 ];

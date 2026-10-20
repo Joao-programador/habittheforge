@@ -207,6 +207,14 @@ async def delete_habit(habit_id: str, user_id: Optional[str] = Depends(get_user_
     supabase.table("habits").delete().eq("id", habit_id).eq("user_id", user_id).execute()
     return {"success": True}
 
+@app.get("/journal", response_class=HTMLResponse)
+async def journal(request: Request, user_id: Optional[str] = Depends(get_user_id)):
+    if not user_id:
+        return RedirectResponse(url="/auth", status_code=302)
+    return templates.TemplateResponse(
+        request=request, name="pages/journal.html", context={"title": "Diário - Habit Forge"}
+    )
+
 @app.get("/achievements", response_class=HTMLResponse)
 async def achievements(request: Request, user_id: Optional[str] = Depends(get_user_id)):
     if not user_id:
