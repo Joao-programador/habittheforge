@@ -187,15 +187,18 @@
         :class="collapsed ? 'w-16' : 'w-64'" 
         class="border-r border-border/60 transition-all duration-300 flex flex-col bg-card/30 sticky top-0 h-screen shrink-0"
       >
-        <div class="p-4 flex items-center gap-2.5 h-16 shrink-0">
-          <div :class="collapsed ? 'w-9 p-0.5' : 'px-2'" class="h-9 rounded-xl bg-white flex items-center justify-center shadow-sm border border-border/50 shrink-0 overflow-hidden">
-            <img src="/static/assets/logo.png" alt="Forge Logo" :class="collapsed ? 'w-full h-full object-contain' : 'h-6 w-auto object-contain'">
-          </div>
-          <div x-show="!collapsed" class="overflow-hidden whitespace-nowrap transition-all duration-300">
-            <div class="font-display text-lg leading-none tracking-tight">FORGE</div>
-            <div class="text-[10px] text-muted-foreground uppercase tracking-[0.2em] mt-0.5">
-              Discipline · Iron
+        <div class="p-4 flex flex-col items-center text-center shrink-0 border-b border-border/40">
+          <div x-show="!collapsed" class="flex flex-col items-center gap-2">
+            <img src="/static/assets/logo.png" alt="Forge Logo" class="h-16 w-auto object-contain select-none">
+            <div class="overflow-hidden whitespace-nowrap">
+              <div class="font-display text-lg leading-none tracking-tight">FORGE</div>
+              <div class="text-[10px] text-muted-foreground uppercase tracking-[0.2em] mt-1">
+                Discipline · Iron
+              </div>
             </div>
+          </div>
+          <div x-show="collapsed" class="py-1">
+            <img src="/static/assets/logo.png" alt="Forge Logo" class="w-8 h-8 object-contain select-none">
           </div>
         </div>
 

@@ -30,28 +30,30 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border/60">
-      <SidebarHeader className="p-4">
-        <div className="flex items-center gap-2.5">
-          <div
-            className={`h-9 rounded-xl bg-white flex items-center justify-center border border-border/50 shadow-sm shrink-0 overflow-hidden ${
-              collapsed ? "w-9 p-0.5" : "px-2"
-            }`}
-          >
+      <SidebarHeader className="p-4 border-b border-sidebar-border/40">
+        {!collapsed ? (
+          <div className="flex flex-col items-center text-center gap-2">
             <img
               src="/assets/logo.png"
               alt="Forge Logo"
-              className={collapsed ? "w-full h-full object-contain" : "h-6 w-auto object-contain"}
+              className="h-16 w-auto object-contain select-none"
             />
-          </div>
-          {!collapsed && (
             <div className="overflow-hidden">
               <div className="font-display text-lg leading-none tracking-tight">FORGE</div>
-              <div className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] mt-0.5">
+              <div className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] mt-1">
                 Discipline · Iron
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="flex justify-center items-center py-1">
+            <img
+              src="/assets/logo.png"
+              alt="Forge Logo"
+              className="w-8 h-8 object-contain select-none"
+            />
+          </div>
+        )}
       </SidebarHeader>
 
       <SidebarContent>

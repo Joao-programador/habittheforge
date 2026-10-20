@@ -61,14 +61,12 @@ export default function Auth() {
     <main className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-8">
-          <div className="px-3.5 py-1.5 rounded-2xl bg-white flex items-center justify-center shadow-lg border border-border/50 overflow-hidden">
-            <img
-              src="/assets/logo.png"
-              alt="Forge Logo"
-              className="h-10 w-auto object-contain"
-            />
-          </div>
-          <h1 className="font-display text-3xl tracking-tight mt-4">FORGE</h1>
+          <img
+            src="/assets/logo.png"
+            alt="Forge Logo"
+            className="h-20 w-auto object-contain select-none"
+          />
+          <h1 className="font-display text-3xl tracking-tight mt-3">FORGE</h1>
           <p className="text-sm text-muted-foreground mt-1 text-center">
             Sua disciplina em todos os dispositivos. Entre e continue forjando.
           </p>
