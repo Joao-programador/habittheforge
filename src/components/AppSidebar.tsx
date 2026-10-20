@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Hábitos", url: "/habits", icon: Flame },
   { title: "Planner", url: "/planner", icon: CalendarRange },
   { title: "To-Do", url: "/todos", icon: ListChecks },
   { title: "Diário", url: "/journal", icon: BookOpen },

@@ -62,6 +62,34 @@ async def dashboard(request: Request, user_id: Optional[str] = Depends(get_user_
         request=request, name="pages/dashboard.html", context={"title": "Dashboard - Habit Forge", "habits_json": habits_data}
     )
 
+@app.get("/habits", response_class=HTMLResponse)
+async def habits_page(request: Request, user_id: Optional[str] = Depends(get_user_id)):
+    if not user_id:
+        return RedirectResponse(url="/auth", status_code=302)
+        
+    try:
+        response = supabase.table("habits").select("*").eq("user_id", user_id).execute()
+        habits_data = []
+        for h in response.data:
+            meta = {}
+            if h.get("description"):
+                try:
+                    meta = json.loads(h["description"])
+                except:
+                    pass
+            habits_data.append({
+                "id": h["id"],
+                "name": h.get("title", ""),
+                "emoji": meta.get("emoji", "🚀"),
+                "color": meta.get("color", "#4f46e5")
+            })
+    except Exception as e:
+        habits_data = []
+        
+    return templates.TemplateResponse(
+        request=request, name="pages/habits.html", context={"title": "Hábitos - Habit Forge", "habits_json": habits_data}
+    )
+
 @app.get("/auth", response_class=HTMLResponse)
 async def auth(request: Request):
     return templates.TemplateResponse(

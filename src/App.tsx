@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { AuthProvider, ProtectedRoute } from "@/hooks/useAuth";
 import Dashboard from "./pages/Dashboard";
+import Habits from "./pages/Habits";
 import Settings from "./pages/Settings";
 import Achievements from "./pages/Achievements";
 import Planner from "./pages/Planner";
@@ -18,6 +19,7 @@ const queryClient = new QueryClient();
 
 const protectedRoutes = [
   { path: "/", element: <Dashboard /> },
+  { path: "/habits", element: <Habits /> },
   { path: "/planner", element: <Planner /> },
   { path: "/todos", element: <Todos /> },
   { path: "/journal", element: <Journal /> },

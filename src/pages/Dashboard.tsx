@@ -1,86 +1,89 @@
-import { useState, useRef } from "react";
-import { addMonths, format, subMonths } from "date-fns";
+import { useMemo } from "react";
+import { format, subDays, addDays, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AppLayout } from "@/components/AppLayout";
 import { WojakStatusBanner } from "@/components/WojakStatusBanner";
-import { HabitGrid } from "@/components/HabitGrid";
-import { StatsPanel } from "@/components/StatsPanel";
-import { BadgesPanel } from "@/components/BadgesPanel";
-import { JournalPanel } from "@/components/JournalPanel";
-import { AddHabitDialog } from "@/components/AddHabitDialog";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Download, CalendarDays } from "lucide-react";
-import { useHabitsData } from "@/hooks/useHabitsData";
+import { DailyHabitsCard } from "@/components/daily/DailyHabitsCard";
+import { DailyTodosCard } from "@/components/daily/DailyTodosCard";
+import { DailyJournalCard } from "@/components/daily/DailyJournalCard";
 import { useJournalData } from "@/hooks/useJournalData";
-import { exportMonthPDF } from "@/lib/exportPdf";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 
 export default function Dashboard() {
-  const [month, setMonth] = useState(new Date());
   const { selectedDate, setSelectedDate } = useJournalData();
-  const { addHabit, habits, completions, badges } = useHabitsData();
-  const captureRef = useRef<HTMLDivElement>(null);
 
-  const handleExport = async () => {
-    toast.loading("Gerando PDF...", { id: "pdf" });
-    try {
-      await exportMonthPDF({ month, habits, completions, badges });
-      toast.success("PDF exportado!", { id: "pdf" });
-    } catch (e: any) {
-      toast.error("Falha ao exportar: " + e.message, { id: "pdf" });
-    }
-  };
+  const isCurrentDay = useMemo(() => isToday(selectedDate), [selectedDate]);
 
   return (
     <AppLayout>
-      <div ref={captureRef} className="space-y-5">
+      <div className="space-y-5">
+        {/* Banner do Wojak / Beto */}
         <WojakStatusBanner />
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* Barra de Seleção de Dia do Cockpit */}
+        <div className="surface-card p-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => setMonth(subMonths(month, 1))} className="h-10 w-10">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setSelectedDate(subDays(selectedDate, 1))}
+              className="h-8 w-8"
+              title="Dia anterior"
+            >
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <div className="px-3 min-w-[180px] text-center">
-              <div className="font-display text-2xl tracking-tight leading-none capitalize">
-                {format(month, "MMMM", { locale: ptBR })}
-              </div>
-              <div className="font-mono text-xs text-muted-foreground mt-1">
-                {format(month, "yyyy")}
-              </div>
+
+            <div className="px-2 min-w-[170px] text-center">
+              <span className="font-display text-sm tracking-tight capitalize block">
+                {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+              </span>
+              <span className="text-[10px] font-mono text-muted-foreground block">
+                {isCurrentDay ? "Hoje" : format(selectedDate, "yyyy")}
+              </span>
             </div>
-            <Button variant="outline" size="icon" onClick={() => setMonth(addMonths(month, 1))} className="h-10 w-10">
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setSelectedDate(addDays(selectedDate, 1))}
+              className="h-8 w-8"
+              title="Próximo dia"
+            >
               <ChevronRight className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => setMonth(new Date())} className="ml-1 gap-1.5">
-              <CalendarDays className="w-3.5 h-3.5" />
-              Hoje
-            </Button>
+
+            {!isCurrentDay && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedDate(new Date())}
+                className="ml-1 gap-1 h-8 text-xs font-mono"
+              >
+                <CalendarDays className="w-3.5 h-3.5" />
+                Voltar para Hoje
+              </Button>
+            )}
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
-              <Download className="w-4 h-4" /> PDF
-            </Button>
-            <AddHabitDialog onAdd={addHabit} />
+          <div className="text-xs text-muted-foreground font-mono px-2 hidden sm:block">
+            Cockpit Diário · Foco no Presente
           </div>
         </div>
 
-        <StatsPanel currentMonth={month} />
+        {/* Bento Grid Diário */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          {/* Coluna Esquerda: Hábitos de Hoje (7 colunas) */}
+          <div className="lg:col-span-7">
+            <DailyHabitsCard selectedDate={selectedDate} />
+          </div>
 
-        <HabitGrid
-          currentMonth={month}
-          selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
-        />
-
-        <JournalPanel
-          currentMonth={month}
-          selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
-        />
-
-        <BadgesPanel />
+          {/* Coluna Direita: To-Do do Dia e Diário Rápido (5 colunas) */}
+          <div className="lg:col-span-5 space-y-5">
+            <DailyTodosCard selectedDate={selectedDate} />
+            <DailyJournalCard selectedDate={selectedDate} />
+          </div>
+        </div>
       </div>
     </AppLayout>
   );
