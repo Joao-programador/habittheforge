@@ -127,7 +127,11 @@ export function WojakStatusBanner() {
                 transition={{ type: "spring", stiffness: 350, damping: 22 }}
                 className={cn(
                   "w-full h-full select-none drop-shadow-sm",
-                  isChad ? "object-cover" : "object-contain p-2"
+                  isDoomer
+                    ? "object-cover scale-145 object-[center_20%]"
+                    : isChad
+                    ? "object-cover"
+                    : "object-contain p-2"
                 )}
               />
             </AnimatePresence>

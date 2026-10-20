@@ -3,6 +3,7 @@ import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu
 import { LayoutDashboard, Trophy, Settings, Flame, CalendarRange, ListChecks, BookOpen, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { WojakSidebarWidget } from "@/components/wojak/WojakSidebarWidget";
 
 
 const items = [
@@ -67,6 +68,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <WojakSidebarWidget collapsed={collapsed} />
 
       <SidebarFooter className="p-3 gap-2">
         {!collapsed && user?.email && (
