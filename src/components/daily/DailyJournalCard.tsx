@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { BookOpen, Trophy, Skull, Save, ArrowRight, Check } from "lucide-react";
 import { useJournalData } from "@/hooks/useJournalData";
 import { useHabitsData } from "@/hooks/useHabitsData";
-import { getWojakLoreStage } from "@/lib/wojakLore";
+import { getWojakStage } from "@/lib/wojakLore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,7 +28,7 @@ export function DailyJournalCard({ selectedDate = new Date() }: Props) {
     const habitIds = new Set(habits.map((h) => h.id));
     const done = completions.filter((c) => c.date === dateStr && habitIds.has(c.habit_id)).length;
     const pct = Math.round((done / habits.length) * 100);
-    const stage = getWojakLoreStage(pct);
+    const stage = getWojakStage(pct);
     return { completionPct: pct, stageId: stage.id };
   }, [habits, completions, dateStr]);
 
