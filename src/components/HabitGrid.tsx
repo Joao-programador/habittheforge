@@ -8,14 +8,18 @@ import { Trash2, Flame } from "lucide-react";
 import { AddHabitDialog } from "@/components/AddHabitDialog";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useJournalData } from "@/hooks/useJournalData";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface Props {
   currentMonth: Date;
+  selectedDate?: Date;
+  onSelectDate?: (d: Date) => void;
 }
 
-export function HabitGrid({ currentMonth }: Props) {
+export function HabitGrid({ currentMonth, selectedDate, onSelectDate }: Props) {
   const { habits, isCompleted, toggleCompletion, addHabit, updateHabit, deleteHabit, completions } = useHabitsData();
+  const { hasEntry } = useJournalData();
   const days = getMonthDays(currentMonth);
   const today = new Date();
 
@@ -44,13 +48,25 @@ export function HabitGrid({ currentMonth }: Props) {
                 const isTodayDay = isToday(d);
                 const dayOfWeek = d.getDay();
                 const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                const dateKey = format(d, "yyyy-MM-dd");
+                const hasJournal = hasEntry(dateKey);
+                const isSelected = selectedDate ? isSameDay(d, selectedDate) : false;
+
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={d.toISOString()}
+                    onClick={() => {
+                      onSelectDate?.(d);
+                      const el = document.getElementById("journal-panel");
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                    }}
                     className={cn(
-                      "w-10 md:w-10 h-14 flex flex-col items-center justify-center text-xs font-mono transition-colors",
-                      isWeekend && !isTodayDay && "bg-white/[0.015]"
+                      "w-10 md:w-10 h-14 flex flex-col items-center justify-center text-xs font-mono transition-colors group cursor-pointer relative select-none",
+                      isWeekend && !isTodayDay && "bg-white/[0.015]",
+                      isSelected && "bg-primary/10"
                     )}
+                    title={hasJournal ? "Possui anotação no diário (clique para abrir)" : "Clique para abrir no diário"}
                   >
                     <span
                       className={cn(
@@ -69,11 +85,28 @@ export function HabitGrid({ currentMonth }: Props) {
                         {format(d, "d")}
                       </span>
                     ) : (
-                      <span className={cn("mt-0.5", isWeekend ? "text-foreground/75" : "text-foreground/90")}>
+                      <span
+                        className={cn(
+                          "mt-0.5 transition-colors group-hover:text-primary",
+                          isSelected
+                            ? "text-primary font-bold"
+                            : isWeekend
+                            ? "text-foreground/75"
+                            : "text-foreground/90"
+                        )}
+                      >
                         {format(d, "d")}
                       </span>
                     )}
-                  </div>
+
+                    {/* Indicador visual de Diário */}
+                    {hasJournal && (
+                      <span
+                        className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400/80 animate-pulse"
+                        title="Possui anotação no diário"
+                      />
+                    )}
+                  </button>
                 );
               })}
             </div>

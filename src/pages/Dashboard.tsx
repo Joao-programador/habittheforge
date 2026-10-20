@@ -6,15 +6,18 @@ import { WojakStatusBanner } from "@/components/WojakStatusBanner";
 import { HabitGrid } from "@/components/HabitGrid";
 import { StatsPanel } from "@/components/StatsPanel";
 import { BadgesPanel } from "@/components/BadgesPanel";
+import { JournalPanel } from "@/components/JournalPanel";
 import { AddHabitDialog } from "@/components/AddHabitDialog";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Download, CalendarDays } from "lucide-react";
 import { useHabitsData } from "@/hooks/useHabitsData";
+import { useJournalData } from "@/hooks/useJournalData";
 import { exportMonthPDF } from "@/lib/exportPdf";
 import { toast } from "sonner";
 
 export default function Dashboard() {
   const [month, setMonth] = useState(new Date());
+  const { selectedDate, setSelectedDate } = useJournalData();
   const { addHabit, habits, completions, badges } = useHabitsData();
   const captureRef = useRef<HTMLDivElement>(null);
 
@@ -65,7 +68,17 @@ export default function Dashboard() {
 
         <StatsPanel currentMonth={month} />
 
-        <HabitGrid currentMonth={month} />
+        <HabitGrid
+          currentMonth={month}
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+        />
+
+        <JournalPanel
+          currentMonth={month}
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+        />
 
         <BadgesPanel />
       </div>
