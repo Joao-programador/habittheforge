@@ -32,8 +32,16 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border/60">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center glow-primary shrink-0">
-            <Flame className="w-5 h-5 text-primary-foreground" strokeWidth={2.5} />
+          <div
+            className={`h-9 rounded-xl bg-white flex items-center justify-center border border-border/50 shadow-sm shrink-0 overflow-hidden ${
+              collapsed ? "w-9 p-0.5" : "px-2"
+            }`}
+          >
+            <img
+              src="/assets/logo.png"
+              alt="Forge Logo"
+              className={collapsed ? "w-full h-full object-contain" : "h-6 w-auto object-contain"}
+            />
           </div>
           {!collapsed && (
             <div className="overflow-hidden">

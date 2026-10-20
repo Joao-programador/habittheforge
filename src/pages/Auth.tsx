@@ -61,8 +61,12 @@ export default function Auth() {
     <main className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center glow-primary">
-            <Flame className="w-7 h-7 text-primary-foreground" strokeWidth={2.5} />
+          <div className="px-3.5 py-1.5 rounded-2xl bg-white flex items-center justify-center shadow-lg border border-border/50 overflow-hidden">
+            <img
+              src="/assets/logo.png"
+              alt="Forge Logo"
+              className="h-10 w-auto object-contain"
+            />
           </div>
           <h1 className="font-display text-3xl tracking-tight mt-4">FORGE</h1>
           <p className="text-sm text-muted-foreground mt-1 text-center">
