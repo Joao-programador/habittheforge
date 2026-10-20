@@ -142,7 +142,7 @@ export async function evaluateAndUnlockBadges(
       const inserted = await unlockBadge(badgeKey);
       if (inserted) {
         const def = BADGE_DEFS[badgeKey];
-        toast.success(`🏆 Conquista Desbloqueada: ${def?.name || badgeKey}!`, {
+        toast.success(`🏆 Ascensão Desbloqueada: ${def?.name || badgeKey}!`, {
           description: def?.description,
         });
         await new Promise((resolve) => setTimeout(resolve, 350));

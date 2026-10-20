@@ -61,7 +61,7 @@ export function DailyJournalCard({ selectedDate = new Date() }: Props) {
       stageSnapshot: stageId,
     });
     setIsSaved(true);
-    toast.success("Diário do dia gravado na forja!");
+    toast.success("Registro salvo no sistema!");
     setTimeout(() => setIsSaved(false), 2500);
   };
 
@@ -75,7 +75,7 @@ export function DailyJournalCard({ selectedDate = new Date() }: Props) {
               <BookOpen className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="font-display text-lg tracking-tight">Diário de Bordo</h2>
+              <h2 className="font-display text-lg tracking-tight">Diário de Ascensão</h2>
               <p className="text-xs text-muted-foreground capitalize">
                 {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
               </p>
@@ -83,7 +83,7 @@ export function DailyJournalCard({ selectedDate = new Date() }: Props) {
           </div>
 
           <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-secondary border border-border/40 text-muted-foreground">
-            {completionPct}% disciplina
+            {completionPct}% concluído
           </span>
         </div>
       </div>
@@ -98,7 +98,7 @@ export function DailyJournalCard({ selectedDate = new Date() }: Props) {
           <Input
             value={win}
             onChange={(e) => setWin(e.target.value)}
-            placeholder="Ex: Treinei em jejum e li 15 páginas"
+            placeholder="Ex: Treinei em jejum e cumpri 100% da leitura"
             className="h-8 text-xs bg-surface border-border/40 focus-visible:ring-amber-500"
           />
         </div>
@@ -111,7 +111,7 @@ export function DailyJournalCard({ selectedDate = new Date() }: Props) {
           <Input
             value={excuse}
             onChange={(e) => setExcuse(e.target.value)}
-            placeholder="Ex: 'Estou cansado, amanhã eu faço'"
+            placeholder="Ex: 'Estou cansado, amanhã eu compenso'"
             className="h-8 text-xs bg-surface border-border/40 focus-visible:ring-red-500"
           />
         </div>
@@ -119,12 +119,12 @@ export function DailyJournalCard({ selectedDate = new Date() }: Props) {
         <div>
           <label className="text-[11px] font-mono text-muted-foreground flex items-center gap-1.5 mb-1">
             <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Reflexão Rápida</span>
+            <span>Autópsia do Dia</span>
           </label>
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Como foi o combate pela sua mente hoje? Registre o aprendizado..."
+            placeholder="O que te fez subir de nível hoje e o que tentou te puxar para baixo?"
             rows={2}
             className="text-xs resize-none bg-surface border-border/40 focus-visible:ring-primary min-h-[56px]"
           />
@@ -148,7 +148,7 @@ export function DailyJournalCard({ selectedDate = new Date() }: Props) {
           {isSaved ? (
             <>
               <Check className="w-3.5 h-3.5" />
-              <span>Gravado</span>
+              <span>Registrado</span>
             </>
           ) : (
             <>
@@ -162,7 +162,7 @@ export function DailyJournalCard({ selectedDate = new Date() }: Props) {
           to="/journal"
           className="inline-flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-medium hover:underline transition-colors text-xs"
         >
-          <span>Ver histórico completo</span>
+          <span>Abrir arquivo completo</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>

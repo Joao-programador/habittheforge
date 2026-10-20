@@ -15,7 +15,7 @@ export default function Achievements() {
         <div>
           <h1 className="font-display text-4xl tracking-tight">Conquistas</h1>
           <p className="text-muted-foreground mt-1">
-            {badges.length} de {BADGE_LIST.length} desbloqueadas: continue forjando.
+            {badges.length} de {BADGE_LIST.length} desbloqueadas: continue ascendendo.
           </p>
         </div>
 

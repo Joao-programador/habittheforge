@@ -67,7 +67,7 @@ export default function Dashboard() {
           </div>
 
           <div className="text-xs text-muted-foreground font-mono px-2 hidden sm:block">
-            Cockpit Diário · Foco no Presente
+            Cockpit Diário · Execução no Presente
           </div>
         </div>
 

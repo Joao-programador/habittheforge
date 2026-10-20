@@ -63,12 +63,12 @@ export default function Auth() {
         <div className="flex flex-col items-center mb-8">
           <img
             src="/assets/logo.png"
-            alt="Forge Logo"
+            alt="ASCEND Logo"
             className="h-20 w-auto object-contain select-none"
           />
-          <h1 className="font-display text-3xl tracking-tight mt-3">FORGE</h1>
+          <h1 className="font-display text-3xl tracking-tight mt-3">ASCEND</h1>
           <p className="text-sm text-muted-foreground mt-1 text-center">
-            Sua disciplina em todos os dispositivos. Entre e continue forjando.
+            Sua disciplina sincronizada. Entre, dê lock-in e sepulte o beto.
           </p>
         </div>
 

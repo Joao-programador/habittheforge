@@ -35,13 +35,13 @@ export function AppSidebar() {
           <div className="flex flex-col items-center text-center gap-2">
             <img
               src="/assets/logo.png"
-              alt="Forge Logo"
+              alt="ASCEND Logo"
               className="h-16 w-auto object-contain select-none"
             />
             <div className="overflow-hidden">
-              <div className="font-display text-lg leading-none tracking-tight">FORGE</div>
+              <div className="font-display text-lg leading-none tracking-tight">ASCEND</div>
               <div className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] mt-1">
-                Discipline · Iron
+                Lock In · Ascend
               </div>
             </div>
           </div>

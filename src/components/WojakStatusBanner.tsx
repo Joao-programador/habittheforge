@@ -205,11 +205,11 @@ export function WojakStatusBanner() {
             >
               <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
               <span className="leading-tight font-medium">
-                <strong>PENALIDADE DE STREAK:</strong> 2 dias sem forjar hábitos. Conclua mais{" "}
+                <strong>PENALIDADE DO BETO:</strong> 2 dias em queda livre. Conclua mais{" "}
                 <strong className="underline text-red-300">
                   {habitsNeededFor50} {habitsNeededFor50 === 1 ? "hábito" : "hábitos"}
                 </strong>{" "}
-                hoje para destravar a evolução!
+                hoje para quebrar o cativeiro Doomer e voltar a ascender!
               </span>
             </motion.div>
           )}

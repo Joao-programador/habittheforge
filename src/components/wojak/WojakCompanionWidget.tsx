@@ -62,7 +62,7 @@ export function WojakCompanionWidget() {
                 ? "border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.3)]"
                 : stage.borderClass
             )}
-            title="Expandir Mascote da Forja"
+            title="Expandir Radar de Ascensão"
           >
             <div className="w-10 h-10 rounded-full bg-white overflow-hidden border-2 border-white/60 shadow-sm flex items-center justify-center shrink-0">
               <img
@@ -117,11 +117,11 @@ export function WojakCompanionWidget() {
               <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-border/30">
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px] uppercase font-mono font-bold tracking-wider text-muted-foreground">
-                    Companheiro da Forja
+                    Radar de Ascensão
                   </span>
                   {isPenaltyActive && (
                     <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-red-500/20 text-red-400 border border-red-500/40">
-                      <ShieldAlert className="w-2.5 h-2.5" /> Punitivo
+                      <ShieldAlert className="w-2.5 h-2.5" /> Em Queda
                     </span>
                   )}
                 </div>
@@ -131,7 +131,7 @@ export function WojakCompanionWidget() {
                     type="button"
                     onClick={nextQuote}
                     className="p-1 rounded-md hover:bg-secondary/70 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                    title="Sortear nova frase do Beto"
+                    title="Sortear nova frase"
                   >
                     <Dices className="w-3.5 h-3.5" />
                   </button>
@@ -139,7 +139,7 @@ export function WojakCompanionWidget() {
                     type="button"
                     onClick={() => setMinimized(true)}
                     className="p-1 rounded-md hover:bg-secondary/70 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                    title="Minimizar mascote"
+                    title="Minimizar radar"
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>

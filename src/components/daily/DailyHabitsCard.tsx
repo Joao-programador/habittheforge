@@ -47,7 +47,7 @@ export function DailyHabitsCard({ selectedDate = new Date() }: Props) {
 
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs px-2.5 py-1 rounded-md bg-secondary border border-border/40 font-semibold">
-              {completedCount} / {totalCount} feitos
+              {completedCount} / {totalCount} concluídos
             </span>
           </div>
         </div>
@@ -65,10 +65,10 @@ export function DailyHabitsCard({ selectedDate = new Date() }: Props) {
       <div className="space-y-2.5 flex-1 min-h-[220px]">
         {habits.length === 0 ? (
           <div className="py-12 text-center text-muted-foreground space-y-3">
-            <div className="text-4xl">🔥</div>
-            <p className="text-sm">Nenhum hábito cadastrado ainda.</p>
+            <div className="text-4xl">⚡</div>
+            <p className="text-sm">Nenhum hábito ativo no sistema.</p>
             <p className="text-xs text-muted-foreground/80 max-w-xs mx-auto">
-              Comece forjando o primeiro hábito para iniciar sua jornada de disciplina diária.
+              Defina seu primeiro hábito acima para sair da inércia e iniciar sua ascensão.
             </p>
             <AddHabitDialog onAdd={addHabit} />
           </div>

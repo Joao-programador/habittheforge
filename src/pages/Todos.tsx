@@ -92,7 +92,7 @@ export default function Todos() {
           <div>
             <h1 className="font-display text-3xl tracking-tight">To-Do</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {openCount} abertas{overdue > 0 ? ` · ${overdue} atrasadas` : ""}. Prazo = compromisso.
+              {openCount} abertas{overdue > 0 ? ` · ${overdue} atrasadas` : ""}. Prazo = palavra empenhada.
             </p>
           </div>
           <Button onClick={openNew} className="bg-gradient-primary glow-primary gap-2">

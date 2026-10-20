@@ -15,12 +15,12 @@ export default function Journal() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs uppercase tracking-wider font-mono text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
-                Mentalidade & Forja
+                Mindset & Autópsia Diária
               </span>
             </div>
-            <h1 className="font-display text-3xl sm:text-4xl tracking-tight">Diário de Bordo</h1>
+            <h1 className="font-display text-3xl sm:text-4xl tracking-tight">Diário de Ascensão</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Registre a guerra diária contra a procrastinação, identifique desculpas e celebre vitórias.
+              Documente sua ascensão diária, exponha desculpas de beto e registre vitórias.
             </p>
           </div>
 
@@ -30,7 +30,7 @@ export default function Journal() {
               <div className="text-right">
                 <div className="font-display text-lg leading-none">{allEntries.length}</div>
                 <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                  {allEntries.length === 1 ? "Entrada Salva" : "Entradas Salvas"}
+                  {allEntries.length === 1 ? "Registro no Arquivo" : "Registros no Arquivo"}
                 </div>
               </div>
             </div>

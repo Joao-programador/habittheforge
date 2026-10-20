@@ -41,7 +41,7 @@ export default function Habits() {
             <div>
               <h1 className="font-display text-2xl tracking-tight">Matriz de Hábitos</h1>
               <p className="text-xs text-muted-foreground">
-                Visão mensal analítica, aderência temporal e matriz de 31 dias.
+                Visão mensal analítica, taxa de aderência e matriz de 31 dias.
               </p>
             </div>
           </div>

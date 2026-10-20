@@ -99,7 +99,7 @@ export default function Planner() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="font-display text-3xl tracking-tight">Planner</h1>
-            <p className="text-sm text-muted-foreground">Forje seu tempo. Bloqueie. Execute.</p>
+            <p className="text-sm text-muted-foreground">Domine seu tempo. Bloqueie. Execute.</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => setCursor(new Date())} className="gap-1.5">

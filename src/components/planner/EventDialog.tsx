@@ -68,7 +68,7 @@ export function EventDialog({ open, onOpenChange, draft, onSave, onDelete }: Pro
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl tracking-tight">
-            {d.id ? "Editar bloco" : "Novo bloco"}
+            {d.id ? "Editar bloco" : "Novo bloco de execução"}
           </DialogTitle>
         </DialogHeader>
 
@@ -86,14 +86,14 @@ export function EventDialog({ open, onOpenChange, draft, onSave, onDelete }: Pro
             </Select>
             {d.habit_id && (
               <p className="text-xs text-muted-foreground">
-                Concluir aqui marca o check no Dashboard automaticamente.
+                Concluir aqui marca o check no Cockpit automaticamente.
               </p>
             )}
           </div>
 
           <div className="space-y-2">
             <Label>Título</Label>
-            <Input value={d.title} onChange={(e) => update({ title: e.target.value })} placeholder="O que vai forjar?" autoFocus />
+            <Input value={d.title} onChange={(e) => update({ title: e.target.value })} placeholder="Qual missão você vai executar?" autoFocus />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
