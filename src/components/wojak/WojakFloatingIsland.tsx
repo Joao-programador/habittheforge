@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
-import { ArrowUp, Sparkles } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import { useHabitsData } from "@/hooks/useHabitsData";
 import { getWojakStage, checkHasStreakPenalty } from "@/lib/wojakLore";
 import { cn } from "@/lib/utils";
@@ -49,58 +49,67 @@ export function WojakFloatingIsland() {
     <AnimatePresence>
       {scrolled && (
         <motion.div
-          initial={{ y: -50, opacity: 0, scale: 0.95 }}
+          initial={{ y: -60, opacity: 0, scale: 0.92 }}
           animate={{ y: 0, opacity: 1, scale: 1 }}
-          exit={{ y: -40, opacity: 0, scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 400, damping: 28 }}
+          exit={{ y: -50, opacity: 0, scale: 0.92 }}
+          transition={{ type: "spring", stiffness: 380, damping: 26 }}
           onClick={scrollToTop}
           className={cn(
             "fixed top-3 left-1/2 -translate-x-1/2 z-50",
             "cursor-pointer select-none",
-            "flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full",
-            "glass backdrop-blur-xl bg-card/90 border shadow-2xl",
-            "hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200",
+            "flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl sm:rounded-full",
+            "glass backdrop-blur-2xl bg-card/95 border-2 shadow-[0_12px_36px_rgba(0,0,0,0.45)]",
+            "hover:scale-[1.03] active:scale-[0.98] transition-all duration-200",
             isChad
-              ? "border-amber-400/60 shadow-[0_0_25px_rgba(251,191,36,0.25)]"
+              ? "border-amber-400 shadow-[0_0_35px_rgba(251,191,36,0.3)]"
               : stage.borderClass
           )}
           title="Clique para voltar ao topo da página"
         >
-          {/* Mini Avatar com fundo branco para traço nítido */}
-          <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white overflow-hidden shrink-0 border border-white/30 shadow-xs flex items-center justify-center">
+          {/* Avatar ampliado com traço nítido e fundo branco sólido */}
+          <div
+            className={cn(
+              "relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white overflow-hidden shrink-0 border-2 shadow-md flex items-center justify-center",
+              isChad ? "border-amber-400 ring-2 ring-amber-400/40" : "border-white/50"
+            )}
+          >
             <img
               src={stage.imageUrl}
               alt={stage.title}
               className={cn(
                 "w-full h-full select-none",
-                isDoomer ? "object-cover scale-140 object-[center_20%]" : isChad ? "object-cover" : "object-contain p-0.5"
+                isDoomer
+                  ? "object-cover scale-175 object-[center_22%]"
+                  : isChad
+                  ? "object-cover"
+                  : "object-contain p-1"
               )}
             />
           </div>
 
-          {/* Nome e % */}
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="font-display text-xs sm:text-sm tracking-tight text-foreground whitespace-nowrap">
+          {/* Nome e % ampliada */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2.5 min-w-0">
+            <span className="font-display text-sm sm:text-base font-bold tracking-tight text-foreground whitespace-nowrap">
               {stage.title}
             </span>
             <span
               className={cn(
-                "font-mono text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold uppercase tracking-wider",
+                "font-mono text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider self-start sm:self-auto",
                 stage.badgeColor
               )}
             >
-              {percentage}%
+              {percentage}% hoje
             </span>
           </div>
 
           {/* Frase reduzida do Beto / Wojak */}
-          <span className="hidden md:inline-block text-xs text-muted-foreground italic truncate max-w-[220px] lg:max-w-[320px] border-l border-border/40 pl-2.5">
+          <span className="hidden md:inline-block text-xs sm:text-sm text-muted-foreground italic truncate max-w-[240px] lg:max-w-[420px] border-l border-border/40 pl-3">
             "{stage.quotes[0]}"
           </span>
 
-          {/* Botão de retorno ao topo */}
-          <div className="w-5 h-5 rounded-full bg-secondary/80 flex items-center justify-center text-muted-foreground shrink-0 ml-0.5">
-            <ArrowUp className="w-3 h-3" />
+          {/* Botão de retorno ao topo com affordance visual clara */}
+          <div className="w-7 h-7 rounded-full bg-secondary/80 hover:bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground shrink-0 ml-1 border border-border/40 shadow-xs">
+            <ArrowUp className="w-3.5 h-3.5" />
           </div>
         </motion.div>
       )}
