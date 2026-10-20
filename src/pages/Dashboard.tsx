@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { format, subDays, addDays, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AppLayout } from "@/components/AppLayout";
@@ -6,20 +6,47 @@ import { WojakStatusBanner } from "@/components/WojakStatusBanner";
 import { DailyHabitsCard } from "@/components/daily/DailyHabitsCard";
 import { DailyTodosCard } from "@/components/daily/DailyTodosCard";
 import { DailyJournalCard } from "@/components/daily/DailyJournalCard";
+import { AuraMaximaModal } from "@/components/AuraMaximaModal";
 import { useJournalData } from "@/hooks/useJournalData";
+import { useHabitsData } from "@/hooks/useHabitsData";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 
 export default function Dashboard() {
   const { selectedDate, setSelectedDate } = useJournalData();
+  const { habits, completions } = useHabitsData();
+  const [showAuraModal, setShowAuraModal] = useState(false);
 
   const isCurrentDay = useMemo(() => isToday(selectedDate), [selectedDate]);
+  const todayStr = useMemo(() => format(new Date(), "yyyy-MM-dd"), []);
+
+  // Check if today has 100% completion
+  const isTodayComplete = useMemo(() => {
+    if (habits.length === 0) return false;
+    const habitIds = new Set(habits.map((h) => h.id));
+    const doneToday = completions.filter(
+      (c) => c.date === todayStr && habitIds.has(c.habit_id)
+    ).length;
+    return doneToday === habits.length;
+  }, [habits, completions, todayStr]);
+
+  // Auto-trigger celebration on first 100% completion of the day
+  useEffect(() => {
+    if (isTodayComplete) {
+      const key = `ascend_celebrated_${todayStr}`;
+      const hasCelebrated = localStorage.getItem(key);
+      if (!hasCelebrated) {
+        setShowAuraModal(true);
+        localStorage.setItem(key, "true");
+      }
+    }
+  }, [isTodayComplete, todayStr]);
 
   return (
     <AppLayout>
       <div className="space-y-5">
         {/* Banner do Wojak / Beto */}
-        <WojakStatusBanner />
+        <WojakStatusBanner onWatchAscend={() => setShowAuraModal(true)} />
 
         {/* Barra de Seleção de Dia do Cockpit */}
         <div className="surface-card p-3 flex flex-wrap items-center justify-between gap-3">
@@ -85,6 +112,12 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Celebração de 100% / Aura Máxima */}
+      <AuraMaximaModal
+        isOpen={showAuraModal}
+        onClose={() => setShowAuraModal(false)}
+      />
     </AppLayout>
   );
 }

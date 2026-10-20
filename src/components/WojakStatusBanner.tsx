@@ -1,12 +1,16 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
-import { Dices, AlertTriangle, Sparkles, Flame, PlusCircle } from "lucide-react";
+import { Dices, AlertTriangle, Sparkles, Flame, PlusCircle, Play } from "lucide-react";
 import { useHabitsData } from "@/hooks/useHabitsData";
 import { getWojakStage, checkHasStreakPenalty, type WojakStage } from "@/lib/wojakLore";
 import { cn } from "@/lib/utils";
 
-export function WojakStatusBanner() {
+interface WojakStatusBannerProps {
+  onWatchAscend?: () => void;
+}
+
+export function WojakStatusBanner({ onWatchAscend }: WojakStatusBannerProps = {}) {
   const { habits, completions } = useHabitsData();
   const today = useMemo(() => new Date(), []);
   const todayStr = useMemo(() => format(today, "yyyy-MM-dd"), [today]);
@@ -162,9 +166,16 @@ export function WojakStatusBanner() {
                   {isColdStart ? "Pronto para Forjar" : currentStage.title}
                 </h2>
                 {isChad && !isColdStart && (
-                  <span className="flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider text-amber-300 font-bold bg-amber-500/15 border border-amber-400/40 px-2 py-0.5 rounded-full">
-                    <Sparkles className="w-3 h-3 text-amber-400" /> Aura Máxima
-                  </span>
+                  <button
+                    type="button"
+                    onClick={onWatchAscend}
+                    className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-amber-300 font-bold bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/60 px-2.5 py-0.5 rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                    title="Ver transformação da Aura Máxima"
+                  >
+                    <Sparkles className="w-3 h-3 text-amber-400 animate-pulse" />
+                    <span>Aura Máxima</span>
+                    <Play className="w-2.5 h-2.5 fill-amber-300 ml-0.5" />
+                  </button>
                 )}
                 {isColdStart && (
                   <span className="flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider text-primary font-bold bg-primary/15 border border-primary/30 px-2 py-0.5 rounded-full">
