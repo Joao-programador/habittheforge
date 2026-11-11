@@ -196,11 +196,14 @@
                     class="w-full h-[250px] rounded-2xl bg-gradient-to-b from-slate-950/90 via-slate-900/60 to-cyan-950/30 border border-cyan-500/20 flex items-center justify-center cursor-grab active:cursor-grabbing relative overflow-hidden select-none"
                     title="Arraste para inclinar o reator ou clique para agitar a água"
                   >
-                    <div x-show="!waterWebglReady && !waterWebglError" class="text-xs font-mono text-muted-foreground flex items-center gap-2">
+                    <!-- Montagem dedicada do Canvas 3D -->
+                    <div x-ref="waterCanvasMount" class="absolute inset-0 w-full h-full"></div>
+
+                    <div x-show="!waterWebglReady && !waterWebglError" class="text-xs font-mono text-muted-foreground flex items-center gap-2 relative z-10 pointer-events-none">
                       <i data-lucide="waves" class="w-4 h-4 text-cyan-400 animate-spin"></i>
                       <span>Inicializando Reator 3D...</span>
                     </div>
-                    <div x-show="waterWebglError" class="p-4 text-center space-y-2">
+                    <div x-show="waterWebglError" class="p-4 text-center space-y-2 relative z-10">
                       <i data-lucide="droplets" class="w-8 h-8 text-cyan-400 mx-auto"></i>
                       <div class="font-mono text-lg font-bold text-cyan-300" x-text="`${waterPercentage}%`"></div>
                       <p class="text-[11px] text-muted-foreground" x-text="`Modo 2D ativo (${waterIntake} / ${waterGoal} ml)`"></p>
@@ -846,7 +849,8 @@ document.addEventListener('alpine:init', () => {
 
     initWater3D() {
       const container = this.$refs.waterCanvasContainer;
-      if (!container) return;
+      const mount = this.$refs.waterCanvasMount;
+      if (!container || !mount) return;
 
       const THREE = window.THREE;
       if (!THREE) {
@@ -855,8 +859,8 @@ document.addEventListener('alpine:init', () => {
       }
 
       try {
-        const width = container.clientWidth || 220;
-        const height = container.clientHeight || 250;
+        const width = mount.clientWidth || container.clientWidth || 220;
+        const height = mount.clientHeight || container.clientHeight || 250;
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 100);
@@ -867,8 +871,7 @@ document.addEventListener('alpine:init', () => {
         renderer.setSize(width, height);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
-        container.innerHTML = "";
-        container.appendChild(renderer.domElement);
+        mount.appendChild(renderer.domElement);
 
         const reactorGroup = new THREE.Group();
         scene.add(reactorGroup);

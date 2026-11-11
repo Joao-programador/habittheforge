@@ -59,6 +59,7 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
   const [webglError, setWebglError] = useState(false);
 
   const canvasContainerRef = useRef<HTMLDivElement>(null);
+  const canvasMountRef = useRef<HTMLDivElement>(null);
   const sceneControllerRef = useRef<{
     setTargetFill: (ratio: number) => void;
     triggerSplash: (intensity?: number) => void;
@@ -113,11 +114,12 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
 
     ensureThreeLoaded()
       .then((THREE) => {
-        if (!isMounted || !canvasContainerRef.current || !THREE) return;
+        if (!isMounted || !canvasContainerRef.current || !canvasMountRef.current || !THREE) return;
 
         const container = canvasContainerRef.current;
-        const width = container.clientWidth || 220;
-        const height = container.clientHeight || 260;
+        const mount = canvasMountRef.current;
+        const width = mount.clientWidth || container.clientWidth || 220;
+        const height = mount.clientHeight || container.clientHeight || 260;
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 100);
@@ -128,8 +130,7 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
         renderer.setSize(width, height);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
-        container.innerHTML = "";
-        container.appendChild(renderer.domElement);
+        mount.appendChild(renderer.domElement);
 
         // Grupo principal do Reator (permite inclinação 3D interativa)
         const reactorGroup = new THREE.Group();
@@ -444,7 +445,12 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
       isMounted = false;
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       if (observer) observer.disconnect();
-      if (renderer && renderer.dispose) renderer.dispose();
+      if (renderer) {
+        if (renderer.domElement && renderer.domElement.parentNode) {
+          renderer.domElement.parentNode.removeChild(renderer.domElement);
+        }
+        if (renderer.dispose) renderer.dispose();
+      }
     };
   }, []);
 
@@ -561,14 +567,17 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
             className="w-full h-[250px] rounded-2xl bg-gradient-to-b from-slate-950/90 via-slate-900/60 to-cyan-950/30 border border-cyan-500/20 flex items-center justify-center cursor-grab active:cursor-grabbing relative overflow-hidden select-none"
             title="Arraste para inclinar o reator ou clique para agitar a água"
           >
+            {/* Montagem dedicada do Canvas WebGL 3D (sem filhos JSX) */}
+            <div ref={canvasMountRef} className="absolute inset-0 w-full h-full" />
+
             {!webglReady && !webglError && (
-              <div className="text-xs font-mono text-muted-foreground flex items-center gap-2">
+              <div className="text-xs font-mono text-muted-foreground flex items-center gap-2 relative z-10 pointer-events-none">
                 <Waves className="w-4 h-4 text-cyan-400 animate-spin" />
                 <span>Inicializando Reator 3D...</span>
               </div>
             )}
             {webglError && (
-              <div className="p-4 text-center space-y-2">
+              <div className="p-4 text-center space-y-2 relative z-10">
                 <Droplets className="w-8 h-8 text-cyan-400 mx-auto" />
                 <div className="font-mono text-lg font-bold text-cyan-300">{percentage}%</div>
                 <p className="text-[11px] text-muted-foreground">
