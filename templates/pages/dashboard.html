@@ -53,77 +53,279 @@
         <!-- Bento Grid Diário -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           
-          <!-- Coluna Esquerda: Hábitos de Hoje (7 colunas) -->
-          <div class="lg:col-span-7 surface-card p-5 sm:p-6 flex flex-col justify-between space-y-4">
-            <div>
-              <div class="flex items-center justify-between gap-3 mb-2">
-                <div class="flex items-center gap-2">
-                  <div class="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
-                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <!-- Coluna Esquerda: Hábitos de Hoje + Reator de Hidratação 3D (7 colunas) -->
+          <div class="lg:col-span-7 space-y-5">
+
+            <!-- Card de Hábitos de Hoje -->
+            <div class="surface-card p-5 sm:p-6 flex flex-col justify-between space-y-4">
+              <div>
+                <div class="flex items-center justify-between gap-3 mb-2">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
+                      <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <h2 class="font-display text-lg tracking-tight">Hábitos de Hoje</h2>
+                      <p class="text-xs text-muted-foreground capitalize" x-text="selectedDateFormatted"></p>
+                    </div>
+                  </div>
+                  <span class="font-mono text-xs px-2.5 py-1 rounded-md bg-secondary border border-border/40 font-semibold" x-text="`${completedTodayCount} / ${habits.length} feitos`"></span>
+                </div>
+
+                <!-- Barra de Progresso Rápida -->
+                <div class="w-full bg-secondary/50 rounded-full h-2 overflow-hidden border border-border/30 mt-3">
+                  <div class="bg-gradient-primary h-full transition-all duration-500 rounded-full" :style="`width: ${dailyCompletionPct}%`"></div>
+                </div>
+              </div>
+
+              <!-- Lista de Hábitos -->
+              <div class="space-y-2.5 flex-1 min-h-[200px]">
+                <template x-if="habits.length === 0">
+                  <div class="py-12 text-center text-muted-foreground space-y-3">
+                    <div class="text-4xl">🔥</div>
+                    <p class="text-sm">Nenhum hábito cadastrado ainda.</p>
+                    <a href="/habits" class="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline">
+                      Forjar primeiro hábito na Matriz ➔
+                    </a>
+                  </div>
+                </template>
+
+                <template x-for="habit in habits" :key="habit.id">
+                  <div :class="isHabitDone(habit.id) ? 'bg-secondary/40 border-border/50 text-muted-foreground' : 'bg-surface border-border/40 hover:border-primary/40 hover:bg-surface-elevated text-foreground'" class="p-3.5 rounded-xl border transition-all flex items-center justify-between gap-3 group select-none">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <button type="button" @click="toggleHabitToday(habit.id)" :style="isHabitDone(habit.id) ? `border-color: ${habit.color}; box-shadow: 0 0 14px ${habit.color}35` : ''" :class="isHabitDone(habit.id) ? 'bg-primary/20 text-primary border border-primary/40' : 'bg-secondary/60 hover:bg-secondary border border-border/50'" class="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0 transition-transform active:scale-95 cursor-pointer">
+                        <template x-if="isHabitDone(habit.id)">
+                          <i data-lucide="check" class="w-5 h-5 text-white stroke-[3]"></i>
+                        </template>
+                        <template x-if="!isHabitDone(habit.id)">
+                          <span x-text="habit.emoji"></span>
+                        </template>
+                      </button>
+                      <div class="min-w-0">
+                        <div :class="isHabitDone(habit.id) ? 'line-through opacity-70' : ''" class="font-medium text-sm truncate" x-text="habit.name"></div>
+                        <div class="flex items-center gap-2 mt-0.5">
+                          <span class="text-[11px] font-mono text-muted-foreground flex items-center gap-1">
+                            <i data-lucide="flame" class="w-3 h-3 text-orange-400"></i>
+                            <span x-text="`${getStreak(habit.id)}d streak`"></span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button type="button" @click="toggleHabitToday(habit.id)" :class="isHabitDone(habit.id) ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-secondary/60 text-foreground hover:bg-primary hover:text-primary-foreground border-border/40'" class="text-xs px-3 py-1.5 rounded-lg border font-medium transition-all shrink-0 cursor-pointer" x-text="isHabitDone(habit.id) ? 'Feito' : 'Marcar'"></button>
+                  </div>
+                </template>
+              </div>
+
+              <!-- Footer -->
+              <div class="pt-3 border-t border-border/30 flex items-center justify-between">
+                <a href="/habits" class="text-xs text-muted-foreground hover:text-foreground font-mono">
+                  Gerenciar hábitos
+                </a>
+                <a href="/habits" class="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline transition-colors">
+                  <span>Ver Matriz de 31 Dias</span>
+                  <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                </a>
+              </div>
+            </div>
+
+            <!-- Reator de Hidratação 3D (DailyWaterCard) -->
+            <div class="surface-card p-5 sm:p-6 flex flex-col justify-between space-y-5 relative overflow-hidden">
+              <!-- Header do Card -->
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-lg bg-cyan-500/15 text-cyan-400 flex items-center justify-center border border-cyan-500/30">
+                    <i data-lucide="droplets" class="w-4 h-4"></i>
                   </div>
                   <div>
-                    <h2 class="font-display text-lg tracking-tight">Hábitos de Hoje</h2>
+                    <div class="flex items-center gap-2">
+                      <h2 class="font-display text-lg tracking-tight">Reator de Hidratação</h2>
+                      <span
+                        class="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border font-bold"
+                        :class="hydroStatus.badgeClass"
+                        x-text="hydroStatus.label"
+                      ></span>
+                    </div>
                     <p class="text-xs text-muted-foreground capitalize" x-text="selectedDateFormatted"></p>
                   </div>
                 </div>
-                <span class="font-mono text-xs px-2.5 py-1 rounded-md bg-secondary border border-border/40 font-semibold" x-text="`${completedTodayCount} / ${habits.length} feitos`"></span>
-              </div>
 
-              <!-- Barra de Progresso Rápida -->
-              <div class="w-full bg-secondary/50 rounded-full h-2 overflow-hidden border border-border/30 mt-3">
-                <div class="bg-gradient-primary h-full transition-all duration-500 rounded-full" :style="`width: ${dailyCompletionPct}%`"></div>
-              </div>
-            </div>
-
-            <!-- Lista de Hábitos -->
-            <div class="space-y-2.5 flex-1 min-h-[200px]">
-              <template x-if="habits.length === 0">
-                <div class="py-12 text-center text-muted-foreground space-y-3">
-                  <div class="text-4xl">🔥</div>
-                  <p class="text-sm">Nenhum hábito cadastrado ainda.</p>
-                  <a href="/habits" class="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline">
-                    Forjar primeiro hábito na Matriz ➔
-                  </a>
+                <div class="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    @click="showGoalConfig = !showGoalConfig"
+                    class="inline-flex items-center gap-1.5 text-xs font-mono px-2.5 py-1.5 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-muted-foreground hover:text-foreground transition-colors cursor-pointer min-h-[36px]"
+                    title="Calibrar meta diária de água"
+                  >
+                    <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-cyan-400"></i>
+                    <span x-text="`Meta: ${(waterGoal / 1000).toFixed(1)}L`"></span>
+                  </button>
                 </div>
-              </template>
+              </div>
 
-              <template x-for="habit in habits" :key="habit.id">
-                <div :class="isHabitDone(habit.id) ? 'bg-secondary/40 border-border/50 text-muted-foreground' : 'bg-surface border-border/40 hover:border-primary/40 hover:bg-surface-elevated text-foreground'" class="p-3.5 rounded-xl border transition-all flex items-center justify-between gap-3 group select-none">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <button type="button" @click="toggleHabitToday(habit.id)" :style="isHabitDone(habit.id) ? `border-color: ${habit.color}; box-shadow: 0 0 14px ${habit.color}35` : ''" :class="isHabitDone(habit.id) ? 'bg-primary/20 text-primary border border-primary/40' : 'bg-secondary/60 hover:bg-secondary border border-border/50'" class="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0 transition-transform active:scale-95 cursor-pointer">
-                      <template x-if="isHabitDone(habit.id)">
-                        <i data-lucide="check" class="w-5 h-5 text-white stroke-[3]"></i>
-                      </template>
-                      <template x-if="!isHabitDone(habit.id)">
-                        <span x-text="habit.emoji"></span>
-                      </template>
-                    </button>
-                    <div class="min-w-0">
-                      <div :class="isHabitDone(habit.id) ? 'line-through opacity-70' : ''" class="font-medium text-sm truncate" x-text="habit.name"></div>
-                      <div class="flex items-center gap-2 mt-0.5">
-                        <span class="text-[11px] font-mono text-muted-foreground flex items-center gap-1">
-                          <i data-lucide="flame" class="w-3 h-3 text-orange-400"></i>
-                          <span x-text="`${getStreak(habit.id)}d streak`"></span>
-                        </span>
-                      </div>
+              <!-- Painel de Calibração de Meta (Expansível) -->
+              <div x-show="showGoalConfig" x-transition class="p-3.5 rounded-xl bg-secondary/40 border border-cyan-500/30 flex flex-wrap items-center justify-between gap-3">
+                <div class="text-xs">
+                  <span class="font-mono font-semibold text-cyan-300 block">
+                    CALIBRAR META DIÁRIA DE HIDRATAÇÃO
+                  </span>
+                  <span class="text-muted-foreground text-[11px]">
+                    Ajuste conforme seu peso corporal e intensidade de treino (2.0L a 5.0L).
+                  </span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <template x-for="preset in [2000, 2500, 3000, 3500, 4000]" :key="preset">
+                    <button
+                      type="button"
+                      @click="setGoal(preset); showGoalConfig = false"
+                      :class="waterGoal === preset ? 'bg-cyan-500 text-slate-950 font-bold border-cyan-400' : 'bg-surface hover:bg-secondary text-muted-foreground border-border/50'"
+                      class="px-2.5 py-1 rounded-md text-xs font-mono border transition-all cursor-pointer min-h-[34px]"
+                      x-text="`${(preset / 1000).toFixed(1)}L`"
+                    ></button>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Grid Principal: Reator 3D (Esquerda) + Telemetria e Injetores (Direita) -->
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center">
+                <!-- Coluna do Canvas WebGL 3D (5 colunas) -->
+                <div class="sm:col-span-5 flex flex-col items-center justify-center relative">
+                  <div
+                    x-ref="waterCanvasContainer"
+                    @click="triggerSplashAction()"
+                    class="w-full h-[250px] rounded-2xl bg-gradient-to-b from-slate-950/90 via-slate-900/60 to-cyan-950/30 border border-cyan-500/20 flex items-center justify-center cursor-grab active:cursor-grabbing relative overflow-hidden select-none"
+                    title="Arraste para inclinar o reator ou clique para agitar a água"
+                  >
+                    <div x-show="!waterWebglReady && !waterWebglError" class="text-xs font-mono text-muted-foreground flex items-center gap-2">
+                      <i data-lucide="waves" class="w-4 h-4 text-cyan-400 animate-spin"></i>
+                      <span>Inicializando Reator 3D...</span>
+                    </div>
+                    <div x-show="waterWebglError" class="p-4 text-center space-y-2">
+                      <i data-lucide="droplets" class="w-8 h-8 text-cyan-400 mx-auto"></i>
+                      <div class="font-mono text-lg font-bold text-cyan-300" x-text="`${waterPercentage}%`"></div>
+                      <p class="text-[11px] text-muted-foreground" x-text="`Modo 2D ativo (${waterIntake} / ${waterGoal} ml)`"></p>
                     </div>
                   </div>
 
-                  <button type="button" @click="toggleHabitToday(habit.id)" :class="isHabitDone(habit.id) ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-secondary/60 text-foreground hover:bg-primary hover:text-primary-foreground border-border/40'" class="text-xs px-3 py-1.5 rounded-lg border font-medium transition-all shrink-0 cursor-pointer" x-text="isHabitDone(habit.id) ? 'Feito' : 'Marcar'"></button>
+                  <span class="text-[10px] font-mono text-muted-foreground mt-1.5 text-center">
+                    Interaja com o mouse no cilindro 3D para inclinar o fluido
+                  </span>
                 </div>
-              </template>
+
+                <!-- Coluna de Telemetria + Ações Táticas (7 colunas) -->
+                <div class="sm:col-span-7 flex flex-col justify-between space-y-4">
+                  <!-- Placar Numérico de Alta Precisão -->
+                  <div class="p-4 rounded-xl bg-surface border border-border/40 space-y-2">
+                    <div class="flex items-baseline justify-between gap-2">
+                      <div>
+                        <span class="font-display text-2xl sm:text-3xl tracking-tight text-foreground" x-text="waterIntake"></span>
+                        <span class="font-mono text-xs text-muted-foreground ml-1.5" x-text="`/ ${waterGoal} ml`"></span>
+                      </div>
+                      <span
+                        class="font-mono text-base font-bold"
+                        :class="waterPercentage >= 100 ? 'text-amber-400' : 'text-cyan-400'"
+                        x-text="`${waterPercentage}%`"
+                      ></span>
+                    </div>
+
+                    <!-- Barra de Progresso Auxiliar -->
+                    <div class="w-full bg-secondary/60 rounded-full h-2 overflow-hidden border border-border/30">
+                      <div
+                        class="h-full transition-all duration-500 rounded-full"
+                        :class="waterPercentage >= 100 ? 'bg-gradient-to-r from-cyan-400 via-sky-400 to-amber-400' : 'bg-gradient-to-r from-sky-600 to-cyan-400'"
+                        :style="`width: ${Math.min(100, waterPercentage)}%`"
+                      ></div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-[11px] font-mono text-muted-foreground pt-0.5">
+                      <span x-text="waterRemainingMl > 0 ? `Faltam ${waterRemainingMl} ml para blindar o dia` : `Superávit de +${waterIntake - waterGoal} ml atingido`"></span>
+                      <template x-if="waterLogs.length > 0">
+                        <span x-text="`Último: ${waterLogs[0].timestamp}`"></span>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Mensagem de Estado Biológico -->
+                  <p class="text-xs text-muted-foreground leading-relaxed" x-text="hydroStatus.sub"></p>
+
+                  <!-- Botões de Injeção Rápida -->
+                  <div class="grid grid-cols-3 gap-2.5">
+                    <button
+                      type="button"
+                      @click="addWater(250)"
+                      class="h-11 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 font-mono text-xs flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-colors"
+                    >
+                      <span class="font-bold flex items-center gap-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> 250 ml
+                      </span>
+                      <span class="text-[10px] opacity-75">Copo</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      @click="addWater(500)"
+                      class="h-11 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 border border-cyan-400/40 font-mono text-xs flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-colors"
+                    >
+                      <span class="font-bold flex items-center gap-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> 500 ml
+                      </span>
+                      <span class="text-[10px] opacity-80">Garrafa</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      @click="addWater(750)"
+                      class="h-11 rounded-lg bg-sky-500/25 hover:bg-sky-500/35 text-white border border-sky-400/50 font-mono text-xs flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-colors"
+                    >
+                      <span class="font-bold flex items-center gap-1">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i> 750 ml
+                      </span>
+                      <span class="text-[10px] opacity-85">Shaker</span>
+                    </button>
+                  </div>
+
+                  <!-- Controles Secundários: Corrigir (-250ml), Zerar e Vínculo com Hábito -->
+                  <div class="pt-2 border-t border-border/30 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <div class="flex items-center gap-2">
+                      <button
+                        type="button"
+                        @click="addWater(-250)"
+                        :disabled="waterIntake === 0"
+                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground disabled:opacity-40 font-mono text-[11px] transition-colors cursor-pointer"
+                        title="Remover 250 ml"
+                      >
+                        <i data-lucide="minus" class="w-3 h-3"></i> 250 ml
+                      </button>
+
+                      <button
+                        type="button"
+                        x-show="waterIntake > 0"
+                        @click="resetWaterDay()"
+                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-secondary/40 hover:bg-destructive/20 text-muted-foreground hover:text-destructive font-mono text-[11px] transition-colors cursor-pointer"
+                        title="Zerar registros deste dia"
+                      >
+                        <i data-lucide="rotate-ccw" class="w-3 h-3"></i> Zerar
+                      </button>
+                    </div>
+
+                    <template x-if="linkedWaterHabit">
+                      <span
+                        class="inline-flex items-center gap-1.5 text-[11px] font-mono px-2.5 py-1 rounded-md border"
+                        :class="isLinkedWaterHabitDone ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-secondary/50 text-muted-foreground border-border/40'"
+                      >
+                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                        <span x-text="`Vínculo: ${linkedWaterHabit.name} (${isLinkedWaterHabitDone ? 'Feito' : 'Auto 100%'})`"></span>
+                      </span>
+                    </template>
+
+                    <template x-if="!linkedWaterHabit">
+                      <span class="text-[11px] font-mono text-muted-foreground" x-text="`${waterLogs.length} dose${waterLogs.length !== 1 ? 's' : ''} registrada${waterLogs.length !== 1 ? 's' : ''} hoje`"></span>
+                    </template>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <!-- Footer -->
-            <div class="pt-3 border-t border-border/30 flex items-center justify-between">
-              <a href="/habits" class="text-xs text-muted-foreground hover:text-foreground font-mono">
-                Gerenciar hábitos
-              </a>
-              <a href="/habits" class="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline transition-colors">
-                <span>Ver Matriz de 31 Dias</span>
-                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-              </a>
-            </div>
           </div>
 
           <!-- Coluna Direita: To-Dos e Diário (5 colunas) -->
@@ -261,6 +463,13 @@ document.addEventListener('alpine:init', () => {
     journalExcuse: '',
     journalContent: '',
     journalSaved: false,
+    waterIntake: 0,
+    waterGoal: 3000,
+    waterLogs: [],
+    showGoalConfig: false,
+    waterWebglReady: false,
+    waterWebglError: false,
+    waterSceneController: null,
     phraseIndex: 0,
     phrases: [
       "O ferro não se importa com seus sentimentos. Erga o peso da disciplina.",
@@ -329,6 +538,50 @@ document.addEventListener('alpine:init', () => {
       return this.dayTodos.filter(t => t.completed).length;
     },
 
+    get waterPercentage() {
+      if (this.waterGoal <= 0) return 0;
+      return Math.round((this.waterIntake / this.waterGoal) * 100);
+    },
+    get waterRemainingMl() {
+      return Math.max(0, this.waterGoal - this.waterIntake);
+    },
+    get linkedWaterHabit() {
+      return this.habits.find(h => /([aá]gua|hidrat|water|3l|litro)/i.test(h.name));
+    },
+    get isLinkedWaterHabitDone() {
+      if (!this.linkedWaterHabit) return false;
+      return this.isHabitDone(this.linkedWaterHabit.id);
+    },
+    get hydroStatus() {
+      const p = this.waterPercentage;
+      if (p === 0) {
+        return {
+          label: "Seca Doomer",
+          sub: "Células desidratadas. Injete o primeiro copo para ativar o reator.",
+          badgeClass: "bg-zinc-800/80 text-zinc-300 border-zinc-700"
+        };
+      }
+      if (p < 50) {
+        return {
+          label: "Ignição Hidráulica",
+          sub: "Fluxo iniciado. Mantenha a cadência para blindar a sinapse.",
+          badgeClass: "bg-sky-500/15 text-sky-300 border-sky-500/30"
+        };
+      }
+      if (p < 100) {
+        return {
+          label: "Pressão Estável",
+          sub: "Foco operacional elevado. Falta pouco para a meta diária.",
+          badgeClass: "bg-cyan-500/15 text-cyan-300 border-cyan-400/40"
+        };
+      }
+      return {
+        label: "Aura Líquida · #Hydrated",
+        sub: "100% da meta atingida. Volume celular e clareza mental no topo.",
+        badgeClass: "bg-amber-500/20 text-amber-300 border-amber-400/50"
+      };
+    },
+
     init() {
       const saved = localStorage.getItem('forge_completions');
       if (saved) {
@@ -336,22 +589,29 @@ document.addEventListener('alpine:init', () => {
       }
       this.loadTodos();
       this.loadJournal();
-      if (window.lucide) window.lucide.createIcons();
+      this.loadWater();
+      this.$nextTick(() => {
+        this.initWater3D();
+        if (window.lucide) window.lucide.createIcons();
+      });
     },
 
     prevDay() {
       this.currentDate = new Date(this.currentDate.setDate(this.currentDate.getDate() - 1));
       this.loadJournal();
+      this.loadWater();
       this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
     },
     nextDay() {
       this.currentDate = new Date(this.currentDate.setDate(this.currentDate.getDate() + 1));
       this.loadJournal();
+      this.loadWater();
       this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
     },
     goToToday() {
       this.currentDate = new Date();
       this.loadJournal();
+      this.loadWater();
       this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
     },
 
@@ -483,6 +743,413 @@ document.addEventListener('alpine:init', () => {
         setTimeout(() => this.journalSaved = false, 2500);
       } catch(e) {
         alert('Erro ao salvar diário: ' + e.message);
+      }
+    },
+
+    loadWater() {
+      const STORAGE_KEY = "ascend_water_v1";
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : { defaultGoalMl: 3000, records: {} };
+        const rec = parsed.records && parsed.records[this.selectedDateStr];
+        if (rec) {
+          this.waterIntake = rec.intakeMl || 0;
+          this.waterGoal = rec.goalMl || parsed.defaultGoalMl || 3000;
+          this.waterLogs = rec.logs || [];
+        } else {
+          this.waterIntake = 0;
+          this.waterGoal = parsed.defaultGoalMl || 3000;
+          this.waterLogs = [];
+        }
+      } catch(e) {
+        this.waterIntake = 0;
+        this.waterGoal = 3000;
+        this.waterLogs = [];
+      }
+      if (this.waterSceneController) {
+        const ratio = this.waterGoal > 0 ? this.waterIntake / this.waterGoal : 0;
+        this.waterSceneController.setTargetFill(ratio);
+      }
+    },
+
+    saveWater() {
+      const STORAGE_KEY = "ascend_water_v1";
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const state = raw ? JSON.parse(raw) : { defaultGoalMl: 3000, records: {} };
+        if (!state.records) state.records = {};
+        state.defaultGoalMl = this.waterGoal;
+        state.records[this.selectedDateStr] = {
+          date: this.selectedDateStr,
+          intakeMl: this.waterIntake,
+          goalMl: this.waterGoal,
+          logs: this.waterLogs,
+          updatedAt: new Date().toISOString()
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch(e) {}
+    },
+
+    addWater(amount) {
+      const prevPct = this.waterPercentage;
+      this.waterIntake = Math.max(0, Math.min(10000, this.waterIntake + amount));
+      const nowStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      if (amount > 0) {
+        this.waterLogs = [
+          { id: `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, amountMl: amount, timestamp: nowStr },
+          ...this.waterLogs.slice(0, 19)
+        ];
+      } else if (this.waterLogs.length > 0) {
+        this.waterLogs = this.waterLogs.slice(1);
+      }
+      this.saveWater();
+
+      if (this.waterSceneController) {
+        this.waterSceneController.triggerSplash(amount >= 500 ? 1.3 : 0.85);
+        const ratio = this.waterGoal > 0 ? this.waterIntake / this.waterGoal : 0;
+        this.waterSceneController.setTargetFill(ratio);
+      }
+
+      if (amount > 0 && prevPct < 100 && this.waterPercentage >= 100) {
+        if (this.linkedWaterHabit && !this.isLinkedWaterHabitDone) {
+          this.toggleHabitToday(this.linkedWaterHabit.id);
+        }
+      }
+      this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+    },
+
+    setGoal(preset) {
+      this.waterGoal = preset;
+      this.saveWater();
+      if (this.waterSceneController) {
+        const ratio = this.waterGoal > 0 ? this.waterIntake / this.waterGoal : 0;
+        this.waterSceneController.setTargetFill(ratio);
+      }
+      this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+    },
+
+    resetWaterDay() {
+      this.waterIntake = 0;
+      this.waterLogs = [];
+      this.saveWater();
+      if (this.waterSceneController) {
+        this.waterSceneController.setTargetFill(0.02);
+      }
+      this.$nextTick(() => { if (window.lucide) window.lucide.createIcons(); });
+    },
+
+    triggerSplashAction() {
+      if (this.waterSceneController) {
+        this.waterSceneController.triggerSplash(1.1);
+      }
+    },
+
+    initWater3D() {
+      const container = this.$refs.waterCanvasContainer;
+      if (!container) return;
+
+      const THREE = window.THREE;
+      if (!THREE) {
+        setTimeout(() => this.initWater3D(), 150);
+        return;
+      }
+
+      try {
+        const width = container.clientWidth || 220;
+        const height = container.clientHeight || 250;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 100);
+        camera.position.set(0, 0.25, 5.2);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+        renderer.setSize(width, height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+        container.innerHTML = "";
+        container.appendChild(renderer.domElement);
+
+        const reactorGroup = new THREE.Group();
+        scene.add(reactorGroup);
+
+        const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.75);
+        scene.add(ambientLight);
+
+        const keyLight = new THREE.PointLight(0x38bdf8, 2.2, 15);
+        keyLight.position.set(3, 3.5, 4);
+        scene.add(keyLight);
+
+        const rimLight = new THREE.PointLight(0xf59e0b, 1.1, 12);
+        rimLight.position.set(-3, -2, 2.5);
+        scene.add(rimLight);
+
+        const vesselHeight = 2.5;
+        const vesselRadius = 0.82;
+
+        const capGeo = new THREE.CylinderGeometry(vesselRadius * 1.07, vesselRadius * 1.07, 0.14, 40);
+        const capMat = new THREE.MeshStandardMaterial({
+          color: 0x1e293b,
+          metalness: 0.85,
+          roughness: 0.25,
+        });
+        const topCap = new THREE.Mesh(capGeo, capMat);
+        topCap.position.y = vesselHeight / 2 + 0.05;
+        reactorGroup.add(topCap);
+
+        const bottomCap = new THREE.Mesh(capGeo, capMat);
+        bottomCap.position.y = -vesselHeight / 2 - 0.05;
+        reactorGroup.add(bottomCap);
+
+        const ringGeo = new THREE.TorusGeometry(vesselRadius * 1.04, 0.025, 16, 64);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x0ea5e9, transparent: true, opacity: 0.75 });
+        const baseRing = new THREE.Mesh(ringGeo, ringMat);
+        baseRing.rotation.x = Math.PI / 2;
+        baseRing.position.y = -vesselHeight / 2 + 0.02;
+        reactorGroup.add(baseRing);
+
+        const glassGeo = new THREE.CylinderGeometry(vesselRadius, vesselRadius, vesselHeight, 40, 1, true);
+        const glassMat = new THREE.MeshPhysicalMaterial({
+          color: 0x93c5fd,
+          transparent: true,
+          opacity: 0.16,
+          roughness: 0.1,
+          metalness: 0.1,
+          side: THREE.DoubleSide,
+        });
+        const glassMesh = new THREE.Mesh(glassGeo, glassMat);
+        reactorGroup.add(glassMesh);
+
+        [-0.625, 0, 0.625].forEach((markY, idx) => {
+          const markGeo = new THREE.TorusGeometry(vesselRadius * 1.005, 0.008, 8, 48);
+          const markMat = new THREE.MeshBasicMaterial({
+            color: idx === 1 ? 0x38bdf8 : 0x64748b,
+            transparent: true,
+            opacity: idx === 1 ? 0.45 : 0.25,
+          });
+          const mark = new THREE.Mesh(markGeo, markMat);
+          mark.rotation.x = Math.PI / 2;
+          mark.position.y = markY;
+          reactorGroup.add(mark);
+        });
+
+        const liquidRadius = vesselRadius * 0.93;
+        const liquidGeo = new THREE.CylinderGeometry(liquidRadius, liquidRadius, vesselHeight, 48, 28, false);
+        liquidGeo.translate(0, vesselHeight / 2, 0);
+
+        const liquidUniforms = {
+          uTime: { value: 0 },
+          uWaveImpulse: { value: 0.0 },
+          uTiltX: { value: 0.0 },
+          uTiltZ: { value: 0.0 },
+          uDeepColor: { value: new THREE.Color(0x0284c7) },
+          uSurfaceColor: { value: new THREE.Color(0x38bdf8) },
+          uRimColor: { value: new THREE.Color(0xbae6fd) },
+        };
+
+        const liquidMat = new THREE.ShaderMaterial({
+          uniforms: liquidUniforms,
+          transparent: true,
+          vertexShader: `
+            uniform float uTime;
+            uniform float uWaveImpulse;
+            uniform float uTiltX;
+            uniform float uTiltZ;
+            varying vec3 vNormal;
+            varying vec3 vPos;
+            varying float vHeightRatio;
+
+            void main() {
+              vec3 pos = position;
+              vHeightRatio = clamp(pos.y / 2.5, 0.0, 1.0);
+
+              if (pos.y > 0.15) {
+                float amp = (0.035 + uWaveImpulse * 0.11) * pow(vHeightRatio, 1.6);
+                float wave1 = sin(pos.x * 4.5 + uTime * 3.8) * cos(pos.z * 4.5 + uTime * 3.1);
+                float wave2 = sin(pos.x * 8.0 - uTime * 5.2 + pos.z * 6.0) * 0.45;
+                float slosh = (pos.x * uTiltZ - pos.z * uTiltX) * 0.55 * vHeightRatio;
+                pos.y += (wave1 + wave2) * amp + slosh;
+              }
+
+              vPos = pos;
+              vNormal = normalize(normalMatrix * normal);
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+            }
+          `,
+          fragmentShader: `
+            uniform vec3 uDeepColor;
+            uniform vec3 uSurfaceColor;
+            uniform vec3 uRimColor;
+            varying vec3 vNormal;
+            varying vec3 vPos;
+            varying float vHeightRatio;
+
+            void main() {
+              vec3 col = mix(uDeepColor, uSurfaceColor, vHeightRatio);
+              float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.2);
+              col = mix(col, uRimColor, fresnel * 0.55);
+
+              if (vHeightRatio > 0.94) {
+                col = mix(col, uRimColor, 0.45);
+              }
+
+              gl_FragColor = vec4(col, 0.86);
+            }
+          `,
+        });
+
+        const liquidMesh = new THREE.Mesh(liquidGeo, liquidMat);
+        liquidMesh.position.y = -vesselHeight / 2;
+        reactorGroup.add(liquidMesh);
+
+        const crystalGeo = new THREE.OctahedronGeometry(0.22, 0);
+        const crystalMat = new THREE.MeshStandardMaterial({
+          color: 0x38bdf8,
+          emissive: 0x0284c7,
+          emissiveIntensity: 0.65,
+          metalness: 0.4,
+          roughness: 0.15,
+        });
+        const crystalMesh = new THREE.Mesh(crystalGeo, crystalMat);
+        reactorGroup.add(crystalMesh);
+
+        const bubbleCount = 45;
+        const bubblePositions = new Float32Array(bubbleCount * 3);
+        const bubbleSpeeds = new Float32Array(bubbleCount);
+
+        for (let i = 0; i < bubbleCount; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const r = Math.random() * (liquidRadius * 0.8);
+          bubblePositions[i * 3] = Math.cos(angle) * r;
+          bubblePositions[i * 3 + 1] = Math.random() * vesselHeight;
+          bubblePositions[i * 3 + 2] = Math.sin(angle) * r;
+          bubbleSpeeds[i] = 0.008 + Math.random() * 0.016;
+        }
+
+        const bubbleGeo = new THREE.BufferGeometry();
+        bubbleGeo.setAttribute("position", new THREE.BufferAttribute(bubblePositions, 3));
+        const bubbleMat = new THREE.PointsMaterial({
+          color: 0xe0f2fe,
+          size: 0.055,
+          transparent: true,
+          opacity: 0.75,
+        });
+        const bubblePoints = new THREE.Points(bubbleGeo, bubbleMat);
+        bubblePoints.position.y = -vesselHeight / 2;
+        reactorGroup.add(bubblePoints);
+
+        let currentFill = Math.max(0.02, Math.min(1, this.waterGoal > 0 ? this.waterIntake / this.waterGoal : 0));
+        let targetFill = currentFill;
+        let waveImpulse = 0.35;
+        let pointerX = 0;
+        let pointerY = 0;
+        let isVisible = true;
+        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        this.waterSceneController = {
+          setTargetFill: (ratio) => {
+            targetFill = Math.max(0.02, Math.min(1, ratio));
+          },
+          triggerSplash: (intensity = 1.0) => {
+            waveImpulse = Math.min(1.6, waveImpulse + intensity);
+          },
+        };
+
+        const onPointerMove = (e) => {
+          const rect = container.getBoundingClientRect();
+          const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+          pointerX = Math.max(-1, Math.min(1, nx));
+          pointerY = Math.max(-1, Math.min(1, ny));
+        };
+
+        const onPointerLeave = () => {
+          pointerX = 0;
+          pointerY = 0;
+        };
+
+        container.addEventListener("pointermove", onPointerMove);
+        container.addEventListener("pointerleave", onPointerLeave);
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            isVisible = entries[0]?.isIntersecting ?? true;
+          },
+          { threshold: 0.05 }
+        );
+        observer.observe(container);
+
+        const animate = () => {
+          requestAnimationFrame(animate);
+          if (!isVisible || document.hidden) return;
+
+          const step = prefersReducedMotion ? 0.15 : 0.06;
+          currentFill += (targetFill - currentFill) * step;
+          waveImpulse *= 0.95;
+
+          liquidUniforms.uTime.value += prefersReducedMotion ? 0.005 : 0.022;
+          liquidUniforms.uWaveImpulse.value = waveImpulse;
+
+          const targetRotZ = -pointerX * 0.22;
+          const targetRotX = pointerY * 0.16;
+          reactorGroup.rotation.z += (targetRotZ - reactorGroup.rotation.z) * 0.08;
+          reactorGroup.rotation.x += (targetRotX - reactorGroup.rotation.x) * 0.08;
+          reactorGroup.rotation.y += prefersReducedMotion ? 0 : 0.003;
+
+          liquidUniforms.uTiltZ.value = reactorGroup.rotation.z;
+          liquidUniforms.uTiltX.value = reactorGroup.rotation.x;
+
+          liquidMesh.scale.y = Math.max(0.02, currentFill);
+
+          if (currentFill >= 0.99) {
+            liquidUniforms.uSurfaceColor.value.setHex(0x22d3ee);
+            liquidUniforms.uRimColor.value.setHex(0xfde68a);
+            crystalMat.color.setHex(0xfbbf24);
+            crystalMat.emissive.setHex(0xd97706);
+            ringMat.color.setHex(0xfbbf24);
+          } else {
+            liquidUniforms.uSurfaceColor.value.setHex(0x38bdf8);
+            liquidUniforms.uRimColor.value.setHex(0xbae6fd);
+            crystalMat.color.setHex(0x38bdf8);
+            crystalMat.emissive.setHex(0x0284c7);
+            ringMat.color.setHex(0x0ea5e9);
+          }
+
+          const surfaceY = -vesselHeight / 2 + currentFill * vesselHeight;
+          const bobbing = Math.sin(liquidUniforms.uTime.value * 2.4) * (0.04 + waveImpulse * 0.05);
+          crystalMesh.position.y = Math.min(vesselHeight / 2 - 0.18, Math.max(-vesselHeight / 2 + 0.2, surfaceY + bobbing));
+          crystalMesh.rotation.y += 0.02;
+          crystalMesh.rotation.x += 0.01;
+
+          const maxBubbleY = Math.max(0.1, currentFill * vesselHeight);
+          const posAttr = bubbleGeo.getAttribute("position");
+          for (let i = 0; i < bubbleCount; i++) {
+            let by = posAttr.getY(i) + bubbleSpeeds[i] * (1 + waveImpulse * 2.5);
+            if (by > maxBubbleY) {
+              by = 0.02;
+            }
+            posAttr.setY(i, by);
+          }
+          posAttr.needsUpdate = true;
+          bubbleMat.opacity = currentFill > 0.05 ? 0.75 : 0.15;
+
+          renderer.render(scene, camera);
+        };
+
+        this.waterWebglReady = true;
+        animate();
+
+        window.addEventListener("resize", () => {
+          if (!container || !renderer) return;
+          const w = container.clientWidth || 220;
+          const h = container.clientHeight || 250;
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+          renderer.setSize(w, h);
+        });
+      } catch(err) {
+        console.error("Three.js error in hydro reactor:", err);
+        this.waterWebglError = true;
       }
     }
   }));

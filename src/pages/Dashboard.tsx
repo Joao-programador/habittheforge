@@ -4,6 +4,7 @@ import { ptBR } from "date-fns/locale";
 import { AppLayout } from "@/components/AppLayout";
 import { WojakStatusBanner } from "@/components/WojakStatusBanner";
 import { DailyHabitsCard } from "@/components/daily/DailyHabitsCard";
+import { DailyWaterCard } from "@/components/daily/DailyWaterCard";
 import { DailyTodosCard } from "@/components/daily/DailyTodosCard";
 import { DailyJournalCard } from "@/components/daily/DailyJournalCard";
 import { AuraMaximaModal } from "@/components/AuraMaximaModal";
@@ -100,9 +101,10 @@ export default function Dashboard() {
 
         {/* Bento Grid Diário */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-          {/* Coluna Esquerda: Hábitos de Hoje (7 colunas) */}
-          <div className="lg:col-span-7">
+          {/* Coluna Esquerda: Hábitos de Hoje + Reator de Hidratação 3D (7 colunas) */}
+          <div className="lg:col-span-7 space-y-5">
             <DailyHabitsCard selectedDate={selectedDate} />
+            <DailyWaterCard selectedDate={selectedDate} />
           </div>
 
           {/* Coluna Direita: To-Do do Dia e Diário Rápido (5 colunas) */}
