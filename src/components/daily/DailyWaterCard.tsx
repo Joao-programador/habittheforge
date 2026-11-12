@@ -24,143 +24,66 @@ declare global {
 }
 
 const THREE_CDN_URL = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+const GLTF_LOADER_URL = "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js";
+const GIGACHAD_GLB_PATH = "/models/gigachad_vessel.glb";
 
-function ensureThreeLoaded(): Promise<any> {
-  if (typeof window === "undefined") return Promise.reject();
-  if (window.THREE) return Promise.resolve(window.THREE);
-
+function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    const existing = document.querySelector(
-      `script[src="${THREE_CDN_URL}"]`
-    ) as HTMLScriptElement | null;
+    const existing = document.querySelector(`script[src="${src}"]`) as HTMLScriptElement | null;
     if (existing) {
-      existing.addEventListener("load", () => resolve(window.THREE));
+      if ((existing as any).__loaded) return resolve();
+      existing.addEventListener("load", () => resolve());
       existing.addEventListener("error", reject);
       return;
     }
     const script = document.createElement("script");
-    script.src = THREE_CDN_URL;
+    script.src = src;
     script.async = true;
-    script.onload = () => resolve(window.THREE);
+    script.onload = () => {
+      (script as any).__loaded = true;
+      resolve();
+    };
     script.onerror = reject;
     document.head.appendChild(script);
   });
 }
 
-// Gera textura radial realista para microbolhas esféricas (evita pontos quadrados)
+async function ensureThreeAndGLTFLoaded(): Promise<any> {
+  if (typeof window === "undefined") throw new Error("SSR");
+  if (!window.THREE) {
+    await loadScript(THREE_CDN_URL);
+  }
+  if (!window.THREE.GLTFLoader) {
+    await loadScript(GLTF_LOADER_URL);
+  }
+  return window.THREE;
+}
+
 function createBubbleTexture(THREE: any) {
   const canvas = document.createElement("canvas");
   canvas.width = 64;
   canvas.height = 64;
   const ctx = canvas.getContext("2d")!;
 
-  // Corpo esférico translúcido com borda refrativa
   const grad = ctx.createRadialGradient(32, 32, 4, 32, 32, 30);
   grad.addColorStop(0.0, "rgba(255, 255, 255, 0.05)");
-  grad.addColorStop(0.55, "rgba(186, 230, 253, 0.22)");
-  grad.addColorStop(0.85, "rgba(224, 242, 254, 0.75)");
+  grad.addColorStop(0.55, "rgba(186, 230, 253, 0.25)");
+  grad.addColorStop(0.85, "rgba(224, 242, 254, 0.85)");
   grad.addColorStop(1.0, "rgba(255, 255, 255, 0.0)");
   ctx.fillStyle = grad;
   ctx.beginPath();
   ctx.arc(32, 32, 30, 0, Math.PI * 2);
   ctx.fill();
 
-  // Ponto especular de luz na bolha
   const spec = ctx.createRadialGradient(22, 20, 0, 22, 20, 7);
-  spec.addColorStop(0.0, "rgba(255, 255, 255, 0.95)");
+  spec.addColorStop(0.0, "rgba(255, 255, 255, 0.98)");
   spec.addColorStop(1.0, "rgba(255, 255, 255, 0.0)");
   ctx.fillStyle = spec;
   ctx.beginPath();
   ctx.arc(22, 20, 7, 0, Math.PI * 2);
   ctx.fill();
 
-  const texture = new THREE.CanvasTexture(canvas);
-  return texture;
-}
-
-// Gera serigrafia técnica de graduação volumétrica no vidro
-function createScaleTexture(THREE: any) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 512;
-  canvas.height = 512;
-  const ctx = canvas.getContext("2d")!;
-
-  ctx.clearRect(0, 0, 512, 512);
-  ctx.strokeStyle = "rgba(226, 232, 240, 0.42)";
-  ctx.fillStyle = "rgba(226, 232, 240, 0.55)";
-  ctx.font = "600 14px 'JetBrains Mono', monospace";
-  ctx.textAlign = "left";
-
-  const totalTicks = 20;
-  for (let i = 1; i < totalTicks; i++) {
-    const y = 512 - (i / totalTicks) * 512;
-    const isMajor = i % 5 === 0;
-    const tickW = isMajor ? 28 : 12;
-
-    ctx.lineWidth = isMajor ? 2.2 : 1.2;
-    ctx.beginPath();
-    ctx.moveTo(230 - tickW / 2, y);
-    ctx.lineTo(230 + tickW / 2, y);
-    ctx.stroke();
-
-    if (isMajor) {
-      const pct = Math.round((i / totalTicks) * 100);
-      ctx.fillText(`${pct}%`, 250, y + 4);
-    }
-  }
-
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.anisotropy = 4;
-  return tex;
-}
-
-// Cria um Environment Map HDR procedural de estúdio para reflexos reais no vidro e metal
-function createStudioEnvMap(THREE: any, renderer: any) {
-  const pmremGenerator = new THREE.PMREMGenerator(renderer);
-  pmremGenerator.compileEquirectangularShader();
-
-  const envScene = new THREE.Scene();
-  envScene.background = new THREE.Color(0x050811);
-
-  // Softbox principal esquerdo (branco frio intenso para o reflexo vertical do vidro)
-  const softbox1 = new THREE.Mesh(
-    new THREE.PlaneGeometry(10, 28),
-    new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide })
-  );
-  softbox1.position.set(-11, 2, 9);
-  softbox1.lookAt(0, 0, 0);
-  envScene.add(softbox1);
-
-  // Softbox secundário direito (azul ciano suave)
-  const softbox2 = new THREE.Mesh(
-    new THREE.PlaneGeometry(8, 24),
-    new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide })
-  );
-  softbox2.position.set(12, 0, 7);
-  softbox2.lookAt(0, 0, 0);
-  envScene.add(softbox2);
-
-  // Rim light traseiro quente
-  const rimStrip = new THREE.Mesh(
-    new THREE.PlaneGeometry(4, 22),
-    new THREE.MeshBasicMaterial({ color: 0xe0f2fe, side: THREE.DoubleSide })
-  );
-  rimStrip.position.set(-5, 6, -10);
-  rimStrip.lookAt(0, 0, 0);
-  envScene.add(rimStrip);
-
-  // Luz de teto difusa
-  const topLight = new THREE.Mesh(
-    new THREE.PlaneGeometry(18, 18),
-    new THREE.MeshBasicMaterial({ color: 0x94a3b8, side: THREE.DoubleSide })
-  );
-  topLight.position.set(0, 14, 0);
-  topLight.lookAt(0, 0, 0);
-  envScene.add(topLight);
-
-  const envMap = pmremGenerator.fromScene(envScene, 0.035).texture;
-  pmremGenerator.dispose();
-  return envMap;
+  return new THREE.CanvasTexture(canvas);
 }
 
 interface Props {
@@ -196,50 +119,49 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
     if (percentage === 0) {
       return {
         label: "Seca Doomer",
-        sub: "Células desidratadas. Injete o primeiro copo para ativar a câmara.",
+        sub: "Corpo desidratado. Injete o primeiro copo para iniciar a ascensão celular.",
         badgeClass: "bg-zinc-800/80 text-zinc-300 border-zinc-700",
       };
     }
     if (percentage < 50) {
       return {
-        label: "Ignição Hidráulica",
-        sub: "Fluxo iniciado. Mantenha a cadência para blindar a sinapse.",
+        label: "Ignição Muscular",
+        sub: "Fluxo subindo pelos membros inferiores e core. Mantenha a cadência.",
         badgeClass: "bg-sky-500/15 text-sky-300 border-sky-500/30",
       };
     }
     if (percentage < 100) {
       return {
-        label: "Pressão Estável",
-        sub: "Foco operacional elevado. Falta pouco para a meta diária.",
+        label: "Pressão GigaChad",
+        sub: "Peitoral e ombros energizados. Falta pouco para blindar a meta.",
         badgeClass: "bg-cyan-500/15 text-cyan-300 border-cyan-400/40",
       };
     }
     return {
-      label: "Aura Líquida · #Hydrated",
-      sub: "100% da meta atingida. Volume celular e clareza mental no topo.",
+      label: "GigaChad · #Hydrated",
+      sub: "100% da meta atingida. Hidratação máxima do topo do crânio aos pés.",
       badgeClass: "bg-amber-500/20 text-amber-300 border-amber-400/50",
     };
   }, [percentage]);
 
-  // Inicialização da Cena PBR Realista em Three.js
   useEffect(() => {
     let isMounted = true;
     let animationFrameId: number;
     let renderer: any = null;
     let observer: IntersectionObserver | null = null;
 
-    ensureThreeLoaded()
+    ensureThreeAndGLTFLoaded()
       .then((THREE) => {
         if (!isMounted || !canvasContainerRef.current || !canvasMountRef.current || !THREE) return;
 
         const container = canvasContainerRef.current;
         const mount = canvasMountRef.current;
         const width = mount.clientWidth || container.clientWidth || 220;
-        const height = mount.clientHeight || container.clientHeight || 260;
+        const height = mount.clientHeight || container.clientHeight || 270;
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(34, width / height, 0.1, 100);
-        camera.position.set(0, 0.12, 5.35);
+        camera.position.set(0, 0.05, 4.85);
         camera.lookAt(0, 0, 0);
 
         renderer = new THREE.WebGLRenderer({
@@ -250,231 +172,158 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
         renderer.setSize(width, height);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.2;
+        renderer.toneMappingExposure = 1.25;
         renderer.outputEncoding = THREE.sRGBEncoding;
-        renderer.physicallyCorrectLights = true;
 
+        // Limpa com segurança nós filhos anteriores para evitar duplicações
+        while (mount.firstChild) {
+          mount.removeChild(mount.firstChild);
+        }
         mount.appendChild(renderer.domElement);
-
-        // Aplica Environment Map HDR Procedural na cena inteira
-        const envMap = createStudioEnvMap(THREE, renderer);
-        scene.environment = envMap;
 
         const reactorGroup = new THREE.Group();
         scene.add(reactorGroup);
 
-        // Iluminação física de estúdio
-        const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.6);
+        // Iluminação dramática de estúdio anatômico
+        const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.75);
         scene.add(ambientLight);
 
-        const mainSpot = new THREE.DirectionalLight(0xffffff, 2.8);
-        mainSpot.position.set(-4, 6, 5);
-        scene.add(mainSpot);
+        const keyLight = new THREE.DirectionalLight(0xffffff, 2.3);
+        keyLight.position.set(-3, 5, 4);
+        scene.add(keyLight);
 
-        const cyanRim = new THREE.PointLight(0x0ea5e9, 6.5, 12, 2);
-        cyanRim.position.set(3.2, -1.0, 3.0);
-        scene.add(cyanRim);
+        const rimLight = new THREE.PointLight(0x38bdf8, 3.8, 12);
+        rimLight.position.set(3, 1.5, -2.5);
+        scene.add(rimLight);
 
-        const bottomGlowLight = new THREE.PointLight(0x0284c7, 5.0, 6, 2);
-        bottomGlowLight.position.set(0, -1.35, 0);
-        reactorGroup.add(bottomGlowLight);
+        const fillLight = new THREE.PointLight(0x0284c7, 1.6, 8);
+        fillLight.position.set(0, -1.8, 2);
+        scene.add(fillLight);
 
-        const vesselHeight = 2.45;
-        const vesselRadius = 0.82;
+        const modelHeight = 2.45;
+        const baseOffsetY = -modelHeight / 2;
 
-        // -------------------------------------------------------------
-        // 1. HARDWARE USINADO (Tampas de Titânio Escovado + O-Rings)
-        // -------------------------------------------------------------
-        const metalMat = new THREE.MeshStandardMaterial({
-          color: 0x1e293b,
-          metalness: 0.92,
+        // Pedestal Tático Metálico com Anel Emissivo sob os pés do GigaChad
+        const pedestalGeo = new THREE.CylinderGeometry(0.72, 0.80, 0.12, 48);
+        const pedestalMat = new THREE.MeshStandardMaterial({
+          color: 0x0f172a,
+          metalness: 0.9,
           roughness: 0.22,
-          envMap,
-          envMapIntensity: 1.4,
         });
+        const pedestalMesh = new THREE.Mesh(pedestalGeo, pedestalMat);
+        pedestalMesh.position.y = baseOffsetY - 0.06;
+        reactorGroup.add(pedestalMesh);
 
-        const chromeAccentMat = new THREE.MeshStandardMaterial({
-          color: 0x64748b,
-          metalness: 0.98,
-          roughness: 0.12,
-          envMap,
-          envMapIntensity: 1.8,
-        });
-
-        const rubberSealMat = new THREE.MeshStandardMaterial({
-          color: 0x090d16,
-          metalness: 0.05,
-          roughness: 0.85,
-        });
-
-        // Base CNC Multi-Step
-        const bottomBaseMain = new THREE.Mesh(
-          new THREE.CylinderGeometry(vesselRadius * 1.06, vesselRadius * 1.03, 0.18, 64),
-          metalMat
-        );
-        bottomBaseMain.position.y = -vesselHeight / 2 - 0.08;
-        reactorGroup.add(bottomBaseMain);
-
-        const bottomBevel = new THREE.Mesh(
-          new THREE.CylinderGeometry(vesselRadius * 1.01, vesselRadius * 1.06, 0.04, 64),
-          chromeAccentMat
-        );
-        bottomBevel.position.y = -vesselHeight / 2 + 0.02;
-        reactorGroup.add(bottomBevel);
-
-        // O-Ring de vedação inferior
-        const bottomORing = new THREE.Mesh(
-          new THREE.TorusGeometry(vesselRadius * 0.98, 0.022, 16, 64),
-          rubberSealMat
-        );
-        bottomORing.rotation.x = Math.PI / 2;
-        bottomORing.position.y = -vesselHeight / 2 + 0.04;
-        reactorGroup.add(bottomORing);
-
-        // Difusor Óptico Emissivo Interno (ilumina a água por baixo)
-        const diffuserMat = new THREE.MeshBasicMaterial({
+        const ringGeo = new THREE.TorusGeometry(0.70, 0.018, 16, 64);
+        const ringMat = new THREE.MeshBasicMaterial({
           color: 0x38bdf8,
           transparent: true,
-          opacity: 0.85,
+          opacity: 0.9,
         });
-        const diffuserDisk = new THREE.Mesh(
-          new THREE.CylinderGeometry(vesselRadius * 0.78, vesselRadius * 0.78, 0.02, 48),
-          diffuserMat
-        );
-        diffuserDisk.position.y = -vesselHeight / 2 + 0.015;
-        reactorGroup.add(diffuserDisk);
+        const baseRing = new THREE.Mesh(ringGeo, ringMat);
+        baseRing.rotation.x = Math.PI / 2;
+        baseRing.position.y = baseOffsetY + 0.005;
+        reactorGroup.add(baseRing);
 
-        // Tampa Superior CNC Multi-Step
-        const topCapMain = new THREE.Mesh(
-          new THREE.CylinderGeometry(vesselRadius * 1.02, vesselRadius * 1.06, 0.15, 64),
-          metalMat
-        );
-        topCapMain.position.y = vesselHeight / 2 + 0.07;
-        reactorGroup.add(topCapMain);
-
-        const topCapCrown = new THREE.Mesh(
-          new THREE.CylinderGeometry(vesselRadius * 0.68, vesselRadius * 0.74, 0.09, 48),
-          chromeAccentMat
-        );
-        topCapCrown.position.y = vesselHeight / 2 + 0.18;
-        reactorGroup.add(topCapCrown);
-
-        const topORing = new THREE.Mesh(
-          new THREE.TorusGeometry(vesselRadius * 0.98, 0.022, 16, 64),
-          rubberSealMat
-        );
-        topORing.rotation.x = Math.PI / 2;
-        topORing.position.y = vesselHeight / 2 - 0.02;
-        reactorGroup.add(topORing);
-
-        // -------------------------------------------------------------
-        // 2. COLUNA DE ÁGUA REALISTA (PBR Shader: Beer-Lambert + Menisco + Normais Analíticas)
-        // -------------------------------------------------------------
-        const liquidRadius = vesselRadius * 0.945;
-        const liquidGeo = new THREE.CylinderGeometry(
-          liquidRadius,
-          liquidRadius,
-          vesselHeight,
-          64,
-          48,
-          false
-        );
-        liquidGeo.translate(0, vesselHeight / 2, 0);
-
-        const liquidUniforms = {
+        // Uniforms compartilhados entre Casca de Vidro Raio-X e Volume de Água Muscular
+        const sharedUniforms = {
           uTime: { value: 0 },
-          uFillRatio: { value: 0.5 },
-          uWaveImpulse: { value: 0.0 },
+          uFillRatio: { value: Math.max(0.02, Math.min(1, intakeMl / Math.max(1, goalMl))) },
+          uWaveImpulse: { value: 0.25 },
           uTiltX: { value: 0.0 },
           uTiltZ: { value: 0.0 },
+          uModelHeight: { value: modelHeight },
           uDeepColor: { value: new THREE.Color(0x032b44) },
           uShallowColor: { value: new THREE.Color(0x0284c7) },
           uScatterColor: { value: new THREE.Color(0x38bdf8) },
           uMeniscusColor: { value: new THREE.Color(0xe0f2fe) },
+          uGlassColor: { value: new THREE.Color(0x94a3b8) },
         };
 
-        const liquidMat = new THREE.ShaderMaterial({
-          uniforms: liquidUniforms,
+        // -------------------------------------------------------------
+        // SHADER 1: CASCA EXTERNA DE VIDRO BOROSSILICATO & RAIO-X ANATÔMICO
+        // -------------------------------------------------------------
+        const xRayGlassMat = new THREE.ShaderMaterial({
+          uniforms: sharedUniforms,
           transparent: true,
-          side: THREE.DoubleSide,
           depthWrite: false,
+          side: THREE.FrontSide,
           vertexShader: `
-            uniform float uTime;
-            uniform float uFillRatio;
-            uniform float uWaveImpulse;
-            uniform float uTiltX;
-            uniform float uTiltZ;
-
-            varying vec3 vWorldPos;
-            varying vec3 vViewPos;
+            attribute vec4 color;
             varying vec3 vNormal;
+            varying vec3 vViewPos;
             varying vec3 vLocalPos;
-            varying float vHeightNorm;
-            varying float vRadialDist;
-
-            // Calcula a elevação das ondas + inclinação + menisco capilar e retorna (altura, dH/dx, dH/dz)
-            vec3 computeSurfaceWave(vec2 p, float strength) {
-              float amp = (0.016 + uWaveImpulse * 0.075) * strength;
-
-              float ph1 = p.x * 4.2 + p.y * 1.5 + uTime * 3.6;
-              float ph2 = p.y * 4.8 - p.x * 2.1 - uTime * 2.9;
-              float ph3 = (p.x * 7.5 + p.y * 7.5) + uTime * 5.4;
-
-              float w1 = sin(ph1);
-              float w2 = cos(ph2) * 0.7;
-              float w3 = sin(ph3) * 0.28 * (0.4 + uWaveImpulse);
-
-              // Derivadas analíticas para normais reais na superfície da água
-              float dWdx = (4.2 * cos(ph1) + 2.1 * sin(ph2) * 0.7 + 7.5 * cos(ph3) * 0.28) * amp;
-              float dWdz = (1.5 * cos(ph1) - 4.8 * sin(ph2) * 0.7 + 7.5 * cos(ph3) * 0.28) * amp;
-
-              // Compensação gravitacional ao inclinar o cilindro
-              float tiltOffset = (p.x * uTiltZ - p.y * uTiltX) * 0.48 * strength;
-              dWdx += uTiltZ * 0.48 * strength;
-              dWdz -= uTiltX * 0.48 * strength;
-
-              // Menisco côncavo por tensão superficial perto da parede do vidro
-              float rNorm = clamp(length(p) / 0.775, 0.0, 1.0);
-              float meniscus = pow(rNorm, 5.0) * 0.038 * strength;
-              if (rNorm > 0.001) {
-                vec2 rDir = normalize(p);
-                float dMdr = 5.0 * pow(rNorm, 4.0) * (0.038 / 0.775) * strength;
-                dWdx += rDir.x * dMdr;
-                dWdz += rDir.y * dMdr;
-              }
-
-              float h = (w1 + w2 + w3) * amp + tiltOffset + meniscus;
-              return vec3(h, dWdx, dWdz);
-            }
+            varying vec4 vAnatomy;
 
             void main() {
-              vec3 pos = position;
-              vHeightNorm = clamp(pos.y / 2.45, 0.0, 1.0);
-              vRadialDist = clamp(length(pos.xz) / 0.775, 0.0, 1.0);
-
-              // Escala vertical pelo preenchimento real (evita distorcer o menisco)
-              float fillHeight = max(0.04, uFillRatio) * 2.45;
-              pos.y = vHeightNorm * fillHeight;
-
-              float surfaceInfluence = smoothstep(0.15, 1.0, vHeightNorm);
-              vec3 wave = computeSurfaceWave(pos.xz, surfaceInfluence);
-              pos.y += wave.x;
-
-              // Reconstrói a normal física na tampa superior e nas laterais
-              vec3 localNormal = normal;
-              if (normal.y > 0.5) {
-                localNormal = normalize(vec3(-wave.y, 1.0, -wave.z));
-              } else if (normal.y > -0.5) {
-                localNormal = normalize(vec3(normal.x, -wave.y * 0.25, normal.z));
-              }
-
-              vLocalPos = pos;
-              vec4 worldPosition = modelMatrix * vec4(pos, 1.0);
-              vWorldPos = worldPosition.xyz;
-              vec4 mvPosition = viewMatrix * worldPosition;
+              vLocalPos = position;
+              vAnatomy = color;
+              vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
               vViewPos = -mvPosition.xyz;
-              vNormal = normalize(normalMatrix * localNormal);
+              vNormal = normalize(normalMatrix * normal);
+              gl_Position = projectionMatrix * mvPosition;
+            }
+          `,
+          fragmentShader: `
+            uniform float uFillRatio;
+            uniform float uModelHeight;
+            uniform vec3 uGlassColor;
+            uniform vec3 uScatterColor;
 
+            varying vec3 vNormal;
+            varying vec3 vViewPos;
+            varying vec3 vLocalPos;
+            varying vec4 vAnatomy;
+
+            void main() {
+              vec3 N = normalize(vNormal);
+              vec3 V = normalize(vViewPos);
+              float NoV = clamp(dot(N, V), 0.0, 1.0);
+
+              // Fresnel de vidro esculpido + relevo muscular gravado em vAnatomy.r
+              float fresnel = pow(1.0 - NoV, 2.6);
+              float muscleDefinition = clamp(vAnatomy.r, 0.0, 1.0);
+
+              // Iluminação especular de estúdio sobre a musculatura de vidro
+              vec3 L1 = normalize(vec3(-0.6, 0.8, 0.7));
+              vec3 H1 = normalize(L1 + V);
+              float spec = pow(max(dot(N, H1), 0.0), 64.0) * (0.4 + 0.6 * muscleDefinition);
+
+              vec3 col = mix(vec3(0.08, 0.13, 0.22), uGlassColor, muscleDefinition * 0.65 + fresnel * 0.5);
+              col += vec3(0.85, 0.95, 1.0) * spec * 0.75;
+              col += uScatterColor * fresnel * 0.35;
+
+              // Acima da água o vidro fica mais visível (Raio-X seco); abaixo da água é uma película fina
+              float hNorm = clamp(vLocalPos.y / uModelHeight, 0.0, 1.0);
+              float isAboveWater = smoothstep(uFillRatio - 0.02, uFillRatio + 0.02, hNorm);
+              float alpha = mix(0.18 + fresnel * 0.28, 0.26 + fresnel * 0.42 + (1.0 - muscleDefinition) * 0.15, isAboveWater);
+
+              gl_FragColor = vec4(col, clamp(alpha, 0.08, 0.78));
+            }
+          `,
+        });
+
+        // -------------------------------------------------------------
+        // SHADER 2: VOLUME MUSCULAR DE ÁGUA (CLIPPING + ONDAS + MENISCO)
+        // -------------------------------------------------------------
+        const muscleLiquidMat = new THREE.ShaderMaterial({
+          uniforms: sharedUniforms,
+          transparent: true,
+          side: THREE.DoubleSide,
+          vertexShader: `
+            attribute vec4 color;
+            varying vec3 vNormal;
+            varying vec3 vViewPos;
+            varying vec3 vLocalPos;
+            varying vec4 vAnatomy;
+
+            void main() {
+              vec3 displaced = position - normal * 0.003;
+              vLocalPos = displaced;
+              vAnatomy = color;
+              vec4 mvPosition = modelViewMatrix * vec4(displaced, 1.0);
+              vViewPos = -mvPosition.xyz;
+              vNormal = normalize(normalMatrix * normal);
               gl_Position = projectionMatrix * mvPosition;
             }
           `,
@@ -482,200 +331,148 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
             uniform float uTime;
             uniform float uFillRatio;
             uniform float uWaveImpulse;
+            uniform float uTiltX;
+            uniform float uTiltZ;
+            uniform float uModelHeight;
             uniform vec3 uDeepColor;
             uniform vec3 uShallowColor;
             uniform vec3 uScatterColor;
             uniform vec3 uMeniscusColor;
 
-            varying vec3 vWorldPos;
-            varying vec3 vViewPos;
             varying vec3 vNormal;
+            varying vec3 vViewPos;
             varying vec3 vLocalPos;
-            varying float vHeightNorm;
-            varying float vRadialDist;
+            varying vec4 vAnatomy;
 
-            // Padrão de cáusticas ópticas dentro do fluido
             float causticsPattern(vec3 p, float t) {
-              vec2 uv = p.xz * 3.8;
-              float c1 = sin(uv.x * 2.4 + t * 2.1 + cos(uv.y * 2.7 - t * 1.6));
-              float c2 = cos(uv.y * 3.1 - t * 1.8 + sin(uv.x * 2.2 + t * 2.4));
-              float v = abs(c1 + c2);
-              return pow(clamp(1.0 - v * 0.45, 0.0, 1.0), 3.5);
+              vec2 uv = p.xy * 4.5;
+              float c1 = sin(uv.x * 2.6 + t * 2.2 + cos(uv.y * 2.9 - t * 1.7));
+              float c2 = cos(uv.y * 3.2 - t * 1.9 + sin(uv.x * 2.4 + t * 2.5));
+              return pow(clamp(1.0 - abs(c1 + c2) * 0.45, 0.0, 1.0), 3.2);
             }
 
             void main() {
-              vec3 N = normalize(gl_FrontFacing ? vNormal : -vNormal);
+              float amp = 0.015 + uWaveImpulse * 0.055;
+              float wave = sin(vLocalPos.x * 6.5 + uTime * 3.8) * cos(vLocalPos.z * 6.5 + uTime * 3.1) * amp
+                         + sin(vLocalPos.x * 11.0 - uTime * 5.2 + vLocalPos.z * 8.0) * 0.35 * amp;
+              float slosh = (vLocalPos.x * uTiltZ - vLocalPos.z * uTiltX) * 0.45;
+
+              float waterSurfaceY = uFillRatio * uModelHeight + wave + slosh;
+
+              if (vLocalPos.y > waterSurfaceY) discard;
+
               vec3 V = normalize(vViewPos);
-
-              // Schlick Fresnel físico da água (IOR ~1.333 => F0 = 0.02)
+              vec3 N = normalize(gl_FrontFacing ? vNormal : vec3(0.0, 1.0, 0.0));
               float NoV = clamp(dot(N, V), 0.0, 1.0);
-              float fresnel = 0.02 + 0.98 * pow(1.0 - NoV, 4.2);
 
-              // Absorção de Beer-Lambert (mais denso no centro/fundo, mais translúcido na superfície)
-              float opticalDepth = (1.0 - vHeightNorm * 0.75) * (1.15 - vRadialDist * 0.35);
-              vec3 waterCol = mix(uShallowColor, uDeepColor, clamp(opticalDepth, 0.0, 1.0));
+              float fresnel = 0.04 + 0.96 * pow(1.0 - NoV, 3.5);
+              float muscleRelief = clamp(vAnatomy.r, 0.0, 1.0);
+              float hRatio = clamp(vLocalPos.y / max(0.05, waterSurfaceY), 0.0, 1.0);
 
-              // Subsurface Scattering (luz do difusor na base e bordas iluminadas)
-              float bottomGlow = exp(-vHeightNorm * 3.2) * 0.55;
-              float edgeScatter = pow(1.0 - NoV, 2.2) * 0.48;
-              waterCol += uScatterColor * (bottomGlow + edgeScatter);
+              // Absorção volumétrica + Destaque muscular com iluminação interna
+              vec3 waterCol = mix(uDeepColor, uShallowColor, hRatio * 0.75 + muscleRelief * 0.35);
+              waterCol += uScatterColor * pow(muscleRelief, 1.8) * 0.52;
 
-              // Cáusticas dinâmicas mais visíveis na superfície e perto da base iluminada
               float caustics = causticsPattern(vLocalPos, uTime);
-              waterCol += uScatterColor * caustics * (0.18 + 0.25 * vHeightNorm);
+              waterCol += uScatterColor * caustics * 0.24;
 
-              // Iluminação especular dupla (Softbox de estúdio + Rim Light)
-              vec3 L1 = normalize(vec3(-0.6, 0.75, 0.8));
-              vec3 H1 = normalize(L1 + V);
-              float spec1 = pow(max(dot(N, H1), 0.0), 96.0);
+              vec3 L = normalize(vec3(-0.5, 0.8, 0.7));
+              vec3 H = normalize(L + V);
+              float spec = pow(max(dot(N, H), 0.0), 72.0);
+              waterCol += vec3(1.0) * spec * 0.7;
 
-              vec3 L2 = normalize(vec3(0.7, 0.3, 0.6));
-              vec3 H2 = normalize(L2 + V);
-              float spec2 = pow(max(dot(N, H2), 0.0), 48.0);
+              float distToSurface = waterSurfaceY - vLocalPos.y;
+              float meniscusBand = smoothstep(0.042, 0.0, distToSurface);
 
-              // Reflexo de ambiente simulado no topo do líquido
-              vec3 R = reflect(-V, N);
-              float skyGrad = smoothstep(-0.2, 0.9, R.y);
-              vec3 envReflection = mix(uDeepColor, vec3(0.88, 0.96, 1.0), skyGrad);
+              if (!gl_FrontFacing) {
+                waterCol = mix(uShallowColor, uMeniscusColor, 0.55 + 0.35 * caustics);
+              } else {
+                waterCol = mix(waterCol, uMeniscusColor, meniscusBand * 0.92);
+              }
 
-              vec3 finalColor = mix(waterCol, envReflection, fresnel * 0.55);
-              finalColor += vec3(1.0) * spec1 * 0.9 + uScatterColor * spec2 * 0.45;
-
-              // Filete luminoso do Menisco (tensão superficial na parede do cilindro)
-              float meniscusBand = smoothstep(0.965, 0.998, vHeightNorm) * smoothstep(0.72, 0.99, vRadialDist);
-              finalColor = mix(finalColor, uMeniscusColor, meniscusBand * 0.88);
-
-              // Topo da água ligeiramente mais reflexivo e opaco nas bordas
-              float alpha = clamp(0.74 + fresnel * 0.22 + meniscusBand * 0.2, 0.0, 0.96);
-
-              gl_FragColor = vec4(finalColor, alpha);
+              float alpha = clamp(0.82 + fresnel * 0.14 + meniscusBand * 0.18, 0.0, 0.98);
+              gl_FragColor = vec4(waterCol, alpha);
             }
           `,
         });
 
-        const liquidMesh = new THREE.Mesh(liquidGeo, liquidMat);
-        liquidMesh.position.y = -vesselHeight / 2;
-        liquidMesh.renderOrder = 2;
-        reactorGroup.add(liquidMesh);
+        // Carregar Modelo GLB do GigaChad
+        const loader = new THREE.GLTFLoader();
+        loader.load(
+          GIGACHAD_GLB_PATH,
+          (gltf: any) => {
+            if (!isMounted) return;
+            const root = gltf.scene;
+            let bodyGeometry: any = null;
 
-        // -------------------------------------------------------------
-        // 3. MICROBOLHAS ESFÉRICAS DE AERAÇÃO (Com Textura Radial Esférica)
-        // -------------------------------------------------------------
-        const bubbleCount = 55;
+            root.traverse((child: any) => {
+              if (child.isMesh && child.geometry) {
+                bodyGeometry = child.geometry.clone();
+              }
+            });
+
+            if (bodyGeometry) {
+              bodyGeometry.computeBoundingBox();
+              const bbox = bodyGeometry.boundingBox;
+              const sizeY = Math.max(0.01, bbox.max.y - bbox.min.y);
+              const scaleFactor = modelHeight / sizeY;
+
+              const centerX = (bbox.min.x + bbox.max.x) * 0.5;
+              const centerZ = (bbox.min.z + bbox.max.z) * 0.5;
+              bodyGeometry.translate(-centerX, -bbox.min.y, -centerZ);
+              bodyGeometry.scale(scaleFactor, scaleFactor, scaleFactor);
+              bodyGeometry.computeVertexNormals();
+
+              // Camada 1: Volume Muscular de Água (renderOrder 2)
+              const liquidBodyMesh = new THREE.Mesh(bodyGeometry, muscleLiquidMat);
+              liquidBodyMesh.position.y = baseOffsetY;
+              liquidBodyMesh.renderOrder = 2;
+              reactorGroup.add(liquidBodyMesh);
+
+              // Camada 2: Casca Externa de Vidro Borossilicato Raio-X (renderOrder 4)
+              const glassBodyMesh = new THREE.Mesh(bodyGeometry, xRayGlassMat);
+              glassBodyMesh.position.y = baseOffsetY;
+              glassBodyMesh.renderOrder = 4;
+              reactorGroup.add(glassBodyMesh);
+            }
+          },
+          undefined,
+          (err: any) => {
+            console.error("Erro ao carregar gigachad_vessel.glb:", err);
+          }
+        );
+
+        // Microbolhas subindo pelo interior do corpo do GigaChad
+        const bubbleCount = 48;
         const bubblePositions = new Float32Array(bubbleCount * 3);
         const bubbleSpeeds = new Float32Array(bubbleCount);
         const bubblePhases = new Float32Array(bubbleCount);
-        const bubbleBaseR = new Float32Array(bubbleCount);
 
         for (let i = 0; i < bubbleCount; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const r = Math.pow(Math.random(), 0.7) * (liquidRadius * 0.85);
-          bubblePositions[i * 3] = Math.cos(angle) * r;
-          bubblePositions[i * 3 + 1] = Math.random() * vesselHeight;
-          bubblePositions[i * 3 + 2] = Math.sin(angle) * r;
-          bubbleSpeeds[i] = 0.004 + Math.random() * 0.011;
+          bubblePositions[i * 3] = (Math.random() - 0.5) * 0.36;
+          bubblePositions[i * 3 + 1] = Math.random() * modelHeight;
+          bubblePositions[i * 3 + 2] = (Math.random() - 0.5) * 0.16;
+          bubbleSpeeds[i] = 0.005 + Math.random() * 0.011;
           bubblePhases[i] = Math.random() * Math.PI * 2;
-          bubbleBaseR[i] = r;
         }
 
         const bubbleGeo = new THREE.BufferGeometry();
         bubbleGeo.setAttribute("position", new THREE.BufferAttribute(bubblePositions, 3));
-
-        const bubbleTexture = createBubbleTexture(THREE);
         const bubbleMat = new THREE.PointsMaterial({
-          map: bubbleTexture,
+          map: createBubbleTexture(THREE),
           color: 0xe0f2fe,
-          size: 0.09,
+          size: 0.075,
           transparent: true,
           opacity: 0.85,
           depthWrite: false,
           blending: THREE.AdditiveBlending,
         });
-
         const bubblePoints = new THREE.Points(bubbleGeo, bubbleMat);
-        bubblePoints.position.y = -vesselHeight / 2;
+        bubblePoints.position.y = baseOffsetY;
         bubblePoints.renderOrder = 3;
         reactorGroup.add(bubblePoints);
 
-        // -------------------------------------------------------------
-        // 4. VIDRO BOROSSILICATO DE PAREDE DUPLA + SERIGRAFIA A LASER
-        // -------------------------------------------------------------
-        // Parede interna sutil
-        const innerGlassGeo = new THREE.CylinderGeometry(
-          vesselRadius * 0.96,
-          vesselRadius * 0.96,
-          vesselHeight,
-          64,
-          1,
-          true
-        );
-        const innerGlassMat = new THREE.MeshPhysicalMaterial({
-          color: 0xe0f2fe,
-          transparent: true,
-          opacity: 0.07,
-          roughness: 0.05,
-          metalness: 0.0,
-          envMap,
-          envMapIntensity: 0.9,
-          side: THREE.BackSide,
-          depthWrite: false,
-        });
-        const innerGlassMesh = new THREE.Mesh(innerGlassGeo, innerGlassMat);
-        innerGlassMesh.renderOrder = 1;
-        reactorGroup.add(innerGlassMesh);
-
-        // Parede externa com Fresnel e reflexos de estúdio (Softbox Streaks)
-        const outerGlassGeo = new THREE.CylinderGeometry(
-          vesselRadius,
-          vesselRadius,
-          vesselHeight,
-          64,
-          1,
-          true
-        );
-        const outerGlassMat = new THREE.MeshPhysicalMaterial({
-          color: 0xffffff,
-          transparent: true,
-          opacity: 0.18,
-          roughness: 0.04,
-          metalness: 0.05,
-          reflectivity: 1.0,
-          clearcoat: 1.0,
-          clearcoatRoughness: 0.03,
-          envMap,
-          envMapIntensity: 2.2,
-          side: THREE.FrontSide,
-          depthWrite: false,
-        });
-        const outerGlassMesh = new THREE.Mesh(outerGlassGeo, outerGlassMat);
-        outerGlassMesh.renderOrder = 4;
-        reactorGroup.add(outerGlassMesh);
-
-        // Escala volumétrica gravada a laser na superfície frontal do vidro
-        const scaleTexture = createScaleTexture(THREE);
-        const scaleGeo = new THREE.CylinderGeometry(
-          vesselRadius * 1.002,
-          vesselRadius * 1.002,
-          vesselHeight * 0.88,
-          64,
-          1,
-          true,
-          -Math.PI * 0.35,
-          Math.PI * 0.7
-        );
-        const scaleMat = new THREE.MeshBasicMaterial({
-          map: scaleTexture,
-          transparent: true,
-          opacity: 0.75,
-          depthWrite: false,
-        });
-        const scaleMesh = new THREE.Mesh(scaleGeo, scaleMat);
-        scaleMesh.renderOrder = 5;
-        reactorGroup.add(scaleMesh);
-
-        // -------------------------------------------------------------
-        // 5. ANIMAÇÃO E INTERAÇÃO FÍSICA (Inércia + Gravidade)
-        // -------------------------------------------------------------
+        // Estado de animação e interação 3D (Rotação Y 360° + Inclinação X/Z)
         let currentFill = Math.max(0.02, Math.min(1, intakeMl / Math.max(1, goalMl)));
         let targetFill = currentFill;
         let waveImpulse = 0.25;
@@ -726,57 +523,55 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
           waveImpulse *= 0.96;
 
           const dt = prefersReducedMotion ? 0.005 : 0.018;
-          liquidUniforms.uTime.value += dt;
-          liquidUniforms.uFillRatio.value = currentFill;
-          liquidUniforms.uWaveImpulse.value = waveImpulse;
+          sharedUniforms.uTime.value += dt;
+          sharedUniforms.uFillRatio.value = currentFill;
+          sharedUniforms.uWaveImpulse.value = waveImpulse;
 
-          // Inclinação com inércia física
-          const targetRotZ = -pointerX * 0.2;
-          const targetRotX = pointerY * 0.14;
+          // Mover o mouse gira o GigaChad em 360° (permite ver peitoral/abdômen e coluna) e inclina o fluido
+          const targetRotY = pointerX * 0.95 + Math.sin(sharedUniforms.uTime.value * 0.45) * 0.12;
+          const targetRotZ = -pointerX * 0.12;
+          const targetRotX = pointerY * 0.12;
+
           const prevRotZ = reactorGroup.rotation.z;
-          reactorGroup.rotation.z += (targetRotZ - reactorGroup.rotation.z) * 0.075;
-          reactorGroup.rotation.x += (targetRotX - reactorGroup.rotation.x) * 0.075;
+          reactorGroup.rotation.y += (targetRotY - reactorGroup.rotation.y) * 0.08;
+          reactorGroup.rotation.z += (targetRotZ - reactorGroup.rotation.z) * 0.08;
+          reactorGroup.rotation.x += (targetRotX - reactorGroup.rotation.x) * 0.08;
 
-          // Movimento angular do cilindro gera turbulência real no líquido
           const angularVel = Math.abs(reactorGroup.rotation.z - prevRotZ);
           waveImpulse = Math.min(1.8, waveImpulse + angularVel * 3.5);
 
-          liquidUniforms.uTiltZ.value = reactorGroup.rotation.z;
-          liquidUniforms.uTiltX.value = reactorGroup.rotation.x;
+          sharedUniforms.uTiltZ.value = reactorGroup.rotation.z;
+          sharedUniforms.uTiltX.value = reactorGroup.rotation.x;
 
-          // Transição cromática sutil e realista em 100% (Bioluminescência Ciano/Turquesa)
+          // Modo Overdrive 100% (Aura Ciano + Ouro)
           if (currentFill >= 0.99) {
-            liquidUniforms.uShallowColor.value.setHex(0x0891b2);
-            liquidUniforms.uScatterColor.value.setHex(0x22d3ee);
-            liquidUniforms.uMeniscusColor.value.setHex(0xfef08a);
-            diffuserMat.color.setHex(0x22d3ee);
-            bottomGlowLight.color.setHex(0x06b6d4);
+            sharedUniforms.uShallowColor.value.setHex(0x0891b2);
+            sharedUniforms.uScatterColor.value.setHex(0x22d3ee);
+            sharedUniforms.uMeniscusColor.value.setHex(0xfef08a);
+            baseRing.material.color.setHex(0xfbbf24);
           } else {
-            liquidUniforms.uShallowColor.value.setHex(0x0284c7);
-            liquidUniforms.uScatterColor.value.setHex(0x38bdf8);
-            liquidUniforms.uMeniscusColor.value.setHex(0xe0f2fe);
-            diffuserMat.color.setHex(0x38bdf8);
-            bottomGlowLight.color.setHex(0x0284c7);
+            sharedUniforms.uShallowColor.value.setHex(0x0284c7);
+            sharedUniforms.uScatterColor.value.setHex(0x38bdf8);
+            sharedUniforms.uMeniscusColor.value.setHex(0xe0f2fe);
+            baseRing.material.color.setHex(0x38bdf8);
           }
 
-          // Atualização helicoidal das microbolhas dentro da coluna de água
-          const maxBubbleY = Math.max(0.08, currentFill * vesselHeight - 0.05);
+          // Atualiza bolhas dentro do volume preenchido do corpo
+          const maxBubbleY = Math.max(0.08, currentFill * modelHeight - 0.04);
           const posAttr = bubbleGeo.getAttribute("position");
-          const t = liquidUniforms.uTime.value;
+          const t = sharedUniforms.uTime.value;
 
           for (let i = 0; i < bubbleCount; i++) {
             let by = posAttr.getY(i) + bubbleSpeeds[i] * (1 + waveImpulse * 2.2);
             if (by > maxBubbleY) {
-              by = 0.02;
+              by = 0.05;
             }
-            const wobble = Math.sin(t * 3.0 + bubblePhases[i] + by * 4.0) * 0.018;
-            const angle = bubblePhases[i] + t * 0.35;
-            const r = Math.min(liquidRadius * 0.85, bubbleBaseR[i]);
-
-            posAttr.setXYZ(i, Math.cos(angle) * r + wobble, by, Math.sin(angle) * r + wobble);
+            const wobbleX = Math.sin(t * 2.8 + bubblePhases[i] + by * 3.5) * 0.14;
+            const wobbleZ = Math.cos(t * 2.4 + bubblePhases[i]) * 0.06;
+            posAttr.setXYZ(i, wobbleX, by, wobbleZ);
           }
           posAttr.needsUpdate = true;
-          bubbleMat.opacity = currentFill > 0.05 ? 0.82 : 0.12;
+          bubbleMat.opacity = currentFill > 0.05 ? 0.85 : 0.12;
 
           renderer.render(scene, camera);
         };
@@ -787,7 +582,7 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
         const onResize = () => {
           if (!container || !mount || !renderer) return;
           const w = mount.clientWidth || container.clientWidth || 220;
-          const h = mount.clientHeight || container.clientHeight || 260;
+          const h = mount.clientHeight || container.clientHeight || 270;
           camera.aspect = w / h;
           camera.updateProjectionMatrix();
           renderer.setSize(w, h);
@@ -800,7 +595,8 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
           container.removeEventListener("pointerleave", onPointerLeave);
         };
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Falha ao inicializar WebGL:", err);
         if (isMounted) setWebglError(true);
       });
 
@@ -832,7 +628,7 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
 
     if (amount > 0) {
       if (prevPct < 100 && nextPct >= 100) {
-        toast.success("META HIDRÁULICA ATINGIDA! #Hydrated desbloqueado.");
+        toast.success("META HIDRÁULICA ATINGIDA! GigaChad #Hydrated desbloqueado.");
         if (linkedWaterHabit && !isLinkedHabitDone) {
           toggleCompletion(linkedWaterHabit.id, selectedDate);
           toast.success(`Hábito "${linkedWaterHabit.name}" marcado automaticamente!`);
@@ -855,7 +651,7 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-display text-lg tracking-tight">Reator de Hidratação</h2>
+              <h2 className="font-display text-lg tracking-tight">Hidratação Anatômica</h2>
               <span
                 className={cn(
                   "text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border font-bold",
@@ -921,22 +717,30 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
 
       {/* Grid Principal */}
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center">
-        {/* Coluna do Canvas WebGL 3D (5 colunas) */}
+        {/* Coluna da Escultura 3D GigaChad (5 colunas) */}
         <div className="sm:col-span-5 flex flex-col items-center justify-center relative">
           <div
             ref={canvasContainerRef}
+            translate="no"
             onClick={() => sceneControllerRef.current?.triggerSplash(1.1)}
-            className="w-full h-[250px] rounded-2xl bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900/90 via-slate-950 to-black border border-cyan-500/20 flex items-center justify-center cursor-grab active:cursor-grabbing relative overflow-hidden select-none shadow-inner"
-            title="Arraste para inclinar o reator ou clique para agitar a água"
+            className="notranslate w-full h-[270px] rounded-2xl bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900/90 via-slate-950 to-black border border-cyan-500/20 flex items-center justify-center cursor-grab active:cursor-grabbing relative overflow-hidden select-none shadow-inner"
+            title="Mova o mouse para girar o GigaChad 3D ou clique para agitar a água"
           >
-            <div ref={canvasMountRef} className="absolute inset-0 w-full h-full" />
+            {/* Montagem isolada do Canvas WebGL */}
+            <div ref={canvasMountRef} className="absolute inset-0 w-full h-full pointer-events-none" />
 
-            {!webglReady && !webglError && (
-              <div className="text-xs font-mono text-muted-foreground flex items-center gap-2 relative z-10 pointer-events-none">
-                <Waves className="w-4 h-4 text-cyan-400 animate-spin" />
-                <span>Inicializando Câmara PBR...</span>
-              </div>
-            )}
+            {/* Overlay de carregamento mantido fixo no DOM para imunidade total contra erros de tradução */}
+            <div
+              className={cn(
+                "text-xs font-mono text-muted-foreground flex items-center gap-2 relative z-10 pointer-events-none transition-opacity duration-300",
+                webglReady || webglError ? "opacity-0 pointer-events-none" : "opacity-100"
+              )}
+            >
+              <Waves className="w-4 h-4 text-cyan-400 animate-spin" />
+              <span>Carregando Anatomia 3D...</span>
+            </div>
+
+            {/* Fallback 2D caso o WebGL falhe */}
             {webglError && (
               <div className="p-4 text-center space-y-2 relative z-10">
                 <Droplets className="w-8 h-8 text-cyan-400 mx-auto" />
@@ -949,7 +753,7 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
           </div>
 
           <span className="text-[10px] font-mono text-muted-foreground mt-1.5 text-center">
-            Interaja com o mouse no cilindro 3D para inclinar o fluido
+            Mova o mouse para girar a anatomia 3D e inclinar o fluido
           </span>
         </div>
 
