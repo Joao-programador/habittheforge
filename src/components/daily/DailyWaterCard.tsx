@@ -472,12 +472,10 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
         bubblePoints.renderOrder = 3;
         reactorGroup.add(bubblePoints);
 
-        // Estado de animação e interação 3D (Rotação Y 360° + Inclinação X/Z)
+        // Estado de animação e rotação lenta automática 360° (sem mouse)
         let currentFill = Math.max(0.02, Math.min(1, intakeMl / Math.max(1, goalMl)));
         let targetFill = currentFill;
         let waveImpulse = 0.25;
-        let pointerX = 0;
-        let pointerY = 0;
         let isVisible = true;
         const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -489,22 +487,6 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
             waveImpulse = Math.min(1.8, waveImpulse + intensity);
           },
         };
-
-        const onPointerMove = (e: PointerEvent) => {
-          const rect = container.getBoundingClientRect();
-          const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-          const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
-          pointerX = Math.max(-1, Math.min(1, nx));
-          pointerY = Math.max(-1, Math.min(1, ny));
-        };
-
-        const onPointerLeave = () => {
-          pointerX = 0;
-          pointerY = 0;
-        };
-
-        container.addEventListener("pointermove", onPointerMove);
-        container.addEventListener("pointerleave", onPointerLeave);
 
         observer = new IntersectionObserver(
           (entries) => {
@@ -527,21 +509,15 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
           sharedUniforms.uFillRatio.value = currentFill;
           sharedUniforms.uWaveImpulse.value = waveImpulse;
 
-          // Mover o mouse gira o GigaChad em 360° (permite ver peitoral/abdômen e coluna) e inclina o fluido
-          const targetRotY = pointerX * 0.95 + Math.sin(sharedUniforms.uTime.value * 0.45) * 0.12;
-          const targetRotZ = -pointerX * 0.12;
-          const targetRotX = pointerY * 0.12;
+          // Rotação suave e contínua de 360° em velocidade lenta
+          if (!prefersReducedMotion) {
+            reactorGroup.rotation.y += dt * 0.40;
+          }
+          reactorGroup.rotation.z = 0;
+          reactorGroup.rotation.x = 0;
 
-          const prevRotZ = reactorGroup.rotation.z;
-          reactorGroup.rotation.y += (targetRotY - reactorGroup.rotation.y) * 0.08;
-          reactorGroup.rotation.z += (targetRotZ - reactorGroup.rotation.z) * 0.08;
-          reactorGroup.rotation.x += (targetRotX - reactorGroup.rotation.x) * 0.08;
-
-          const angularVel = Math.abs(reactorGroup.rotation.z - prevRotZ);
-          waveImpulse = Math.min(1.8, waveImpulse + angularVel * 3.5);
-
-          sharedUniforms.uTiltZ.value = reactorGroup.rotation.z;
-          sharedUniforms.uTiltX.value = reactorGroup.rotation.x;
+          sharedUniforms.uTiltZ.value = 0.0;
+          sharedUniforms.uTiltX.value = 0.0;
 
           // Modo Overdrive 100% (Aura Ciano + Ouro)
           if (currentFill >= 0.99) {
@@ -591,8 +567,6 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
 
         return () => {
           window.removeEventListener("resize", onResize);
-          container.removeEventListener("pointermove", onPointerMove);
-          container.removeEventListener("pointerleave", onPointerLeave);
         };
       })
       .catch((err) => {
@@ -722,9 +696,7 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
           <div
             ref={canvasContainerRef}
             translate="no"
-            onClick={() => sceneControllerRef.current?.triggerSplash(1.1)}
-            className="notranslate w-full h-[270px] rounded-2xl bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900/90 via-slate-950 to-black border border-cyan-500/20 flex items-center justify-center cursor-grab active:cursor-grabbing relative overflow-hidden select-none shadow-inner"
-            title="Mova o mouse para girar o GigaChad 3D ou clique para agitar a água"
+            className="notranslate w-full h-[270px] bg-transparent flex items-center justify-center relative overflow-hidden select-none pointer-events-none"
           >
             {/* Montagem isolada do Canvas WebGL */}
             <div ref={canvasMountRef} className="absolute inset-0 w-full h-full pointer-events-none" />
@@ -751,10 +723,6 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
               </div>
             )}
           </div>
-
-          <span className="text-[10px] font-mono text-muted-foreground mt-1.5 text-center">
-            Mova o mouse para girar a anatomia 3D e inclinar o fluido
-          </span>
         </div>
 
         {/* Coluna de Telemetria + Ações Táticas (7 colunas) */}

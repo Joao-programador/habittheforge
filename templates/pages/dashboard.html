@@ -193,9 +193,7 @@
                   <div
                     x-ref="waterCanvasContainer"
                     translate="no"
-                    @click="triggerSplashAction()"
-                    class="notranslate w-full h-[270px] rounded-2xl bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900/90 via-slate-950 to-black border border-cyan-500/20 flex items-center justify-center cursor-grab active:cursor-grabbing relative overflow-hidden select-none shadow-inner"
-                    title="Mova o mouse para girar o GigaChad 3D ou clique para agitar a água"
+                    class="notranslate w-full h-[270px] bg-transparent flex items-center justify-center relative overflow-hidden select-none pointer-events-none"
                   >
                     <!-- Montagem dedicada do Canvas 3D -->
                     <div x-ref="waterCanvasMount" class="absolute inset-0 w-full h-full pointer-events-none"></div>
@@ -210,10 +208,6 @@
                       <p class="text-[11px] text-muted-foreground" x-text="`Modo 2D ativo (${waterIntake} / ${waterGoal} ml)`"></p>
                     </div>
                   </div>
-
-                  <span class="text-[10px] font-mono text-muted-foreground mt-1.5 text-center">
-                    Mova o mouse para girar a anatomia 3D e inclinar o fluido
-                  </span>
                 </div>
 
                 <!-- Coluna de Telemetria + Ações Táticas (7 colunas) -->
@@ -1278,23 +1272,7 @@ document.addEventListener('alpine:init', () => {
           },
         };
 
-        const onPointerMove = (e) => {
-          const rect = container.getBoundingClientRect();
-          const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-          const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
-          pointerX = Math.max(-1, Math.min(1, nx));
-          pointerY = Math.max(-1, Math.min(1, ny));
-        };
-
-        const onPointerLeave = () => {
-          pointerX = 0;
-          pointerY = 0;
-        };
-
-        container.addEventListener("pointermove", onPointerMove);
-        container.addEventListener("pointerleave", onPointerLeave);
-
-        const observer = new IntersectionObserver(
+        observer = new IntersectionObserver(
           (entries) => {
             isVisible = entries[0]?.isIntersecting ?? true;
           },
@@ -1315,20 +1293,15 @@ document.addEventListener('alpine:init', () => {
           sharedUniforms.uFillRatio.value = currentFill;
           sharedUniforms.uWaveImpulse.value = waveImpulse;
 
-          const targetRotY = pointerX * 0.95 + Math.sin(sharedUniforms.uTime.value * 0.45) * 0.12;
-          const targetRotZ = -pointerX * 0.12;
-          const targetRotX = pointerY * 0.12;
+          // Rotação suave e contínua 360° em velocidade lenta (sem mouse)
+          if (!prefersReducedMotion) {
+            reactorGroup.rotation.y += dt * 0.40;
+          }
+          reactorGroup.rotation.z = 0;
+          reactorGroup.rotation.x = 0;
 
-          const prevRotZ = reactorGroup.rotation.z;
-          reactorGroup.rotation.y += (targetRotY - reactorGroup.rotation.y) * 0.08;
-          reactorGroup.rotation.z += (targetRotZ - reactorGroup.rotation.z) * 0.08;
-          reactorGroup.rotation.x += (targetRotX - reactorGroup.rotation.x) * 0.08;
-
-          const angularVel = Math.abs(reactorGroup.rotation.z - prevRotZ);
-          waveImpulse = Math.min(1.8, waveImpulse + angularVel * 3.5);
-
-          sharedUniforms.uTiltZ.value = reactorGroup.rotation.z;
-          sharedUniforms.uTiltX.value = reactorGroup.rotation.x;
+          sharedUniforms.uTiltZ.value = 0.0;
+          sharedUniforms.uTiltX.value = 0.0;
 
           if (currentFill >= 0.99) {
             sharedUniforms.uShallowColor.value.setHex(0x0891b2);
