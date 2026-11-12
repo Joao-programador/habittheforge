@@ -101,14 +101,14 @@ export default function Dashboard() {
 
         {/* Bento Grid Diário */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-          {/* Coluna Esquerda: Hábitos de Hoje + Reator de Hidratação 3D (7 colunas) */}
+          {/* Coluna Esquerda: Hábitos de Hoje (7 colunas) */}
           <div className="lg:col-span-7 space-y-5">
             <DailyHabitsCard selectedDate={selectedDate} />
-            <DailyWaterCard selectedDate={selectedDate} />
           </div>
 
-          {/* Coluna Direita: To-Do do Dia e Diário Rápido (5 colunas) */}
+          {/* Coluna Direita: Hidratação 3D, To-Do do Dia e Diário Rápido (5 colunas) */}
           <div className="lg:col-span-5 space-y-5">
+            <DailyWaterCard selectedDate={selectedDate} />
             <DailyTodosCard selectedDate={selectedDate} />
             <DailyJournalCard selectedDate={selectedDate} />
           </div>
