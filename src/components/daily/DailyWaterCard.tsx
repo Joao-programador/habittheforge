@@ -509,12 +509,8 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
           sharedUniforms.uFillRatio.value = currentFill;
           sharedUniforms.uWaveImpulse.value = waveImpulse;
 
-          // Rotação suave e contínua de 360° em velocidade lenta
-          if (!prefersReducedMotion) {
-            reactorGroup.rotation.y += dt * 0.40;
-          }
-          reactorGroup.rotation.z = 0;
-          reactorGroup.rotation.x = 0;
+          // Escultura 100% estática na vista frontal
+          reactorGroup.rotation.set(0, 0, 0);
 
           sharedUniforms.uTiltZ.value = 0.0;
           sharedUniforms.uTiltX.value = 0.0;
