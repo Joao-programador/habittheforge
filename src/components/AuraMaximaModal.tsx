@@ -47,19 +47,19 @@ export function AuraMaximaModal({ isOpen, onClose }: AuraMaximaModalProps) {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.92, opacity: 0, y: 20 }}
             transition={{ type: "spring", stiffness: 350, damping: 28 }}
-            className="relative w-full max-w-lg rounded-3xl overflow-hidden glass bg-zinc-950/95 border-2 border-amber-400/80 shadow-[0_0_60px_rgba(251,191,36,0.35)] z-10 flex flex-col"
+            className="relative w-full max-w-lg max-h-[90dvh] overflow-y-auto rounded-3xl glass bg-zinc-950/95 border-2 border-amber-400/80 shadow-[0_0_60px_rgba(251,191,36,0.35)] z-10 flex flex-col"
           >
             {/* Ambient Top Glow */}
             <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-amber-500/20 via-amber-500/5 to-transparent pointer-events-none" />
 
             {/* Header com Fechar e Áudio */}
-            <div className="relative p-5 pb-3 flex items-center justify-between border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <span className="p-1.5 rounded-lg bg-amber-400/15 border border-amber-400/30 text-amber-300">
+            <div className="relative p-3.5 sm:p-5 pb-3 flex items-center justify-between border-b border-white/10">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="p-1.5 rounded-lg bg-amber-400/15 border border-amber-400/30 text-amber-300 shrink-0">
                   <Sparkles className="w-4 h-4" />
                 </span>
-                <div>
-                  <h3 className="font-display text-base sm:text-lg tracking-tight text-foreground leading-none">
+                <div className="min-w-0">
+                  <h3 className="font-display text-sm sm:text-lg tracking-tight text-foreground leading-none truncate">
                     100% DE LOCK-IN ATINGIDO
                   </h3>
                   <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber-400/90 font-bold mt-1 block">
@@ -108,7 +108,7 @@ export function AuraMaximaModal({ isOpen, onClose }: AuraMaximaModalProps) {
             </div>
 
             {/* Rodapé com Mensagem e Botão */}
-            <div className="p-5 pt-4 space-y-4 text-center">
+            <div className="p-3.5 sm:p-5 pt-3.5 sm:pt-4 space-y-3.5 sm:space-y-4 text-center">
               <p className="text-xs sm:text-sm text-foreground/90 font-sans leading-relaxed">
                 Você executou todos os protocolos do dia, destruiu a procrastinação e ascendeu à sua versão definitiva.
               </p>

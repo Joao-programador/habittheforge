@@ -3,10 +3,36 @@ import { Zap } from "lucide-react";
 
 interface Props {
   onPick: (habitId: string) => void;
+  compact?: boolean;
 }
 
-export function HabitQuickPanel({ onPick }: Props) {
+export function HabitQuickPanel({ onPick, compact = false }: Props) {
   const { habits } = useHabitsData();
+
+  if (compact) {
+    if (habits.length === 0) return null;
+    return (
+      <div className="surface-card p-2.5 flex items-center gap-2 overflow-x-auto scrollbar-hide overscroll-x-contain">
+        <span className="text-[11px] font-mono text-muted-foreground shrink-0 inline-flex items-center gap-1 pl-1">
+          <Zap className="w-3.5 h-3.5 text-primary" />
+          Alocar:
+        </span>
+        {habits.map((h) => (
+          <button
+            key={h.id}
+            type="button"
+            onClick={() => onPick(h.id)}
+            className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] rounded-full bg-secondary/50 hover:bg-secondary active:scale-95 transition text-xs font-medium border"
+            style={{ borderColor: `${h.color}40` }}
+          >
+            <span>{h.emoji}</span>
+            <span className="max-w-[120px] truncate">{h.name}</span>
+            <span className="text-[10px] text-primary font-bold">+</span>
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="surface-card p-4">

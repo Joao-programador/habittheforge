@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { EventBlock } from "./EventBlock";
@@ -25,6 +25,13 @@ export function WeekView({ date, events, isHabitCompleted, onSlotClick, onEventC
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
   const today = new Date();
   const { todos, toggleTodo } = useTodos();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const focusHour = Math.max(6, new Date().getHours() - 1);
+    scrollRef.current.scrollTop = focusHour * HOUR_PX;
+  }, []);
 
   const hasAnyTodo = useMemo(
     () => days.some((d) => getTodosForDay(todos, d).length > 0),
@@ -91,7 +98,7 @@ export function WeekView({ date, events, isHabitCompleted, onSlotClick, onEventC
             </div>
           )}
 
-          <div className="overflow-y-auto max-h-[calc(100dvh-290px)] md:max-h-[calc(100dvh-280px)]">
+          <div ref={scrollRef} className="overflow-y-auto max-h-[calc(100dvh-290px)] md:max-h-[calc(100dvh-280px)]">
             <div className="grid grid-cols-[56px_repeat(7,minmax(88px,1fr))]" style={{ height: HOUR_PX * 24 }}>
               <div className="relative border-r border-border/40 sticky left-0 z-10 bg-card">
                 {HOURS.map((h) => (

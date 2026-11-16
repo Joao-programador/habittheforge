@@ -149,6 +149,8 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
     let animationFrameId: number;
     let renderer: any = null;
     let observer: IntersectionObserver | null = null;
+    let resizeObserver: ResizeObserver | null = null;
+    let cleanupResize: (() => void) | null = null;
 
     ensureThreeAndGLTFLoaded()
       .then((THREE) => {
@@ -553,15 +555,19 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
 
         const onResize = () => {
           if (!container || !mount || !renderer) return;
-          const w = mount.clientWidth || container.clientWidth || 220;
-          const h = mount.clientHeight || container.clientHeight || 270;
+          const w = mount.clientWidth || container.clientWidth;
+          const h = mount.clientHeight || container.clientHeight;
+          if (!w || !h) return;
           camera.aspect = w / h;
           camera.updateProjectionMatrix();
           renderer.setSize(w, h);
         };
         window.addEventListener("resize", onResize);
-
-        return () => {
+        if (typeof ResizeObserver !== "undefined") {
+          resizeObserver = new ResizeObserver(onResize);
+          resizeObserver.observe(container);
+        }
+        cleanupResize = () => {
           window.removeEventListener("resize", onResize);
         };
       })
@@ -574,6 +580,8 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
       isMounted = false;
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       if (observer) observer.disconnect();
+      if (resizeObserver) resizeObserver.disconnect();
+      if (cleanupResize) cleanupResize();
       if (renderer) {
         if (renderer.domElement && renderer.domElement.parentNode) {
           renderer.domElement.parentNode.removeChild(renderer.domElement);
@@ -612,7 +620,7 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
   const remainingMl = Math.max(0, goalMl - intakeMl);
 
   return (
-    <div className="surface-card p-5 sm:p-6 flex flex-col justify-between space-y-5 relative overflow-hidden">
+    <div className="surface-card p-4 sm:p-6 flex flex-col justify-between space-y-3.5 sm:space-y-5 relative overflow-hidden">
       {/* Header do Card */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
@@ -685,14 +693,14 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
         </div>
       )}
 
-      {/* Grid Principal */}
-      <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center">
-        {/* Coluna da Escultura 3D GigaChad (5 colunas) */}
-        <div className="sm:col-span-5 flex flex-col items-center justify-center relative">
+      {/* Grid Principal: Lado a lado no celular (Escultura + Placar), botões completos abaixo */}
+      <div className="grid grid-cols-12 gap-3 sm:gap-5 items-center sm:items-stretch">
+        {/* Coluna da Escultura 3D GigaChad (5 colunas, 2 linhas no sm+) */}
+        <div className="col-span-5 sm:row-span-2 flex flex-col items-center justify-center self-center relative">
           <div
             ref={canvasContainerRef}
             translate="no"
-            className="notranslate w-full h-[270px] bg-transparent flex items-center justify-center relative overflow-hidden select-none pointer-events-none"
+            className="notranslate w-full h-[175px] sm:h-[270px] bg-transparent flex items-center justify-center relative overflow-hidden select-none pointer-events-none"
           >
             {/* Montagem isolada do Canvas WebGL */}
             <div ref={canvasMountRef} className="absolute inset-0 w-full h-full pointer-events-none" />
@@ -705,37 +713,37 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
               )}
             >
               <Waves className="w-4 h-4 text-cyan-400 animate-spin" />
-              <span>Carregando Anatomia 3D...</span>
+              <span className="hidden sm:inline">Carregando Anatomia 3D...</span>
             </div>
 
             {/* Fallback 2D caso o WebGL falhe */}
             {webglError && (
-              <div className="p-4 text-center space-y-2 relative z-10">
-                <Droplets className="w-8 h-8 text-cyan-400 mx-auto" />
-                <div className="font-mono text-lg font-bold text-cyan-300">{percentage}%</div>
-                <p className="text-[11px] text-muted-foreground">
-                  Modo de contingência 2D ativo ({intakeMl} / {goalMl} ml).
+              <div className="p-3 sm:p-4 text-center space-y-1.5 relative z-10">
+                <Droplets className="w-7 h-7 sm:w-8 sm:h-8 text-cyan-400 mx-auto" />
+                <div className="font-mono text-base sm:text-lg font-bold text-cyan-300">{percentage}%</div>
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground">
+                  {intakeMl} / {goalMl} ml
                 </p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Coluna de Telemetria + Ações Táticas (7 colunas) */}
-        <div className="sm:col-span-7 flex flex-col justify-between space-y-4">
-          <div className="p-4 rounded-xl bg-surface border border-border/40 space-y-2">
-            <div className="flex items-baseline justify-between gap-2">
-              <div>
-                <span className="font-display text-2xl sm:text-3xl tracking-tight text-foreground">
+        {/* Coluna de Telemetria (7 colunas ao lado do 3D) */}
+        <div className="col-span-7 flex flex-col justify-center space-y-2.5 sm:space-y-3.5">
+          <div className="p-3 sm:p-4 rounded-xl bg-surface border border-border/40 space-y-1.5 sm:space-y-2">
+            <div className="flex items-baseline justify-between gap-1.5">
+              <div className="min-w-0">
+                <span className="font-display text-xl sm:text-3xl tracking-tight text-foreground">
                   {intakeMl}
                 </span>
-                <span className="font-mono text-xs text-muted-foreground ml-1.5">
-                  / {goalMl} ml
+                <span className="font-mono text-[11px] sm:text-xs text-muted-foreground ml-1">
+                  / {goalMl}ml
                 </span>
               </div>
               <span
                 className={cn(
-                  "font-mono text-base font-bold",
+                  "font-mono text-sm sm:text-base font-bold shrink-0",
                   percentage >= 100 ? "text-amber-400" : "text-cyan-400"
                 )}
               >
@@ -755,23 +763,28 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
               />
             </div>
 
-            <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground pt-0.5">
+            <div className="flex flex-wrap items-center justify-between gap-1 text-[10px] sm:text-[11px] font-mono text-muted-foreground pt-0.5">
               <span>
                 {remainingMl > 0
-                  ? `Faltam ${remainingMl} ml para blindar o dia`
-                  : `Superávit de +${intakeMl - goalMl} ml atingido`}
+                  ? `Faltam ${remainingMl} ml`
+                  : `+${intakeMl - goalMl} ml bônus`}
               </span>
               {logs.length > 0 && <span>Último: {logs[0].timestamp}</span>}
             </div>
           </div>
 
-          <p className="text-xs text-muted-foreground leading-relaxed">{hydroStatus.sub}</p>
+          <p className="text-[11px] sm:text-xs text-muted-foreground leading-snug sm:leading-relaxed">
+            {hydroStatus.sub}
+          </p>
+        </div>
 
-          <div className="grid grid-cols-3 gap-2.5">
+        {/* Coluna de Ações Táticas (12 cols no celular, 7 cols abaixo da telemetria no sm+) */}
+        <div className="col-span-12 sm:col-span-7 flex flex-col justify-between space-y-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
             <Button
               type="button"
               onClick={() => handleInjectWater(250)}
-              className="h-11 bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 font-mono text-xs flex flex-col items-center justify-center gap-0.5 cursor-pointer"
+              className="h-10 sm:h-11 bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 font-mono text-xs flex flex-col items-center justify-center gap-0.5 cursor-pointer"
             >
               <span className="font-bold flex items-center gap-1">
                 <Plus className="w-3.5 h-3.5" /> 250 ml
@@ -782,7 +795,7 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
             <Button
               type="button"
               onClick={() => handleInjectWater(500)}
-              className="h-11 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 border border-cyan-400/40 font-mono text-xs flex flex-col items-center justify-center gap-0.5 cursor-pointer"
+              className="h-10 sm:h-11 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 border border-cyan-400/40 font-mono text-xs flex flex-col items-center justify-center gap-0.5 cursor-pointer"
             >
               <span className="font-bold flex items-center gap-1">
                 <Plus className="w-3.5 h-3.5" /> 500 ml
@@ -793,7 +806,7 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
             <Button
               type="button"
               onClick={() => handleInjectWater(750)}
-              className="h-11 bg-sky-500/25 hover:bg-sky-500/35 text-white border border-sky-400/50 font-mono text-xs flex flex-col items-center justify-center gap-0.5 cursor-pointer"
+              className="h-10 sm:h-11 bg-sky-500/25 hover:bg-sky-500/35 text-white border border-sky-400/50 font-mono text-xs flex flex-col items-center justify-center gap-0.5 cursor-pointer"
             >
               <span className="font-bold flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" /> 750 ml

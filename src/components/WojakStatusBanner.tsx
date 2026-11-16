@@ -88,7 +88,7 @@ export function WojakStatusBanner({ onWatchAscend }: WojakStatusBannerProps = {}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className={cn(
-        "relative overflow-hidden surface-card p-4 sm:p-5 md:p-6 transition-all duration-700",
+        "relative overflow-hidden surface-card p-3.5 sm:p-5 md:p-6 transition-all duration-700",
         isColdStart
           ? "border-primary/30"
           : isChad
@@ -107,59 +107,108 @@ export function WojakStatusBanner({ onWatchAscend }: WojakStatusBannerProps = {}
       />
       {isChad && <div className="absolute inset-0 opacity-20 animate-shimmer pointer-events-none" />}
 
-      <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 md:gap-7">
-        {/* Wojak Avatar Frame - Solid White Background to restore line-art fills */}
-        <div className="relative shrink-0">
-          <div
-            className={cn(
-              "w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-2xl overflow-hidden",
-              "bg-white border-2 flex items-center justify-center shadow-2xl transition-all duration-500",
-              isChad
-                ? "border-amber-400 shadow-amber-500/25 ring-2 ring-amber-400/30"
-                : "border-white/40 shadow-xl",
-              !isColdStart && isDoomer && percentage === 0 && "grayscale contrast-125"
-            )}
-          >
-            <AnimatePresence mode="wait">
-              <motion.img
-                key={isColdStart ? "cold-start" : currentStage.id}
-                src={isColdStart ? "/assets/wojaks/wojak.png" : currentStage.imageUrl}
-                alt={isColdStart ? "Pronto para Forjar" : currentStage.title}
-                initial={{ scale: 0.8, opacity: 0, rotate: -6 }}
-                animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                exit={{ scale: 0.85, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 350, damping: 22 }}
-                className={cn(
-                  "w-full h-full select-none drop-shadow-sm",
-                  isDoomer
-                    ? "object-cover scale-145 object-[center_20%]"
-                    : isChad
-                    ? "object-cover"
-                    : "object-contain p-2"
-                )}
-              />
-            </AnimatePresence>
-          </div>
-
-          {/* Level indicator pill on avatar bottom */}
-          <div className="absolute -bottom-2.5 inset-x-0 flex justify-center z-10">
-            <span
+      <div className="relative flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-6 md:gap-7">
+        {/* Top Row on Mobile: Avatar + Stage Header side-by-side; on sm+ Avatar stays left column */}
+        <div className="flex items-center sm:items-start gap-3.5 sm:gap-0 w-full sm:w-auto">
+          {/* Wojak Avatar Frame - Solid White Background to restore line-art fills */}
+          <div className="relative shrink-0">
+            <div
               className={cn(
-                "px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-mono font-bold tracking-tight border shadow-md backdrop-blur-md",
-                isColdStart
-                  ? "bg-primary/20 text-primary-foreground border-primary/40"
-                  : currentStage.badgeColor
+                "w-16 h-16 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-2xl overflow-hidden",
+                "bg-white border-2 flex items-center justify-center shadow-2xl transition-all duration-500",
+                isChad
+                  ? "border-amber-400 shadow-amber-500/25 ring-2 ring-amber-400/30"
+                  : "border-white/40 shadow-xl",
+                !isColdStart && isDoomer && percentage === 0 && "grayscale contrast-125"
               )}
             >
-              {isColdStart ? "NOVO" : `${percentage}%`}
-            </span>
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={isColdStart ? "cold-start" : currentStage.id}
+                  src={isColdStart ? "/assets/wojaks/wojak.png" : currentStage.imageUrl}
+                  alt={isColdStart ? "Pronto para Forjar" : currentStage.title}
+                  initial={{ scale: 0.8, opacity: 0, rotate: -6 }}
+                  animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                  exit={{ scale: 0.85, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 22 }}
+                  className={cn(
+                    "w-full h-full select-none drop-shadow-sm",
+                    isDoomer
+                      ? "object-cover scale-145 object-[center_20%]"
+                      : isChad
+                      ? "object-cover"
+                      : "object-contain p-1 sm:p-2"
+                  )}
+                />
+              </AnimatePresence>
+            </div>
+
+            {/* Level indicator pill on avatar bottom */}
+            <div className="absolute -bottom-2 sm:-bottom-2.5 inset-x-0 flex justify-center z-10">
+              <span
+                className={cn(
+                  "px-2 py-0.2 sm:px-2.5 sm:py-0.5 rounded-full text-[10px] sm:text-xs font-mono font-bold tracking-tight border shadow-md backdrop-blur-md",
+                  isColdStart
+                    ? "bg-primary/20 text-primary-foreground border-primary/40"
+                    : currentStage.badgeColor
+                )}
+              >
+                {isColdStart ? "NOVO" : `${percentage}%`}
+              </span>
+            </div>
+          </div>
+
+          {/* Mobile-only header beside compact 64px avatar */}
+          <div className="flex-1 min-w-0 sm:hidden">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <h2 className="font-display text-base tracking-tight leading-tight text-foreground truncate">
+                  {isColdStart ? "Pronto para Forjar" : currentStage.title}
+                </h2>
+                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                  {isColdStart ? "Cadastre seu primeiro hábito" : currentStage.subtitle}
+                </p>
+              </div>
+              {!isColdStart && (
+                <button
+                  onClick={handleShuffleQuote}
+                  aria-label="Sortear nova frase deste estágio"
+                  title="Girar frases deste estágio"
+                  className="shrink-0 w-9 h-9 rounded-lg bg-surface-elevated/60 hover:bg-surface-elevated border border-white/5 flex items-center justify-center text-muted-foreground active:scale-95 transition-all"
+                >
+                  <Dices
+                    className={cn(
+                      "w-4 h-4 transition-transform duration-300",
+                      isRolling && "rotate-180 scale-110 text-primary"
+                    )}
+                  />
+                </button>
+              )}
+            </div>
+            {isChad && !isColdStart && (
+              <button
+                type="button"
+                onClick={onWatchAscend}
+                className="mt-1.5 inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-amber-300 font-bold bg-amber-500/20 border border-amber-400/60 px-2.5 py-0.5 rounded-full shadow-sm active:scale-95 transition-all cursor-pointer"
+                title="Ver transformação da Aura Máxima"
+              >
+                <Sparkles className="w-3 h-3 text-amber-400 animate-pulse" />
+                <span>Aura Máxima</span>
+                <Play className="w-2.5 h-2.5 fill-amber-300 ml-0.5" />
+              </button>
+            )}
+            {isColdStart && (
+              <span className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-primary font-bold bg-primary/15 border border-primary/30 px-2 py-0.5 rounded-full">
+                <PlusCircle className="w-3 h-3" /> Início
+              </span>
+            )}
           </div>
         </div>
 
         {/* Content & Progress Area */}
         <div className="flex-1 min-w-0 flex flex-col justify-between w-full">
-          {/* Header Row: Stage title & Status Badge */}
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          {/* Desktop Header Row (sm+) */}
+          <div className="hidden sm:flex flex-wrap items-center justify-between gap-2">
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="font-display text-lg sm:text-xl tracking-tight leading-none text-foreground">
@@ -169,7 +218,7 @@ export function WojakStatusBanner({ onWatchAscend }: WojakStatusBannerProps = {}
                   <button
                     type="button"
                     onClick={onWatchAscend}
-                    className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-amber-300 font-bold bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/60 px-3 py-1 sm:px-2.5 sm:py-0.5 min-h-[36px] sm:min-h-0 rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                    className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-amber-300 font-bold bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/60 px-2.5 py-0.5 rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
                     title="Ver transformação da Aura Máxima"
                   >
                     <Sparkles className="w-3 h-3 text-amber-400 animate-pulse" />
@@ -194,7 +243,7 @@ export function WojakStatusBanner({ onWatchAscend }: WojakStatusBannerProps = {}
                 onClick={handleShuffleQuote}
                 aria-label="Sortear nova frase deste estágio"
                 title="Girar frases deste estágio"
-                className="inline-flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg bg-surface-elevated/40 hover:bg-surface-elevated border border-white/5 active:scale-95 transition-all min-h-[44px] min-w-[44px] md:min-h-[36px]"
+                className="inline-flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg bg-surface-elevated/40 hover:bg-surface-elevated border border-white/5 active:scale-95 transition-all min-h-[36px]"
               >
                 <Dices
                   className={cn(
@@ -212,10 +261,10 @@ export function WojakStatusBanner({ onWatchAscend }: WojakStatusBannerProps = {}
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
-              className="mt-2.5 px-3 py-1.5 rounded-xl bg-destructive/15 border border-destructive/30 text-destructive-foreground text-xs flex items-center gap-2"
+              className="mt-1.5 sm:mt-2.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-destructive/15 border border-destructive/30 text-destructive-foreground text-[11px] sm:text-xs flex items-center gap-2"
             >
               <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-              <span className="leading-tight font-medium">
+              <span className="leading-snug font-medium">
                 <strong>PENALIDADE DO BETO:</strong> 2 dias em queda livre. Conclua mais{" "}
                 <strong className="underline text-red-300">
                   {habitsNeededFor50} {habitsNeededFor50 === 1 ? "hábito" : "hábitos"}
@@ -225,8 +274,8 @@ export function WojakStatusBanner({ onWatchAscend }: WojakStatusBannerProps = {}
             </motion.div>
           )}
 
-          {/* Dynamic Meme Quote (Refined Editorial Typography & CLS stability) */}
-          <div className="my-2 min-h-[3.25rem] sm:min-h-[2.5rem] flex items-center">
+          {/* Dynamic Meme Quote (CLS-stable on mobile) */}
+          <div className="my-1.5 sm:my-2 min-h-[2.5rem] flex items-center">
             <AnimatePresence mode="wait">
               <motion.p
                 key={isColdStart ? "quote-cold" : `${currentStage.id}-${quoteIndex}`}
@@ -234,7 +283,7 @@ export function WojakStatusBanner({ onWatchAscend }: WojakStatusBannerProps = {}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 6 }}
                 transition={{ duration: 0.25 }}
-                className="font-sans font-medium text-sm sm:text-base text-foreground/85 italic leading-relaxed tracking-normal"
+                className="font-sans font-medium text-xs sm:text-base text-foreground/85 italic leading-snug sm:leading-relaxed tracking-normal line-clamp-2 sm:line-clamp-none"
               >
                 "{currentQuote}"
               </motion.p>

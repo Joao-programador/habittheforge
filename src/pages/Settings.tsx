@@ -86,12 +86,12 @@ export default function Settings() {
 
           <div>
             <Label className="text-xs uppercase tracking-widest text-muted-foreground mb-3 block">Cor primária</Label>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-8 gap-1.5 sm:flex sm:gap-2 sm:flex-wrap">
               {PRIMARY_COLORS.map((c) => (
                 <button
                   key={c}
                   onClick={() => update({ primary_color: c })}
-                  className={`w-11 h-11 sm:w-10 sm:h-10 rounded-xl transition-all hover:scale-110 ${primary_color === c ? "ring-2 ring-offset-2 ring-offset-background ring-foreground" : ""}`}
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl transition-all hover:scale-110 ${primary_color === c ? "ring-2 ring-offset-2 ring-offset-background ring-foreground" : ""}`}
                   style={{ background: c }}
                 />
               ))}
@@ -100,12 +100,12 @@ export default function Settings() {
 
           <div>
             <Label className="text-xs uppercase tracking-widest text-muted-foreground mb-3 block">Cor de destaque</Label>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-8 gap-1.5 sm:flex sm:gap-2 sm:flex-wrap">
               {ACCENT_COLORS.map((c) => (
                 <button
                   key={c}
                   onClick={() => update({ accent_color: c })}
-                  className={`w-11 h-11 sm:w-10 sm:h-10 rounded-xl transition-all hover:scale-110 ${accent_color === c ? "ring-2 ring-offset-2 ring-offset-background ring-foreground" : ""}`}
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl transition-all hover:scale-110 ${accent_color === c ? "ring-2 ring-offset-2 ring-offset-background ring-foreground" : ""}`}
                   style={{ background: c }}
                 />
               ))}

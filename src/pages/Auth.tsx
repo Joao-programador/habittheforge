@@ -60,19 +60,19 @@ export default function Auth() {
   return (
     <main className="min-h-[100dvh] flex items-center justify-center bg-background px-4 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
       <div className="w-full max-w-md">
-        <div className="flex flex-col items-center mb-8">
+        <div className="flex flex-col items-center mb-5 sm:mb-8">
           <img
             src="/assets/logo.png"
             alt="ASCEND Logo"
-            className="h-20 w-auto object-contain select-none"
+            className="h-14 sm:h-20 w-auto object-contain select-none"
           />
-          <h1 className="font-display text-3xl tracking-tight mt-3">ASCEND</h1>
-          <p className="text-sm text-muted-foreground mt-1 text-center">
+          <h1 className="font-display text-2xl sm:text-3xl tracking-tight mt-2.5 sm:mt-3">ASCEND</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 text-center">
             Sua disciplina sincronizada. Entre, dê lock-in e sepulte o beto.
           </p>
         </div>
 
-        <Card className="p-6">
+        <Card className="p-5 sm:p-6">
           {sent ? (
             <div className="text-center space-y-3">
               <p className="font-display text-lg tracking-tight">Verifique seu e-mail</p>

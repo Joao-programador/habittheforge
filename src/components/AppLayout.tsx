@@ -49,7 +49,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
           </header>
 
-          <main className="flex-1 p-3.5 sm:p-4 md:p-6 lg:p-8 pb-[calc(5.75rem+env(safe-area-inset-bottom))] md:pb-8 max-w-[1480px] w-full mx-auto overflow-x-hidden">
+          <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 pb-[calc(9.25rem+env(safe-area-inset-bottom))] md:pb-8 max-w-[1480px] w-full mx-auto overflow-x-hidden">
             {children}
           </main>
         </div>

@@ -81,6 +81,7 @@ export function JournalPanel({ currentMonth, selectedDate, onSelectDate }: Props
   // Search & Filter State for Archive
   const [searchQuery, setSearchQuery] = useState("");
   const [stageFilter, setStageFilter] = useState<"all" | WojakStageId>("all");
+  const [mobileTab, setMobileTab] = useState<"editor" | "archive">("editor");
 
   // Load entry into form when selected date changes
   useEffect(() => {
@@ -178,8 +179,8 @@ export function JournalPanel({ currentMonth, selectedDate, onSelectDate }: Props
   const isCurrentDayToday = isToday(selectedDate);
 
   return (
-    <div id="journal-panel" className="space-y-4 pt-2">
-      <div className="flex items-center justify-between gap-3">
+    <div id="journal-panel" className="space-y-3.5 sm:space-y-4 pt-0 sm:pt-2">
+      <div className="hidden md:flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
             <BookOpen className="w-4 h-4" />
@@ -199,11 +200,44 @@ export function JournalPanel({ currentMonth, selectedDate, onSelectDate }: Props
         )}
       </div>
 
+      {/* Alternador Mobile: Escrever Hoje vs Histórico */}
+      <div className="lg:hidden grid grid-cols-2 gap-1 p-1 rounded-2xl bg-surface border border-border/50">
+        <button
+          type="button"
+          onClick={() => setMobileTab("editor")}
+          className={cn(
+            "h-10 rounded-xl text-xs font-medium transition-all cursor-pointer",
+            mobileTab === "editor"
+              ? "bg-primary text-primary-foreground font-semibold shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          Escrever Hoje
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileTab("archive")}
+          className={cn(
+            "h-10 rounded-xl text-xs font-medium transition-all cursor-pointer",
+            mobileTab === "archive"
+              ? "bg-primary text-primary-foreground font-semibold shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          Histórico ({allEntries.length})
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* ========================================================================= */}
         {/* COLUNA 1: EDITOR DO DIA SELECIONADO (7 colunas)                          */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-7 surface-card p-4 sm:p-5 flex flex-col justify-between space-y-4">
+        <div
+          className={cn(
+            "lg:col-span-7 surface-card p-4 sm:p-5 flex flex-col justify-between space-y-4",
+            mobileTab !== "editor" && "hidden lg:flex"
+          )}
+        >
           {/* Header do Editor */}
           <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border/30">
             <div className="flex items-center gap-1.5">
@@ -309,12 +343,12 @@ export function JournalPanel({ currentMonth, selectedDate, onSelectDate }: Props
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder={dynamicPlaceholder}
-              rows={6}
-              className="resize-none text-base md:text-sm bg-secondary/20 border-border/40 focus:border-primary/60 leading-relaxed min-h-[140px]"
+              rows={4}
+              className="resize-none text-base md:text-sm bg-secondary/20 border-border/40 focus:border-primary/60 leading-relaxed min-h-[104px] md:min-h-[140px]"
             />
           </div>
 
-          {/* Seletor de Tags (Pills) */}
+          {/* Seletor de Tags (Carrossel horizontal de 1 linha no mobile) */}
           <div className="space-y-2 pt-1">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
@@ -322,7 +356,7 @@ export function JournalPanel({ currentMonth, selectedDate, onSelectDate }: Props
               </span>
             </div>
 
-            <div className="flex flex-wrap gap-1.5 items-center">
+            <div className="flex overflow-x-auto scrollbar-hide flex-nowrap sm:flex-wrap gap-1.5 items-center pb-1">
               {SUGGESTED_TAGS.map((t) => {
                 const active = tags.includes(t);
                 return (
@@ -331,7 +365,7 @@ export function JournalPanel({ currentMonth, selectedDate, onSelectDate }: Props
                     type="button"
                     onClick={() => toggleTag(t)}
                     className={cn(
-                      "text-xs px-3 py-2 md:px-2.5 md:py-1 rounded-md border transition-all select-none",
+                      "shrink-0 text-xs px-3 py-2 md:px-2.5 md:py-1 rounded-md border transition-all select-none",
                       active
                         ? "bg-primary/20 border-primary text-primary font-medium shadow-xs"
                         : "bg-secondary/30 border-border/40 text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
@@ -407,7 +441,12 @@ export function JournalPanel({ currentMonth, selectedDate, onSelectDate }: Props
         {/* ========================================================================= */}
         {/* COLUNA 2: HISTÓRICO & ARQUIVO (5 colunas)                                */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-5 surface-card p-4 sm:p-5 flex flex-col space-y-3.5 max-h-[640px]">
+        <div
+          className={cn(
+            "lg:col-span-5 surface-card p-4 sm:p-5 flex flex-col space-y-3.5 max-h-[640px]",
+            mobileTab !== "archive" && "hidden lg:flex"
+          )}
+        >
           <div className="flex items-center justify-between gap-2 pb-2 border-b border-border/30">
             <h3 className="font-display text-sm tracking-tight flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-primary" /> Histórico & Padrões
@@ -480,7 +519,10 @@ export function JournalPanel({ currentMonth, selectedDate, onSelectDate }: Props
                 return (
                   <div
                     key={entry.date}
-                    onClick={() => onSelectDate(entryDate)}
+                    onClick={() => {
+                      onSelectDate(entryDate);
+                      setMobileTab("editor");
+                    }}
                     className={cn(
                       "p-3 rounded-xl border transition-all text-left cursor-pointer group hover:border-primary/50 relative overflow-hidden",
                       isSelected

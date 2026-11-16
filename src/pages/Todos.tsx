@@ -23,7 +23,20 @@ export default function Todos() {
   const [filter, setFilter] = useState<Filter>("open");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Todo | null>(null);
+  const [quickTitle, setQuickTitle] = useState("");
   const [form, setForm] = useState({ title: "", notes: "", due_date: "", color: COLOR_OPTIONS[0] });
+
+  const addQuick = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickTitle.trim()) return;
+    addTodo({
+      title: quickTitle.trim(),
+      due_date: format(new Date(), "yyyy-MM-dd"),
+      color: COLOR_OPTIONS[0],
+    });
+    setQuickTitle("");
+    toast.success("Tarefa adicionada para hoje!");
+  };
 
   const filtered = useMemo(() => {
     const list = todos.filter((t) =>
@@ -87,18 +100,36 @@ export default function Todos() {
 
   return (
     <AppLayout>
-      <div className="space-y-6 max-w-4xl">
+      <div className="space-y-4 sm:space-y-6 max-w-4xl">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="font-display text-3xl tracking-tight">To-Do</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <h1 className="font-display text-2xl sm:text-3xl tracking-tight">To-Do</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
               {openCount} abertas{overdue > 0 ? ` · ${overdue} atrasadas` : ""}. Prazo = palavra empenhada.
             </p>
           </div>
-          <Button onClick={openNew} className="bg-gradient-primary glow-primary gap-2">
+          <Button onClick={openNew} className="bg-gradient-primary glow-primary gap-2 h-10 md:h-9">
             <Plus className="w-4 h-4" /> Nova tarefa
           </Button>
         </div>
+
+        {/* Adição Rápida Inline para Mobile/Agilidade */}
+        <form onSubmit={addQuick} className="flex items-center gap-2">
+          <Input
+            value={quickTitle}
+            onChange={(e) => setQuickTitle(e.target.value)}
+            placeholder="Adicionar tarefa rápida para hoje..."
+            className="h-11 md:h-10 bg-surface border-border/50"
+          />
+          <Button
+            type="submit"
+            disabled={!quickTitle.trim()}
+            className="h-11 md:h-10 px-4 shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground"
+          >
+            <Plus className="w-4 h-4 sm:mr-1" />
+            <span className="hidden sm:inline">Criar</span>
+          </Button>
+        </form>
 
         <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
           <TabsList className="bg-surface-elevated/60 border border-white/5">
@@ -130,7 +161,7 @@ export default function Todos() {
               <div
                 key={t.id}
                 className={cn(
-                  "surface-card p-4 flex items-center gap-3.5 group transition-all duration-200 hover:border-border/80 rounded-xl",
+                  "surface-card p-3 sm:p-4 flex items-center gap-3 sm:gap-3.5 group transition-all duration-200 hover:border-border/80 rounded-xl",
                   t.completed && "opacity-60",
                   t.notes && "items-start"
                 )}

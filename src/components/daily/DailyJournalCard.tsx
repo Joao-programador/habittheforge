@@ -66,7 +66,7 @@ export function DailyJournalCard({ selectedDate = new Date() }: Props) {
   };
 
   return (
-    <div className="surface-card p-5 sm:p-6 flex flex-col justify-between space-y-4">
+    <div className="surface-card p-4 sm:p-6 flex flex-col justify-between space-y-3.5 sm:space-y-4">
       {/* Header */}
       <div>
         <div className="flex items-center justify-between gap-3 mb-2">

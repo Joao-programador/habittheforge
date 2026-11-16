@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { EventBlock } from "./EventBlock";
@@ -30,20 +30,27 @@ export function DayView({ date, events, isHabitCompleted, onSlotClick, onEventCl
   const now = new Date();
   const nowMinutes = today ? now.getHours() * 60 + now.getMinutes() : -1;
   const gridRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const focusHour = today ? Math.max(6, now.getHours() - 1) : 7;
+    scrollRef.current.scrollTop = focusHour * HOUR_PX;
+  }, [today]);
 
   return (
     <div className="surface-card overflow-hidden">
-      <div className="px-5 py-3 border-b border-border/40 flex items-baseline gap-3">
-        <span className="font-display text-2xl tracking-tight capitalize">
+      <div className="px-3.5 sm:px-5 py-2.5 sm:py-3 border-b border-border/40 flex items-baseline gap-2.5 sm:gap-3">
+        <span className="font-display text-lg sm:text-2xl tracking-tight capitalize">
           {format(date, "EEEE", { locale: ptBR })}
         </span>
-        <span className="text-sm text-muted-foreground font-mono">
+        <span className="text-xs sm:text-sm text-muted-foreground font-mono">
           {format(date, "dd 'de' MMMM", { locale: ptBR })}
         </span>
       </div>
 
       {dayTodos.length > 0 && (
-        <div className="px-5 py-2.5 border-b border-border/40 bg-secondary/20">
+        <div className="px-3.5 sm:px-5 py-2.5 border-b border-border/40 bg-secondary/20">
           <div className="flex items-center gap-2 mb-1.5">
             <ListChecks className="w-3.5 h-3.5 text-primary" />
             <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-mono">
@@ -58,7 +65,7 @@ export function DayView({ date, events, isHabitCompleted, onSlotClick, onEventCl
         </div>
       )}
 
-      <div className="relative overflow-y-auto max-h-[calc(100dvh-310px)] md:max-h-[calc(100dvh-280px)]">
+      <div ref={scrollRef} className="relative overflow-y-auto max-h-[calc(100dvh-310px)] md:max-h-[calc(100dvh-280px)]">
         <div ref={gridRef} className="relative grid grid-cols-[64px_1fr]" style={{ height: HOUR_PX * 24 }}>
           <div className="border-r border-border/40">
             {HOURS.map((h) => (

@@ -1,11 +1,11 @@
-import { useRef, useEffect, useCallback } from "react";
-import { format, isSameDay, isSameMonth, isToday, isFuture } from "date-fns";
+import { useRef, useEffect, useCallback, useState, useMemo } from "react";
+import { format, isSameDay, isSameMonth, isToday, isFuture, startOfWeek, startOfMonth, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useHabitsData } from "@/hooks/useHabitsData";
 import { getMonthDays, getStreak, getMonthCompletions } from "@/lib/stats";
 import { HabitCheck } from "@/components/HabitCheck";
 import { Button } from "@/components/ui/button";
-import { Trash2, Flame, CalendarDays } from "lucide-react";
+import { Trash2, Flame, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { AddHabitDialog } from "@/components/AddHabitDialog";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -26,6 +26,18 @@ export function HabitGrid({ currentMonth, selectedDate, onSelectDate }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const todayColRef = useRef<HTMLButtonElement>(null);
   const showingCurrentMonth = isSameMonth(currentMonth, today);
+  const [mobileMode, setMobileMode] = useState<"week" | "month">("week");
+  const [weekOffset, setWeekOffset] = useState(0);
+
+  useEffect(() => {
+    setWeekOffset(0);
+  }, [currentMonth]);
+
+  const mobileWeekDays = useMemo(() => {
+    const anchor = isSameMonth(currentMonth, today) ? today : startOfMonth(currentMonth);
+    const start = startOfWeek(addDays(anchor, weekOffset * 7), { weekStartsOn: 1 });
+    return Array.from({ length: 7 }, (_, i) => addDays(start, i));
+  }, [currentMonth, today, weekOffset]);
 
   const scrollToToday = useCallback(() => {
     if (!scrollContainerRef.current || !todayColRef.current) return;
@@ -42,14 +54,14 @@ export function HabitGrid({ currentMonth, selectedDate, onSelectDate }: Props) {
     if (!showingCurrentMonth) return;
     const timer = setTimeout(scrollToToday, 120);
     return () => clearTimeout(timer);
-  }, [showingCurrentMonth, scrollToToday]);
+  }, [showingCurrentMonth, scrollToToday, mobileMode]);
 
   if (!habits.length) {
     return (
-      <div className="surface-card p-12 text-center">
-        <div className="text-6xl mb-4">🔥</div>
-        <h3 className="font-display text-2xl mb-2">Comece sua jornada</h3>
-        <p className="text-muted-foreground mb-6">Adicione seu primeiro hábito e comece a forjar disciplina hoje.</p>
+      <div className="surface-card p-10 sm:p-12 text-center">
+        <div className="text-5xl sm:text-6xl mb-4">🔥</div>
+        <h3 className="font-display text-xl sm:text-2xl mb-2">Comece sua jornada</h3>
+        <p className="text-sm text-muted-foreground mb-6">Adicione seu primeiro hábito e comece a forjar disciplina hoje.</p>
         <AddHabitDialog onAdd={addHabit} />
       </div>
     );
@@ -57,24 +69,187 @@ export function HabitGrid({ currentMonth, selectedDate, onSelectDate }: Props) {
 
   return (
     <div className="surface-card overflow-hidden">
-      {showingCurrentMonth && (
-        <div className="sm:hidden px-3 py-2 border-b border-border/20 flex items-center justify-between gap-2 bg-secondary/20">
-          <span className="text-[11px] font-mono text-muted-foreground">
-            Deslize os dias para marcar
-          </span>
+      {/* Toolbar exclusiva Mobile (< md): Alternador Semana 7d vs Matriz 31d */}
+      <div className="md:hidden p-2.5 border-b border-border/30 space-y-2 bg-secondary/20">
+        <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-background/70 border border-border/40">
           <button
             type="button"
-            onClick={scrollToToday}
-            className="inline-flex items-center gap-1 text-[11px] font-mono text-primary font-semibold px-2.5 py-1 rounded-lg bg-primary/10 active:scale-95 transition-transform"
+            onClick={() => setMobileMode("week")}
+            className={cn(
+              "h-9 rounded-lg text-xs font-medium transition-all cursor-pointer",
+              mobileMode === "week"
+                ? "bg-primary text-primary-foreground font-semibold shadow-sm"
+                : "text-muted-foreground"
+            )}
           >
-            <CalendarDays className="w-3 h-3" /> Ir para hoje
+            Semana (7d)
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileMode("month")}
+            className={cn(
+              "h-9 rounded-lg text-xs font-medium transition-all cursor-pointer",
+              mobileMode === "month"
+                ? "bg-primary text-primary-foreground font-semibold shadow-sm"
+                : "text-muted-foreground"
+            )}
+          >
+            Matriz (31d)
           </button>
         </div>
+
+        {mobileMode === "week" ? (
+          <div className="flex items-center justify-between gap-2 px-1">
+            <button
+              type="button"
+              onClick={() => setWeekOffset((w) => w - 1)}
+              className="h-9 w-9 rounded-lg border border-border/40 bg-background/60 flex items-center justify-center text-muted-foreground active:scale-95"
+              aria-label="Semana anterior"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <div className="text-center">
+              <span className="text-xs font-mono font-semibold text-foreground capitalize">
+                {format(mobileWeekDays[0], "dd MMM", { locale: ptBR })} a {format(mobileWeekDays[6], "dd MMM", { locale: ptBR })}
+              </span>
+              {weekOffset !== 0 && (
+                <button
+                  type="button"
+                  onClick={() => setWeekOffset(0)}
+                  className="ml-2 text-[11px] font-mono text-primary underline"
+                >
+                  Atual
+                </button>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setWeekOffset((w) => w + 1)}
+              className="h-9 w-9 rounded-lg border border-border/40 bg-background/60 flex items-center justify-center text-muted-foreground active:scale-95"
+              aria-label="Próxima semana"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        ) : showingCurrentMonth ? (
+          <div className="flex items-center justify-between gap-2 px-1">
+            <span className="text-[11px] font-mono text-muted-foreground">
+              Deslize os dias para marcar
+            </span>
+            <button
+              type="button"
+              onClick={scrollToToday}
+              className="inline-flex items-center gap-1 text-[11px] font-mono text-primary font-semibold px-2.5 py-1 rounded-lg bg-primary/10 active:scale-95 transition-transform"
+            >
+              <CalendarDays className="w-3 h-3" /> Ir para hoje
+            </button>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Visão Semanal Mobile (7 dias completos na largura da tela, sem scroll horizontal) */}
+      {mobileMode === "week" && (
+        <div className="md:hidden divide-y divide-border/30">
+          {habits.map((habit) => {
+            const streak = getStreak(habit.id, completions, today);
+            const monthCount = getMonthCompletions(habit.id, completions, currentMonth);
+            return (
+              <div key={habit.id} className="p-3 space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <AddHabitDialog
+                    habitToEdit={habit}
+                    onUpdate={updateHabit}
+                    trigger={
+                      <button type="button" className="flex items-center gap-2.5 min-w-0 flex-1 text-left">
+                        <div
+                          className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0"
+                          style={{ background: `${habit.color}25`, border: `1px solid ${habit.color}55` }}
+                        >
+                          {habit.emoji}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-semibold text-sm truncate">{habit.name}</div>
+                          <div className="flex items-center gap-2 text-[11px] font-mono text-muted-foreground">
+                            <span className="inline-flex items-center gap-0.5">
+                              <Flame className="w-3 h-3 text-orange-400" />
+                              {streak}d
+                            </span>
+                            <span>·</span>
+                            <span style={{ color: habit.color }}>
+                              {monthCount}/{days.length} no mês
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+                    }
+                  />
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-destructive shrink-0">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Apagar "{habit.name}"?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Todo o histórico deste hábito será permanentemente removido. Esta ação não pode ser desfeita.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => deleteHabit(habit.id)} className="bg-destructive text-destructive-foreground">
+                          Apagar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+
+                <div className="grid grid-cols-7 gap-1 pt-0.5">
+                  {mobileWeekDays.map((d) => {
+                    const done = isCompleted(habit.id, d);
+                    const future = isFuture(d) && !isToday(d);
+                    const isTodayDay = isToday(d);
+                    return (
+                      <div
+                        key={d.toISOString()}
+                        className={cn(
+                          "flex flex-col items-center gap-1 py-1.5 rounded-xl",
+                          isTodayDay && "bg-primary/10 border border-primary/25"
+                        )}
+                      >
+                        <span className={cn("text-[10px] font-mono uppercase leading-none", isTodayDay ? "text-primary font-bold" : "text-muted-foreground")}>
+                          {format(d, "EEEEE", { locale: ptBR })}
+                        </span>
+                        <span className={cn("text-[10px] font-mono leading-none", isTodayDay ? "text-primary font-bold" : "text-foreground/80")}>
+                          {format(d, "d")}
+                        </span>
+                        <HabitCheck
+                          done={done}
+                          color={habit.color}
+                          onClick={() => toggleCompletion(habit.id, d)}
+                          size="sm"
+                          disabled={future}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
-      {/* Header row with day numbers */}
+
+      {/* Header row with day numbers (Matriz 31d: sempre visível em md+, e no mobile quando mobileMode === "month") */}
       <div
         ref={scrollContainerRef}
-        className="overflow-x-auto scrollbar-hide overscroll-x-contain [-webkit-overflow-scrolling:touch]"
+        className={cn(
+          "overflow-x-auto scrollbar-hide overscroll-x-contain [-webkit-overflow-scrolling:touch]",
+          mobileMode === "week" ? "hidden md:block" : "block"
+        )}
       >
         <div className="min-w-max">
           <div className="flex items-center sticky top-0 z-20 bg-background border-b border-border/20">

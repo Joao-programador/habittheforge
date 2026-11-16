@@ -49,7 +49,7 @@ export function DailyTodosCard({ selectedDate = new Date() }: Props) {
   };
 
   return (
-    <div className="surface-card p-5 sm:p-6 flex flex-col justify-between space-y-4">
+    <div className="surface-card p-4 sm:p-6 flex flex-col justify-between space-y-3.5 sm:space-y-4">
       {/* Header */}
       <div>
         <div className="flex items-center justify-between gap-3 mb-2">
@@ -93,7 +93,7 @@ export function DailyTodosCard({ selectedDate = new Date() }: Props) {
       </div>
 
       {/* Lista de To-Dos do Dia */}
-      <div className="space-y-2 flex-1 min-h-[140px] max-h-[220px] overflow-y-auto pr-1">
+      <div className="space-y-2 flex-1 min-h-0 md:min-h-[140px] max-h-[260px] md:max-h-[220px] overflow-y-auto pr-1">
         {dayTodos.length === 0 ? (
           <div className="py-8 text-center text-muted-foreground space-y-1.5">
             <p className="text-xs font-medium">Nenhuma tarefa agendada para este dia.</p>

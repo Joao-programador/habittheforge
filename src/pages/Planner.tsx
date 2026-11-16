@@ -97,11 +97,11 @@ export default function Planner() {
 
   return (
     <AppLayout>
-      <div className="space-y-5">
+      <div className="space-y-3.5 sm:space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="font-display text-3xl tracking-tight">Planner</h1>
-            <p className="text-sm text-muted-foreground">Domine seu tempo. Bloqueie. Execute.</p>
+            <h1 className="font-display text-2xl sm:text-3xl tracking-tight">Planner</h1>
+            <p className="hidden sm:block text-sm text-muted-foreground">Domine seu tempo. Bloqueie. Execute.</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => setCursor(new Date())} className="gap-1.5 h-10 md:h-9">
@@ -113,15 +113,15 @@ export default function Planner() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => navigate(-1)} className="h-11 w-11 md:h-9 md:w-9">
+        <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Button variant="outline" size="icon" onClick={() => navigate(-1)} className="h-10 w-10 md:h-9 md:w-9">
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <div className="px-3 min-w-[140px] md:min-w-[200px] text-center font-display text-lg tracking-tight capitalize">
+            <div className="px-2 sm:px-3 min-w-[130px] md:min-w-[200px] text-center font-display text-sm sm:text-lg tracking-tight capitalize">
               {headerLabel()}
             </div>
-            <Button variant="outline" size="icon" onClick={() => navigate(1)} className="h-11 w-11 md:h-9 md:w-9">
+            <Button variant="outline" size="icon" onClick={() => navigate(1)} className="h-10 w-10 md:h-9 md:w-9">
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
@@ -133,6 +133,11 @@ export default function Planner() {
               <TabsTrigger value="month">Mês</TabsTrigger>
             </TabsList>
           </Tabs>
+        </div>
+
+        {/* Faixa horizontal rápida no mobile (< lg) para alocar hábitos sem rolar até o fim */}
+        <div className="lg:hidden">
+          <HabitQuickPanel onPick={handlePickHabit} compact />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-5">
@@ -168,7 +173,7 @@ export default function Planner() {
             )}
           </div>
 
-          <div className="space-y-4">
+          <div className="hidden lg:block space-y-4">
             <HabitQuickPanel onPick={handlePickHabit} />
           </div>
         </div>
