@@ -107,12 +107,12 @@ export function WojakStatusBanner({ onWatchAscend }: WojakStatusBannerProps = {}
       />
       {isChad && <div className="absolute inset-0 opacity-20 animate-shimmer pointer-events-none" />}
 
-      <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6 md:gap-7">
+      <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 md:gap-7">
         {/* Wojak Avatar Frame - Solid White Background to restore line-art fills */}
         <div className="relative shrink-0">
           <div
             className={cn(
-              "w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-2xl overflow-hidden",
+              "w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-2xl overflow-hidden",
               "bg-white border-2 flex items-center justify-center shadow-2xl transition-all duration-500",
               isChad
                 ? "border-amber-400 shadow-amber-500/25 ring-2 ring-amber-400/30"
@@ -169,7 +169,7 @@ export function WojakStatusBanner({ onWatchAscend }: WojakStatusBannerProps = {}
                   <button
                     type="button"
                     onClick={onWatchAscend}
-                    className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-amber-300 font-bold bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/60 px-2.5 py-0.5 rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                    className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-amber-300 font-bold bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/60 px-3 py-1 sm:px-2.5 sm:py-0.5 min-h-[36px] sm:min-h-0 rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer"
                     title="Ver transformação da Aura Máxima"
                   >
                     <Sparkles className="w-3 h-3 text-amber-400 animate-pulse" />
@@ -194,7 +194,7 @@ export function WojakStatusBanner({ onWatchAscend }: WojakStatusBannerProps = {}
                 onClick={handleShuffleQuote}
                 aria-label="Sortear nova frase deste estágio"
                 title="Girar frases deste estágio"
-                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg bg-surface-elevated/40 hover:bg-surface-elevated border border-white/5 active:scale-95 transition-all min-h-[36px]"
+                className="inline-flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg bg-surface-elevated/40 hover:bg-surface-elevated border border-white/5 active:scale-95 transition-all min-h-[44px] min-w-[44px] md:min-h-[36px]"
               >
                 <Dices
                   className={cn(

@@ -51,42 +51,46 @@ export default function Dashboard() {
 
         {/* Barra de Seleção de Dia do Cockpit */}
         <div className="surface-card p-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setSelectedDate(subDays(selectedDate, 1))}
-              className="h-8 w-8"
-              title="Dia anterior"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+            <div className="flex items-center gap-2 flex-1 sm:flex-none justify-between sm:justify-start">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setSelectedDate(subDays(selectedDate, 1))}
+                className="h-11 w-11 md:h-8 md:w-8 shrink-0"
+                title="Dia anterior"
+                aria-label="Dia anterior"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
 
-            <div className="px-2 min-w-[170px] text-center">
-              <span className="font-display text-sm tracking-tight capitalize block">
-                {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
-              </span>
-              <span className="text-[10px] font-mono text-muted-foreground block">
-                {isCurrentDay ? "Hoje" : format(selectedDate, "yyyy")}
-              </span>
+              <div className="px-2 min-w-[150px] sm:min-w-[170px] text-center">
+                <span className="font-display text-sm tracking-tight capitalize block">
+                  {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                </span>
+                <span className="text-[10px] font-mono text-muted-foreground block">
+                  {isCurrentDay ? "Hoje" : format(selectedDate, "yyyy")}
+                </span>
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setSelectedDate(addDays(selectedDate, 1))}
+                className="h-11 w-11 md:h-8 md:w-8 shrink-0"
+                title="Próximo dia"
+                aria-label="Próximo dia"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
             </div>
-
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setSelectedDate(addDays(selectedDate, 1))}
-              className="h-8 w-8"
-              title="Próximo dia"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
 
             {!isCurrentDay && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedDate(new Date())}
-                className="ml-1 gap-1 h-8 text-xs font-mono"
+                className="w-full sm:w-auto sm:ml-1 gap-1.5 h-10 md:h-8 text-xs font-mono"
               >
                 <CalendarDays className="w-3.5 h-3.5" />
                 Voltar para Hoje

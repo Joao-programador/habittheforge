@@ -43,109 +43,113 @@ export function WeekView({ date, events, isHabitCompleted, onSlotClick, onEventC
           <span>Sem blocos agendados nesta semana. Clique em qualquer horário ou use o painel lateral para alocar seu tempo.</span>
         </div>
       )}
-      <div className="grid grid-cols-[56px_repeat(7,minmax(0,1fr))] border-b border-border/40 sticky top-0 bg-card/95 backdrop-blur-md z-20">
-        <div />
-        {days.map((d) => {
-          const isToday = isSameDay(d, today);
-          return (
-            <div key={d.toISOString()} className={cn("py-2 text-center border-l border-border/30", isToday && "bg-primary/10")}>
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                {format(d, "EEE", { locale: ptBR })}
-              </div>
-              <div className={cn("font-display text-xl leading-none mt-1", isToday && "text-primary")}>
-                {format(d, "dd")}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {hasAnyTodo && (
-        <div className="grid grid-cols-[56px_repeat(7,minmax(92px,1fr))] border-b border-border/40 bg-secondary/20">
-          <div className="text-[9px] uppercase tracking-wide text-muted-foreground font-mono text-right pr-2 pt-1.5">
-            Prazos
-          </div>
-          {days.map((d) => {
-            const dt = getTodosForDay(todos, d);
-            return (
-              <div key={d.toISOString()} className="border-l border-border/30 p-1 space-y-1 min-h-[28px]">
-                {dt.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => toggleTodo(t.id)}
-                    className={cn(
-                      "w-full text-left text-[10px] px-1.5 py-0.5 rounded truncate font-medium transition hover:brightness-110",
-                      t.completed && "line-through opacity-50"
-                    )}
-                    style={{ background: `${t.color}20`, border: `1px solid ${t.color}35` }}
-                    title={t.title}
-                  >
-                    ◇ {t.title}
-                  </button>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      <div className="overflow-y-auto max-h-[calc(100vh-280px)]">
-        <div className="grid grid-cols-[56px_repeat(7,minmax(0,1fr))]" style={{ height: HOUR_PX * 24 }}>
-          <div className="relative border-r border-border/40">
-            {HOURS.map((h) => (
-              <div key={h} style={{ height: HOUR_PX }} className="text-[10px] font-mono text-muted-foreground text-right pr-2 pt-0.5">
-                {h.toString().padStart(2, "0")}
-              </div>
-            ))}
-          </div>
-          {days.map((d) => {
-            const dayEvents = getEventsForDay(events, d);
-            const clusters = groupDayEvents(dayEvents);
-            const isToday = isSameDay(d, today);
-            const nowMin = isToday ? today.getHours() * 60 + today.getMinutes() : -1;
-            return (
-              <div key={d.toISOString()} className="relative border-l border-border/30">
-                {HOURS.map((h) => (
-                  <div key={h} style={{ height: HOUR_PX, top: h * HOUR_PX }}
-                    className="absolute left-0 right-0 border-t border-border/20 hover:bg-primary/5 cursor-pointer"
-                    onClick={() => onSlotClick(d, h * 60)} />
-                ))}
-                {nowMin >= 0 && (
-                  <div className="absolute left-0 right-0 z-20 pointer-events-none" style={{ top: (nowMin / 60) * HOUR_PX }}>
-                    <div className="h-px bg-primary" />
+      <div className="overflow-x-auto overscroll-x-contain scrollbar-hide">
+        <div className="min-w-[680px]">
+          <div className="grid grid-cols-[56px_repeat(7,minmax(88px,1fr))] border-b border-border/40 sticky top-0 bg-card/95 backdrop-blur-md z-20">
+            <div className="sticky left-0 z-30 bg-card/95 border-r border-border/30" />
+            {days.map((d) => {
+              const isToday = isSameDay(d, today);
+              return (
+                <div key={d.toISOString()} className={cn("py-2 text-center border-l border-border/30", isToday && "bg-primary/10")}>
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                    {format(d, "EEE", { locale: ptBR })}
                   </div>
-                )}
-                {clusters.map((cluster) => {
-                  const startMin = Math.min(...cluster.map(e => e.startMinutes));
-                  const maxEnd = Math.max(...cluster.map(e => e.startMinutes + e.durationMinutes));
-                  const top = (startMin / 60) * HOUR_PX;
-                  const height = Math.max(20, ((maxEnd - startMin) / 60) * HOUR_PX - 2);
+                  <div className={cn("font-display text-xl leading-none mt-1", isToday && "text-primary")}>
+                    {format(d, "dd")}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
-                  return (
-                    <div
-                      key={"cluster-" + cluster[0].id + d.toISOString()}
-                      className="absolute"
-                      style={{
-                        top,
-                        height,
-                        left: `2px`,
-                        width: `calc(100% - 4px)`,
-                      }}
-                    >
-                      <EventCluster
-                        cluster={cluster}
-                        dateObj={d}
-                        isHabitCompleted={isHabitCompleted}
-                        onEventClick={onEventClick}
-                        onToggleHabit={onToggleHabit}
-                        compact={true}
-                      />
-                    </div>
-                  );
-                })}
+          {hasAnyTodo && (
+            <div className="grid grid-cols-[56px_repeat(7,minmax(88px,1fr))] border-b border-border/40 bg-secondary/20">
+              <div className="sticky left-0 z-20 bg-card/95 border-r border-border/30 text-[9px] uppercase tracking-wide text-muted-foreground font-mono text-right pr-2 pt-1.5">
+                Prazos
               </div>
-            );
-          })}
+              {days.map((d) => {
+                const dt = getTodosForDay(todos, d);
+                return (
+                  <div key={d.toISOString()} className="border-l border-border/30 p-1 space-y-1 min-h-[28px]">
+                    {dt.map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => toggleTodo(t.id)}
+                        className={cn(
+                          "w-full text-left text-[10px] px-1.5 py-0.5 rounded truncate font-medium transition hover:brightness-110",
+                          t.completed && "line-through opacity-50"
+                        )}
+                        style={{ background: `${t.color}20`, border: `1px solid ${t.color}35` }}
+                        title={t.title}
+                      >
+                        ◇ {t.title}
+                      </button>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="overflow-y-auto max-h-[calc(100dvh-290px)] md:max-h-[calc(100dvh-280px)]">
+            <div className="grid grid-cols-[56px_repeat(7,minmax(88px,1fr))]" style={{ height: HOUR_PX * 24 }}>
+              <div className="relative border-r border-border/40 sticky left-0 z-10 bg-card">
+                {HOURS.map((h) => (
+                  <div key={h} style={{ height: HOUR_PX }} className="text-[10px] font-mono text-muted-foreground text-right pr-2 pt-0.5">
+                    {h.toString().padStart(2, "0")}
+                  </div>
+                ))}
+              </div>
+              {days.map((d) => {
+                const dayEvents = getEventsForDay(events, d);
+                const clusters = groupDayEvents(dayEvents);
+                const isToday = isSameDay(d, today);
+                const nowMin = isToday ? today.getHours() * 60 + today.getMinutes() : -1;
+                return (
+                  <div key={d.toISOString()} className="relative border-l border-border/30">
+                    {HOURS.map((h) => (
+                      <div key={h} style={{ height: HOUR_PX, top: h * HOUR_PX }}
+                        className="absolute left-0 right-0 border-t border-border/20 hover:bg-primary/5 cursor-pointer"
+                        onClick={() => onSlotClick(d, h * 60)} />
+                    ))}
+                    {nowMin >= 0 && (
+                      <div className="absolute left-0 right-0 z-20 pointer-events-none" style={{ top: (nowMin / 60) * HOUR_PX }}>
+                        <div className="h-px bg-primary" />
+                      </div>
+                    )}
+                    {clusters.map((cluster) => {
+                      const startMin = Math.min(...cluster.map(e => e.startMinutes));
+                      const maxEnd = Math.max(...cluster.map(e => e.startMinutes + e.durationMinutes));
+                      const top = (startMin / 60) * HOUR_PX;
+                      const height = Math.max(20, ((maxEnd - startMin) / 60) * HOUR_PX - 2);
+
+                      return (
+                        <div
+                          key={"cluster-" + cluster[0].id + d.toISOString()}
+                          className="absolute"
+                          style={{
+                            top,
+                            height,
+                            left: `2px`,
+                            width: `calc(100% - 4px)`,
+                          }}
+                        >
+                          <EventCluster
+                            cluster={cluster}
+                            dateObj={d}
+                            isHabitCompleted={isHabitCompleted}
+                            onEventClick={onEventClick}
+                            onToggleHabit={onToggleHabit}
+                            compact={true}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -139,9 +139,12 @@ export default function Todos() {
                 <Checkbox
                   checked={t.completed}
                   onCheckedChange={() => toggleTodo(t.id)}
-                  className={cn("mt-0.5", t.notes && "mt-1")}
+                  className={cn(
+                    "relative h-5 w-5 md:h-4 md:w-4 mt-0.5 before:content-[''] before:absolute before:-inset-2.5 before:md:hidden",
+                    t.notes && "mt-1"
+                  )}
                 />
-                <button onClick={() => openEdit(t)} className="flex-1 min-w-0 text-left">
+                <button onClick={() => openEdit(t)} className="flex-1 min-w-0 text-left py-0.5">
                   <div className={cn("font-medium text-sm sm:text-base leading-snug", t.completed && "line-through text-muted-foreground")}>
                     {t.title}
                   </div>
@@ -168,8 +171,9 @@ export default function Todos() {
                     deleteTodo(t.id);
                     toast.success("Tarefa removida");
                   }}
-                  className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition p-2 -m-0.5 text-muted-foreground hover:text-destructive"
+                  className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 flex items-center justify-center p-2 -m-1 text-muted-foreground hover:text-destructive"
                   title="Excluir tarefa"
+                  aria-label={`Excluir tarefa ${t.title}`}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

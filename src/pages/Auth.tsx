@@ -58,7 +58,7 @@ export default function Auth() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-background px-4">
+    <main className="min-h-[100dvh] flex items-center justify-center bg-background px-4 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-8">
           <img

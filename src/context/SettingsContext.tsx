@@ -67,6 +67,11 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     root.style.setProperty("--accent", hexToHslString(settings.primary_color));
     root.style.setProperty("--primary-glow", hexToHslString(settings.accent_color));
     root.style.setProperty("--sidebar-primary", hexToHslString(settings.primary_color));
+
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) {
+      themeMeta.setAttribute("content", settings.dark_mode ? "#09090b" : "#fafafa");
+    }
   }, [settings]);
 
   const update = useCallback((patch: Partial<Settings>) => {

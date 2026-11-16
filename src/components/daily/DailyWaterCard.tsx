@@ -641,7 +641,7 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
           <button
             type="button"
             onClick={() => setShowGoalConfig((v) => !v)}
-            className="inline-flex items-center gap-1.5 text-xs font-mono px-2.5 py-1.5 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-muted-foreground hover:text-foreground transition-colors cursor-pointer min-h-[36px]"
+            className="inline-flex items-center gap-1.5 text-xs font-mono px-3 py-2 md:px-2.5 md:py-1.5 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-muted-foreground hover:text-foreground transition-colors cursor-pointer min-h-[44px] md:min-h-[36px]"
             title="Calibrar meta diária de água"
           >
             <SlidersHorizontal className="w-3.5 h-3.5 text-cyan-400" />
@@ -661,7 +661,7 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
               Ajuste conforme seu peso corporal e intensidade de treino (2.0L a 5.0L).
             </span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             {[2000, 2500, 3000, 3500, 4000].map((preset) => (
               <button
                 key={preset}
@@ -672,7 +672,7 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
                   toast.success(`Meta calibrada para ${preset} ml.`);
                 }}
                 className={cn(
-                  "px-2.5 py-1 rounded-md text-xs font-mono border transition-all cursor-pointer min-h-[34px]",
+                  "px-3 py-1.5 md:px-2.5 md:py-1 rounded-md text-xs font-mono border transition-all cursor-pointer min-h-[40px] md:min-h-[34px]",
                   goalMl === preset
                     ? "bg-cyan-500 text-slate-950 font-bold border-cyan-400"
                     : "bg-surface hover:bg-secondary text-muted-foreground border-border/50"
@@ -808,7 +808,7 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
                 type="button"
                 onClick={() => handleInjectWater(-250)}
                 disabled={intakeMl === 0}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground disabled:opacity-40 font-mono text-[11px] transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 px-3 py-2 md:px-2.5 md:py-1.5 min-h-[40px] md:min-h-0 rounded-lg bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground disabled:opacity-40 font-mono text-[11px] transition-colors cursor-pointer"
                 title="Remover 250 ml"
               >
                 <Minus className="w-3 h-3" /> 250 ml
@@ -818,7 +818,7 @@ export function DailyWaterCard({ selectedDate = new Date() }: Props) {
                 <button
                   type="button"
                   onClick={resetDay}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-secondary/40 hover:bg-destructive/20 text-muted-foreground hover:text-destructive font-mono text-[11px] transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1 px-3 py-2 md:px-2.5 md:py-1.5 min-h-[40px] md:min-h-0 rounded-lg bg-secondary/40 hover:bg-destructive/20 text-muted-foreground hover:text-destructive font-mono text-[11px] transition-colors cursor-pointer"
                   title="Zerar registros deste dia"
                 >
                   <RotateCcw className="w-3 h-3" /> Zerar

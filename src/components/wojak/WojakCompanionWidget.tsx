@@ -43,7 +43,7 @@ export function WojakCompanionWidget() {
   const currentQuote = stage.quotes[quoteIndex % stage.quotes.length] || stage.quotes[0];
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 select-none">
+    <div className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-3.5 md:bottom-5 md:right-5 z-30 select-none max-w-[calc(100vw-1.75rem)]">
       <AnimatePresence mode="wait">
         {minimized ? (
           /* Modo Minimizado: Orbe flutuante compacto e tátil */
@@ -55,7 +55,7 @@ export function WojakCompanionWidget() {
             transition={{ type: "spring", stiffness: 450, damping: 25 }}
             onClick={() => setMinimized(false)}
             className={cn(
-              "group flex items-center gap-2.5 p-1.5 pr-3.5 rounded-full",
+              "group flex items-center gap-2.5 p-1.5 pr-3.5 min-h-[44px] rounded-full",
               "glass backdrop-blur-xl bg-card/90 border-2 shadow-2xl",
               "hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer",
               isChad
@@ -64,7 +64,7 @@ export function WojakCompanionWidget() {
             )}
             title="Expandir Radar de Ascensão"
           >
-            <div className="w-10 h-10 rounded-full bg-white overflow-hidden border-2 border-white/60 shadow-sm flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white overflow-hidden border-2 border-white/60 shadow-sm flex items-center justify-center shrink-0">
               <img
                 src={stage.imageUrl}
                 alt={stage.title}
@@ -101,12 +101,12 @@ export function WojakCompanionWidget() {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.88, opacity: 0, y: 20 }}
             transition={{ type: "spring", stiffness: 400, damping: 28 }}
-            className="flex flex-col items-end gap-2.5 max-w-[340px]"
+            className="flex flex-col items-end gap-2 sm:gap-2.5 max-w-[300px] sm:max-w-[340px]"
           >
             {/* Balão de Fala HQ / VisionOS com Cauda */}
             <div
               className={cn(
-                "relative p-3.5 rounded-2xl glass backdrop-blur-2xl bg-card/95 border-2 shadow-2xl",
+                "relative p-3 sm:p-3.5 rounded-2xl glass backdrop-blur-2xl bg-card/95 border-2 shadow-2xl",
                 "text-left transition-all duration-300",
                 isChad
                   ? "border-amber-400/80 shadow-[0_0_30px_rgba(251,191,36,0.2)]"
@@ -114,7 +114,7 @@ export function WojakCompanionWidget() {
               )}
             >
               {/* Header do Balão: Estágio + Controles */}
-              <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-border/30">
+              <div className="flex items-center justify-between gap-2 pb-1.5 sm:pb-2 mb-1.5 sm:mb-2 border-b border-border/30">
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px] uppercase font-mono font-bold tracking-wider text-muted-foreground">
                     Radar de Ascensão
@@ -130,18 +130,20 @@ export function WojakCompanionWidget() {
                   <button
                     type="button"
                     onClick={nextQuote}
-                    className="p-1 rounded-md hover:bg-secondary/70 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                    className="relative p-1.5 sm:p-1 rounded-md hover:bg-secondary/70 text-muted-foreground hover:text-foreground transition-colors cursor-pointer before:content-[''] before:absolute before:-inset-1.5 before:md:hidden"
                     title="Sortear nova frase"
+                    aria-label="Sortear nova frase"
                   >
-                    <Dices className="w-3.5 h-3.5" />
+                    <Dices className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                   </button>
                   <button
                     type="button"
                     onClick={() => setMinimized(true)}
-                    className="p-1 rounded-md hover:bg-secondary/70 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                    className="relative p-1.5 sm:p-1 rounded-md hover:bg-secondary/70 text-muted-foreground hover:text-foreground transition-colors cursor-pointer before:content-[''] before:absolute before:-inset-1.5 before:md:hidden"
                     title="Minimizar radar"
+                    aria-label="Minimizar radar"
                   >
-                    <Minus className="w-3.5 h-3.5" />
+                    <Minus className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                   </button>
                 </div>
               </div>
@@ -154,16 +156,16 @@ export function WojakCompanionWidget() {
               {/* Cauda do Balão de Fala apontando para baixo */}
               <div
                 className={cn(
-                  "absolute -bottom-2 right-8 w-4 h-4 rotate-45 bg-card/95 border-r-2 border-b-2",
+                  "absolute -bottom-2 right-7 sm:right-8 w-4 h-4 rotate-45 bg-card/95 border-r-2 border-b-2",
                   isChad ? "border-amber-400/80" : stage.borderClass
                 )}
               />
             </div>
 
-            {/* Base do Mascote: Avatar de 88px com Barra de Disciplina */}
-            <div className="flex items-center gap-3 pr-2">
+            {/* Base do Mascote: Avatar com presença em desktop e compacto no celular */}
+            <div className="flex items-center gap-2.5 sm:gap-3 pr-1 sm:pr-2">
               <div className="text-right">
-                <div className="font-display text-sm font-bold tracking-tight text-foreground">
+                <div className="font-display text-xs sm:text-sm font-bold tracking-tight text-foreground">
                   {stage.title}
                 </div>
                 <div className="flex items-center justify-end gap-1.5 mt-0.5">
@@ -178,10 +180,10 @@ export function WojakCompanionWidget() {
                 </div>
               </div>
 
-              {/* Avatar com 88px de presença real */}
+              {/* Avatar com 72px no celular e 88px no desktop */}
               <div
                 className={cn(
-                  "w-[88px] h-[88px] rounded-2xl bg-white overflow-hidden shrink-0 border-2 shadow-2xl",
+                  "w-[72px] h-[72px] sm:w-[88px] sm:h-[88px] rounded-2xl bg-white overflow-hidden shrink-0 border-2 shadow-2xl",
                   "flex items-center justify-center relative",
                   "transition-transform duration-300 hover:scale-105",
                   isChad

@@ -78,13 +78,13 @@ export function DailyTodosCard({ selectedDate = new Date() }: Props) {
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             placeholder="Nova missão para hoje..."
-            className="h-9 text-xs bg-surface border-border/40 focus-visible:ring-indigo-500"
+            className="h-11 md:h-9 text-base md:text-xs bg-surface border-border/40 focus-visible:ring-indigo-500"
           />
           <Button
             type="submit"
             size="sm"
             disabled={!newTitle.trim()}
-            className="h-9 px-3 gap-1 shrink-0 bg-indigo-600 hover:bg-indigo-500 text-white"
+            className="h-11 md:h-9 px-3.5 md:px-3 gap-1 shrink-0 bg-indigo-600 hover:bg-indigo-500 text-white"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline text-xs">Adicionar</span>
@@ -118,8 +118,9 @@ export function DailyTodosCard({ selectedDate = new Date() }: Props) {
                   <button
                     type="button"
                     onClick={() => toggleTodo(t.id)}
+                    aria-label={t.completed ? `Desmarcar ${t.title}` : `Concluir ${t.title}`}
                     className={cn(
-                      "w-5 h-5 rounded-md flex items-center justify-center transition-colors cursor-pointer shrink-0",
+                      "relative w-6 h-6 md:w-5 md:h-5 rounded-md flex items-center justify-center transition-colors cursor-pointer shrink-0 before:content-[''] before:absolute before:-inset-2.5 before:md:hidden",
                       t.completed
                         ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
                         : "border border-border/60 hover:border-indigo-400 bg-secondary/40"

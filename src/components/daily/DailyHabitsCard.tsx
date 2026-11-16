@@ -94,7 +94,7 @@ export function DailyHabitsCard({ selectedDate = new Date() }: Props) {
                       type="button"
                       onClick={() => toggleCompletion(h.id, selectedDate)}
                       className={cn(
-                        "w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0 transition-transform active:scale-95 cursor-pointer",
+                        "w-11 h-11 md:w-9 md:h-9 rounded-xl flex items-center justify-center text-lg shrink-0 transition-transform active:scale-95 cursor-pointer",
                         done
                           ? "bg-primary/20 text-primary border border-primary/40 shadow-xs"
                           : "bg-secondary/60 hover:bg-secondary border border-border/50"
@@ -134,7 +134,7 @@ export function DailyHabitsCard({ selectedDate = new Date() }: Props) {
                     type="button"
                     onClick={() => toggleCompletion(h.id, selectedDate)}
                     className={cn(
-                      "text-xs px-3 py-1.5 rounded-lg border font-medium transition-all shrink-0 cursor-pointer",
+                      "text-xs px-3.5 py-2 md:px-3 md:py-1.5 min-h-[44px] md:min-h-0 rounded-lg border font-medium transition-all active:scale-95 shrink-0 cursor-pointer",
                       done
                         ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20"
                         : "bg-secondary/60 text-foreground hover:bg-primary hover:text-primary-foreground border-border/40"

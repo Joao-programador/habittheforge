@@ -131,13 +131,19 @@
   }
   html {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    overscroll-behavior-y: contain;
+    -webkit-tap-highlight-color: transparent;
   }
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "ss01", "cv11";
     background-image: var(--gradient-hero);
     background-attachment: fixed;
-    min-height: 100vh;
+    min-height: 100dvh;
+    overscroll-behavior-y: contain;
+  }
+  button, a, [role="button"], input, select, textarea {
+    touch-action: manipulation;
   }
   
   /* Custom Scrollbar */
@@ -230,5 +236,14 @@
     background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.1), transparent);
     background-size: 1000px 100%;
     animation: shimmer 2.5s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-pulse-glow,
+    .animate-badge-pop,
+    .animate-check,
+    .animate-shimmer {
+      animation: none !important;
+    }
   }
 }

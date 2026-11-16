@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { AuthProvider, ProtectedRoute } from "@/hooks/useAuth";
+import { useIsMobile } from "@/hooks/use-mobile";
 import Dashboard from "./pages/Dashboard";
 import Habits from "./pages/Habits";
 import Settings from "./pages/Settings";
@@ -27,30 +28,37 @@ const protectedRoutes = [
   { path: "/settings", element: <Settings /> },
 ];
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <AuthProvider>
-        <SettingsProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner position="top-right" richColors />
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              {protectedRoutes.map((r) => (
-                <Route
-                  key={r.path}
-                  path={r.path}
-                  element={<ProtectedRoute>{r.element}</ProtectedRoute>}
-                />
-              ))}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </TooltipProvider>
-        </SettingsProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+const App = () => {
+  const isMobile = useIsMobile();
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>
+          <SettingsProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner
+                position={isMobile ? "top-center" : "top-right"}
+                offset={isMobile ? 14 : undefined}
+                richColors
+              />
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                {protectedRoutes.map((r) => (
+                  <Route
+                    key={r.path}
+                    path={r.path}
+                    element={<ProtectedRoute>{r.element}</ProtectedRoute>}
+                  />
+                ))}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </TooltipProvider>
+          </SettingsProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

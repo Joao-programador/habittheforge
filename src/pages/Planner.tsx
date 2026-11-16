@@ -17,7 +17,9 @@ import { toast } from "sonner";
 type ViewMode = "day" | "week" | "month";
 
 export default function Planner() {
-  const [view, setView] = useState<ViewMode>("week");
+  const [view, setView] = useState<ViewMode>(() =>
+    typeof window !== "undefined" && window.innerWidth < 768 ? "day" : "week"
+  );
   const [cursor, setCursor] = useState(new Date());
   const [dialogOpen, setDialogOpen] = useState(false);
   const [draft, setDraft] = useState<EventDraft | null>(null);
@@ -102,10 +104,10 @@ export default function Planner() {
             <p className="text-sm text-muted-foreground">Domine seu tempo. Bloqueie. Execute.</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setCursor(new Date())} className="gap-1.5">
+            <Button variant="outline" size="sm" onClick={() => setCursor(new Date())} className="gap-1.5 h-10 md:h-9">
               <CalendarDays className="w-3.5 h-3.5" /> Hoje
             </Button>
-            <Button className="bg-gradient-primary glow-primary gap-2" size="sm" onClick={() => openNew()}>
+            <Button className="bg-gradient-primary glow-primary gap-2 h-10 md:h-9" size="sm" onClick={() => openNew()}>
               <Plus className="w-4 h-4" /> Novo bloco
             </Button>
           </div>

@@ -61,17 +61,18 @@ export default function Habits() {
 
         {/* Toolbar de Navegação Mensal */}
         <div className="surface-card p-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
             <Button
               variant="outline"
               size="icon"
               onClick={() => setMonth(subMonths(month, 1))}
-              className="h-9 w-9"
+              className="h-11 w-11 md:h-9 md:w-9 shrink-0"
+              aria-label="Mês anterior"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <div className="px-3 min-w-[160px] text-center">
-              <div className="font-display text-xl tracking-tight leading-none capitalize">
+            <div className="px-2 sm:px-3 min-w-[130px] sm:min-w-[160px] text-center">
+              <div className="font-display text-lg sm:text-xl tracking-tight leading-none capitalize">
                 {format(month, "MMMM", { locale: ptBR })}
               </div>
               <div className="font-mono text-xs text-muted-foreground mt-0.5">
@@ -82,7 +83,8 @@ export default function Habits() {
               variant="outline"
               size="icon"
               onClick={() => setMonth(addMonths(month, 1))}
-              className="h-9 w-9"
+              className="h-11 w-11 md:h-9 md:w-9 shrink-0"
+              aria-label="Próximo mês"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>
@@ -90,7 +92,7 @@ export default function Habits() {
               variant="ghost"
               size="sm"
               onClick={() => setMonth(new Date())}
-              className="ml-1 gap-1.5 h-9"
+              className="ml-auto sm:ml-1 gap-1.5 h-10 md:h-9"
             >
               <CalendarDays className="w-3.5 h-3.5" />
               Hoje

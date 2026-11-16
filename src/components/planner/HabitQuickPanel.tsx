@@ -24,12 +24,12 @@ export function HabitQuickPanel({ onPick }: Props) {
             <button
               key={h.id}
               onClick={() => onPick(h.id)}
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-secondary/40 hover:bg-secondary transition text-left group border"
+              className="w-full min-h-[44px] flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-secondary/40 hover:bg-secondary active:scale-[0.99] transition text-left group border"
               style={{ borderColor: `${h.color}35` }}
             >
               <span className="text-base">{h.emoji}</span>
               <span className="text-sm font-medium truncate flex-1">{h.name}</span>
-              <span className="text-[11px] text-muted-foreground/90 opacity-0 group-hover:opacity-100 transition">
+              <span className="text-[11px] text-muted-foreground/90 opacity-80 md:opacity-0 md:group-hover:opacity-100 transition">
                 + bloco
               </span>
             </button>

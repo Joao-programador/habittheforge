@@ -52,7 +52,7 @@ export function MonthView({ date, events, isHabitCompleted, onDayClick, onEventC
               key={d.toISOString()}
               onClick={() => onDayClick(d)}
               className={cn(
-                "min-h-[110px] cursor-pointer text-left p-1.5 border-r border-b border-border/20 transition hover:bg-primary/5 flex flex-col gap-1",
+                "min-h-[72px] md:min-h-[110px] cursor-pointer text-left p-1 sm:p-1.5 border-r border-b border-border/20 transition hover:bg-primary/5 flex flex-col gap-1",
                 !inMonth && "opacity-40",
                 isToday && "bg-primary/10"
               )}

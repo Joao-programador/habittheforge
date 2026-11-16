@@ -2,11 +2,18 @@
 <html lang="pt-BR" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>{{ title | default('ASCEND — Sistema de Disciplina & Ascensão Diária') }}</title>
     <meta name="description" content="Saia da inércia Doomer, destrua a dopamina barata e ascenda à sua versão máxima um dia de cada vez.">
     <meta name="author" content="ASCEND" />
     <link rel="icon" type="image/png" href="/static/favicon.png" />
+    <link rel="manifest" href="/static/manifest.webmanifest" />
+    <meta name="theme-color" content="#09090b" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="ASCEND" />
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -128,13 +135,19 @@
         }
         html {
           font-family: 'Hind', system-ui, sans-serif;
+          overscroll-behavior-y: contain;
+          -webkit-tap-highlight-color: transparent;
         }
         body {
           @apply bg-background text-foreground antialiased;
           font-feature-settings: "ss01", "cv11";
           background-image: var(--gradient-hero);
           background-attachment: fixed;
-          min-height: 100vh;
+          min-height: 100dvh;
+          overscroll-behavior-y: contain;
+        }
+        button, a, [role="button"], input, select, textarea {
+          touch-action: manipulation;
         }
         h1, h2, h3, h4, h5, .font-display {
           font-family: 'Archivo Black', system-ui, sans-serif;
@@ -185,12 +198,12 @@
       }
     </style>
   </head>
-  <body class="min-h-screen bg-background text-foreground antialiased" x-data="{ collapsed: false, path: window.location.pathname }">
-    <div class="min-h-screen flex w-full">
-      <!-- Sidebar -->
+  <body class="min-h-[100dvh] bg-background text-foreground antialiased" x-data="{ collapsed: false, moreOpen: false, path: window.location.pathname }">
+    <div class="min-h-[100dvh] flex w-full overflow-x-hidden">
+      <!-- Sidebar (Desktop) -->
       <aside 
         :class="collapsed ? 'w-16' : 'w-64'" 
-        class="border-r border-border/60 transition-all duration-300 flex flex-col bg-card/30 sticky top-0 h-screen shrink-0"
+        class="hidden md:flex border-r border-border/60 transition-all duration-300 flex-col bg-card/30 sticky top-0 h-screen shrink-0"
       >
         <div class="p-4 flex flex-col items-center text-center shrink-0 border-b border-border/40">
           <div x-show="!collapsed" class="flex flex-col items-center gap-2">
@@ -247,21 +260,21 @@
         </div>
       </aside>
 
-      <!-- Mascote Flutuante da Forja (Canto Inferior Direito) -->
+      <!-- Mascote Flutuante da Forja (Acima da Bottom Bar no Celular) -->
       <div 
         x-data="{ minimized: false }"
-        class="fixed bottom-5 right-5 z-50 select-none"
+        class="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-3.5 md:bottom-5 md:right-5 z-30 select-none max-w-[calc(100vw-1.75rem)]"
       >
         <!-- Minimizado -->
         <button 
           x-show="minimized" 
           @click="minimized = false"
-          class="flex items-center gap-2.5 p-1.5 pr-3.5 rounded-full glass backdrop-blur-xl bg-card/90 border-2 border-border/70 shadow-2xl hover:scale-105 transition-transform"
+          class="flex items-center gap-2.5 p-1.5 pr-3.5 min-h-[44px] rounded-full glass backdrop-blur-xl bg-card/90 border-2 border-border/70 shadow-2xl hover:scale-105 transition-transform"
           style="display: none;"
           title="Expandir Mascote da Forja"
         >
-          <div class="w-10 h-10 rounded-full bg-white overflow-hidden border-2 border-white/60 shadow-sm flex items-center justify-center shrink-0">
-            <img src="/assets/wojaks/doomer.png" alt="Wojak" class="w-full h-full object-cover scale-155 object-[center_20%]">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white overflow-hidden border-2 border-white/60 shadow-sm flex items-center justify-center shrink-0">
+            <img src="/static/assets/wojaks/doomer.png" alt="Wojak" class="w-full h-full object-cover scale-155 object-[center_20%]">
           </div>
           <span class="font-display text-xs font-bold text-foreground">Doomer</span>
           <span class="font-mono text-[10px] px-2 py-0.5 rounded-full font-bold uppercase bg-zinc-800 text-zinc-300">9%</span>
@@ -271,54 +284,111 @@
         <!-- Expandido -->
         <div 
           x-show="!minimized"
-          class="flex flex-col items-end gap-2.5 max-w-[320px]"
+          class="flex flex-col items-end gap-2 sm:gap-2.5 max-w-[300px] sm:max-w-[320px]"
         >
           <!-- Balão de Fala HQ -->
-          <div class="relative p-3.5 rounded-2xl glass backdrop-blur-2xl bg-card/95 border-2 border-border/70 shadow-2xl text-left">
-            <div class="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-border/30">
+          <div class="relative p-3 sm:p-3.5 rounded-2xl glass backdrop-blur-2xl bg-card/95 border-2 border-border/70 shadow-2xl text-left">
+            <div class="flex items-center justify-between gap-2 pb-1.5 sm:pb-2 mb-1.5 sm:mb-2 border-b border-border/30">
               <span class="text-[10px] uppercase font-mono font-bold tracking-wider text-muted-foreground">
                 Companheiro da Forja
               </span>
-              <button @click="minimized = true" class="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Minimizar">
+              <button @click="minimized = true" class="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors" title="Minimizar">
                 <i data-lucide="minus" class="w-3.5 h-3.5"></i>
               </button>
             </div>
             <p class="text-xs text-foreground/90 italic leading-relaxed">
               "It's over pro beto. Cada hábito concluído é um passo rumo à redenção."
             </p>
-            <div class="absolute -bottom-2 right-8 w-4 h-4 rotate-45 bg-card/95 border-r-2 border-b-2 border-border/70"></div>
+            <div class="absolute -bottom-2 right-7 sm:right-8 w-4 h-4 rotate-45 bg-card/95 border-r-2 border-b-2 border-border/70"></div>
           </div>
 
-          <!-- Base: Avatar de 88px -->
-          <div class="flex items-center gap-3 pr-2">
+          <!-- Base: Avatar -->
+          <div class="flex items-center gap-2.5 sm:gap-3 pr-1 sm:pr-2">
             <div class="text-right">
-              <div class="font-display text-sm font-bold tracking-tight text-foreground">
+              <div class="font-display text-xs sm:text-sm font-bold tracking-tight text-foreground">
                 Withered Doomer
               </div>
               <span class="font-mono text-[10px] px-2 py-0.5 rounded-full font-bold uppercase bg-zinc-800 text-zinc-300 border border-zinc-700">
                 9% hoje
               </span>
             </div>
-            <div class="w-[88px] h-[88px] rounded-2xl bg-white overflow-hidden shrink-0 border-2 border-white/50 shadow-2xl flex items-center justify-center hover:scale-105 transition-transform">
-              <img src="/assets/wojaks/doomer.png" alt="Wojak" class="w-full h-full object-cover scale-155 object-[center_20%]">
+            <div class="w-[72px] h-[72px] sm:w-[88px] sm:h-[88px] rounded-2xl bg-white overflow-hidden shrink-0 border-2 border-white/50 shadow-2xl flex items-center justify-center hover:scale-105 transition-transform">
+              <img src="/static/assets/wojaks/doomer.png" alt="Wojak" class="w-full h-full object-cover scale-155 object-[center_20%]">
             </div>
           </div>
         </div>
       </div>
 
       <!-- Main Content Wrapper -->
-      <div class="flex-1 flex flex-col min-w-0">
-        <!-- Header / Sidebar Trigger -->
-        <header class="h-14 border-b border-border/40 flex items-center px-3 sticky top-0 z-30 bg-background/70 backdrop-blur-xl">
+      <div class="flex-1 flex flex-col min-w-0 overflow-x-hidden">
+        <!-- Desktop Header -->
+        <header class="hidden md:flex h-14 border-b border-border/40 items-center px-3 sticky top-0 z-30 bg-background/70 backdrop-blur-xl">
           <button @click="collapsed = !collapsed" class="p-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Toggle Sidebar">
             <i data-lucide="panel-left" class="w-5 h-5"></i>
           </button>
         </header>
 
+        <!-- Mobile Context Header -->
+        <header class="md:hidden pt-[env(safe-area-inset-top)] border-b border-border/30 bg-background/80 backdrop-blur-md">
+          <div class="h-12 px-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <img src="/static/assets/logo.png" alt="ASCEND Logo" class="h-6 w-6 object-contain select-none">
+              <span class="font-display text-sm tracking-tight text-foreground">ASCEND</span>
+            </div>
+            <span class="text-xs font-mono text-muted-foreground">Mobile</span>
+          </div>
+        </header>
+
         <!-- Main Content Area -->
-        <main id="main-content" class="flex-1 p-4 md:p-6 lg:p-8 max-w-[1480px] w-full mx-auto">
+        <main id="main-content" class="flex-1 p-3.5 sm:p-4 md:p-6 lg:p-8 pb-[calc(5.75rem+env(safe-area-inset-bottom))] md:pb-8 max-w-[1480px] w-full mx-auto overflow-x-hidden">
           {% block content %}{% endblock %}
         </main>
+      </div>
+
+      <!-- Mobile Bottom Navigation Bar -->
+      <nav aria-label="Navegação principal mobile" class="md:hidden fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/90 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]">
+        <div class="flex items-stretch justify-around px-1 h-16 max-w-lg mx-auto">
+          <a href="/" :class="path === '/' ? 'text-primary font-semibold' : 'text-muted-foreground'" class="relative flex-1 min-w-[48px] min-h-[44px] flex flex-col items-center justify-center gap-1 rounded-xl">
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+            <span class="text-[11px] leading-none">Hoje</span>
+          </a>
+          <a href="/habits" :class="path === '/habits' ? 'text-primary font-semibold' : 'text-muted-foreground'" class="relative flex-1 min-w-[48px] min-h-[44px] flex flex-col items-center justify-center gap-1 rounded-xl">
+            <i data-lucide="flame" class="w-5 h-5"></i>
+            <span class="text-[11px] leading-none">Hábitos</span>
+          </a>
+          <a href="/planner" :class="path === '/planner' ? 'text-primary font-semibold' : 'text-muted-foreground'" class="relative flex-1 min-w-[48px] min-h-[44px] flex flex-col items-center justify-center gap-1 rounded-xl">
+            <i data-lucide="calendar-range" class="w-5 h-5"></i>
+            <span class="text-[11px] leading-none">Planner</span>
+          </a>
+          <a href="/journal" :class="path === '/journal' ? 'text-primary font-semibold' : 'text-muted-foreground'" class="relative flex-1 min-w-[48px] min-h-[44px] flex flex-col items-center justify-center gap-1 rounded-xl">
+            <i data-lucide="book-open" class="w-5 h-5"></i>
+            <span class="text-[11px] leading-none">Diário</span>
+          </a>
+          <button type="button" @click="moreOpen = true" :class="['/todos', '/achievements', '/settings'].includes(path) ? 'text-primary font-semibold' : 'text-muted-foreground'" class="relative flex-1 min-w-[48px] min-h-[44px] flex flex-col items-center justify-center gap-1 rounded-xl">
+            <i data-lucide="layout-grid" class="w-5 h-5"></i>
+            <span class="text-[11px] leading-none">Mais</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Mobile Bottom Sheet "Mais" -->
+      <div x-show="moreOpen" style="display: none;" class="md:hidden fixed inset-0 z-50 flex items-end">
+        <div @click="moreOpen = false" class="fixed inset-0 bg-black/80"></div>
+        <div class="relative w-full rounded-t-3xl border-t border-border/60 bg-background/95 backdrop-blur-2xl px-5 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] space-y-2 z-10">
+          <div class="mx-auto w-10 h-1 rounded-full bg-border/80 mb-3"></div>
+          <a href="/todos" class="w-full min-h-[48px] px-3.5 py-2.5 rounded-2xl border border-border/40 bg-card/60 flex items-center gap-3 text-sm font-medium">
+            <i data-lucide="list-checks" class="w-5 h-5 text-primary"></i>
+            <span>To-Do</span>
+          </a>
+          <a href="/achievements" class="w-full min-h-[48px] px-3.5 py-2.5 rounded-2xl border border-border/40 bg-card/60 flex items-center gap-3 text-sm font-medium">
+            <i data-lucide="trophy" class="w-5 h-5 text-primary"></i>
+            <span>Conquistas</span>
+          </a>
+          <a href="/settings" class="w-full min-h-[48px] px-3.5 py-2.5 rounded-2xl border border-border/40 bg-card/60 flex items-center gap-3 text-sm font-medium">
+            <i data-lucide="settings" class="w-5 h-5 text-primary"></i>
+            <span>Configurações</span>
+          </a>
+        </div>
       </div>
     </div>
 

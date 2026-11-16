@@ -1,10 +1,11 @@
-import { format, isSameDay, isToday, isFuture } from "date-fns";
+import { useRef, useEffect, useCallback } from "react";
+import { format, isSameDay, isSameMonth, isToday, isFuture } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useHabitsData } from "@/hooks/useHabitsData";
 import { getMonthDays, getStreak, getMonthCompletions } from "@/lib/stats";
 import { HabitCheck } from "@/components/HabitCheck";
 import { Button } from "@/components/ui/button";
-import { Trash2, Flame } from "lucide-react";
+import { Trash2, Flame, CalendarDays } from "lucide-react";
 import { AddHabitDialog } from "@/components/AddHabitDialog";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,26 @@ export function HabitGrid({ currentMonth, selectedDate, onSelectDate }: Props) {
   const { hasEntry } = useJournalData();
   const days = getMonthDays(currentMonth);
   const today = new Date();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const todayColRef = useRef<HTMLButtonElement>(null);
+  const showingCurrentMonth = isSameMonth(currentMonth, today);
+
+  const scrollToToday = useCallback(() => {
+    if (!scrollContainerRef.current || !todayColRef.current) return;
+    const container = scrollContainerRef.current;
+    const el = todayColRef.current;
+    const stickyOffset = window.innerWidth < 640 ? 128 : 224;
+    container.scrollTo({
+      left: Math.max(0, el.offsetLeft - stickyOffset - 24),
+      behavior: "smooth",
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!showingCurrentMonth) return;
+    const timer = setTimeout(scrollToToday, 120);
+    return () => clearTimeout(timer);
+  }, [showingCurrentMonth, scrollToToday]);
 
   if (!habits.length) {
     return (
@@ -36,11 +57,28 @@ export function HabitGrid({ currentMonth, selectedDate, onSelectDate }: Props) {
 
   return (
     <div className="surface-card overflow-hidden">
+      {showingCurrentMonth && (
+        <div className="sm:hidden px-3 py-2 border-b border-border/20 flex items-center justify-between gap-2 bg-secondary/20">
+          <span className="text-[11px] font-mono text-muted-foreground">
+            Deslize os dias para marcar
+          </span>
+          <button
+            type="button"
+            onClick={scrollToToday}
+            className="inline-flex items-center gap-1 text-[11px] font-mono text-primary font-semibold px-2.5 py-1 rounded-lg bg-primary/10 active:scale-95 transition-transform"
+          >
+            <CalendarDays className="w-3 h-3" /> Ir para hoje
+          </button>
+        </div>
+      )}
       {/* Header row with day numbers */}
-      <div className="overflow-x-auto scrollbar-hide overscroll-x-contain [-webkit-overflow-scrolling:touch]">
+      <div
+        ref={scrollContainerRef}
+        className="overflow-x-auto scrollbar-hide overscroll-x-contain [-webkit-overflow-scrolling:touch]"
+      >
         <div className="min-w-max">
           <div className="flex items-center sticky top-0 z-20 bg-background border-b border-border/20">
-            <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 font-semibold text-xs text-muted-foreground sticky left-0 z-20 bg-background border-r border-border/20 tracking-normal">
+            <div className="w-32 sm:w-48 md:w-56 shrink-0 p-3 md:p-4 font-semibold text-xs text-muted-foreground sticky left-0 z-20 bg-background border-r border-border/20 tracking-normal">
               Hábito
             </div>
             <div className="flex">
@@ -54,6 +92,7 @@ export function HabitGrid({ currentMonth, selectedDate, onSelectDate }: Props) {
 
                 return (
                   <button
+                    ref={isTodayDay ? todayColRef : undefined}
                     type="button"
                     key={d.toISOString()}
                     onClick={() => {
@@ -130,21 +169,29 @@ export function HabitGrid({ currentMonth, selectedDate, onSelectDate }: Props) {
                 transition={{ delay: i * 0.04 }}
                 className="flex items-center border-b border-border/30 bg-background hover:bg-surface-elevated transition-colors group"
               >
-                <div className="w-40 md:w-56 shrink-0 p-3 md:p-4 sticky left-0 z-30 bg-background border-r border-border/20 group-hover:bg-surface-elevated transition-colors">
+                <div className="w-32 sm:w-48 md:w-56 shrink-0 p-2.5 sm:p-3 md:p-4 sticky left-0 z-30 bg-background border-r border-border/20 group-hover:bg-surface-elevated transition-colors">
                   <AddHabitDialog
                     habitToEdit={habit}
                     onUpdate={updateHabit}
                     trigger={
-                      <button className="flex items-center gap-3 w-full text-left hover:opacity-75 transition group">
+                      <button className="flex items-center gap-2 sm:gap-3 w-full text-left hover:opacity-75 transition group min-h-[44px]">
                         <div
-                          className="w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center text-lg md:text-xl shrink-0 transition-transform group-hover:scale-105"
+                          className="w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center text-base sm:text-lg md:text-xl shrink-0 transition-transform group-hover:scale-105"
                           style={{ background: `${habit.color}25`, border: `1px solid ${habit.color}55` }}
                         >
                           {habit.emoji}
                         </div>
                         <div className="min-w-0">
                           <div className="font-semibold truncate text-xs md:text-sm">{habit.name}</div>
-                          <div className="text-[11px] text-zinc-400 opacity-80 group-hover:opacity-100 transition">Editar hábito</div>
+                          <div className="hidden sm:block text-[11px] text-zinc-400 opacity-80 group-hover:opacity-100 transition">Editar hábito</div>
+                          <div className="sm:hidden flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground mt-0.5">
+                            <span className="inline-flex items-center gap-0.5">
+                              <Flame className="w-2.5 h-2.5 text-orange-400" />
+                              {streak}d
+                            </span>
+                            <span>·</span>
+                            <span style={{ color: habit.color }}>{monthCount}/{days.length}</span>
+                          </div>
                         </div>
                       </button>
                     }
@@ -180,10 +227,10 @@ export function HabitGrid({ currentMonth, selectedDate, onSelectDate }: Props) {
                   </span>
                   <span className="text-xs text-muted-foreground">/{days.length}</span>
                 </div>
-                <div className="w-12 shrink-0 px-2">
+                <div className="w-12 shrink-0 px-1 sm:px-2 flex justify-center">
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                      <Button variant="ghost" size="icon" className="h-10 w-10 md:h-8 md:w-8 text-muted-foreground hover:text-destructive">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </AlertDialogTrigger>

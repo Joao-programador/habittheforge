@@ -99,7 +99,7 @@ export function DailyJournalCard({ selectedDate = new Date() }: Props) {
             value={win}
             onChange={(e) => setWin(e.target.value)}
             placeholder="Ex: Treinei em jejum e cumpri 100% da leitura"
-            className="h-8 text-xs bg-surface border-border/40 focus-visible:ring-amber-500"
+            className="h-11 md:h-8 text-base md:text-xs bg-surface border-border/40 focus-visible:ring-amber-500"
           />
         </div>
 
@@ -112,7 +112,7 @@ export function DailyJournalCard({ selectedDate = new Date() }: Props) {
             value={excuse}
             onChange={(e) => setExcuse(e.target.value)}
             placeholder="Ex: 'Estou cansado, amanhã eu compenso'"
-            className="h-8 text-xs bg-surface border-border/40 focus-visible:ring-red-500"
+            className="h-11 md:h-8 text-base md:text-xs bg-surface border-border/40 focus-visible:ring-red-500"
           />
         </div>
 
@@ -126,7 +126,7 @@ export function DailyJournalCard({ selectedDate = new Date() }: Props) {
             onChange={(e) => setContent(e.target.value)}
             placeholder="O que te fez subir de nível hoje e o que tentou te puxar para baixo?"
             rows={2}
-            className="text-xs resize-none bg-surface border-border/40 focus-visible:ring-primary min-h-[56px]"
+            className="text-base md:text-xs resize-none bg-surface border-border/40 focus-visible:ring-primary min-h-[64px] md:min-h-[56px]"
           />
         </div>
       </div>
@@ -139,7 +139,7 @@ export function DailyJournalCard({ selectedDate = new Date() }: Props) {
           onClick={handleSave}
           disabled={!win.trim() && !excuse.trim() && !content.trim()}
           className={cn(
-            "h-8 px-3 gap-1.5 font-medium transition-all text-xs",
+            "h-11 md:h-8 px-4 md:px-3 gap-1.5 font-medium transition-all text-xs",
             isSaved
               ? "bg-emerald-600 hover:bg-emerald-500 text-white"
               : "bg-primary hover:bg-primary/90 text-primary-foreground"

@@ -2,12 +2,13 @@ import { AppLayout } from "@/components/AppLayout";
 import { useSettings } from "@/context/SettingsContext";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Sun, Moon, Palette } from "lucide-react";
+import { Sun, Moon, Palette, Smartphone, Download, CheckCircle2, Trash2 } from "lucide-react";
 import { useHabitsData } from "@/hooks/useHabitsData";
+import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { AddHabitDialog } from "@/components/AddHabitDialog";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 const PRIMARY_COLORS = ["#4f46e5", "#7c3aed", "#ec4899", "#f43f5e", "#f59e0b", "#10b981", "#06b6d4", "#3b82f6"];
 const ACCENT_COLORS = ["#818cf8", "#a78bfa", "#f472b6", "#fb7185", "#fbbf24", "#34d399", "#22d3ee", "#60a5fa"];
@@ -15,13 +16,48 @@ const ACCENT_COLORS = ["#818cf8", "#a78bfa", "#f472b6", "#fb7185", "#fbbf24", "#
 export default function Settings() {
   const { dark_mode, primary_color, accent_color, update } = useSettings();
   const { habits, addHabit, deleteHabit } = useHabitsData();
+  const { canPromptInstall, isIosInstallable, isStandalone, promptInstall } = usePwaInstall();
+
+  const handleInstall = async () => {
+    const ok = await promptInstall();
+    if (ok) toast.success("ASCEND instalado com sucesso!");
+  };
 
   return (
     <AppLayout>
       <div className="max-w-3xl space-y-6">
         <div>
-          <h1 className="font-display text-4xl tracking-tight">Configurações</h1>
+          <h1 className="font-display text-3xl sm:text-4xl tracking-tight">Configurações</h1>
           <p className="text-muted-foreground mt-1">Calibre seu sistema.</p>
+        </div>
+
+        {/* App Mobile / PWA */}
+        <div className="surface-card p-4 sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <Smartphone className="w-5 h-5 text-primary shrink-0" />
+              <div className="min-w-0">
+                <Label className="font-display text-lg">Aplicativo no Celular (PWA)</Label>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {isStandalone
+                    ? "Executando em modo aplicativo independente."
+                    : isIosInstallable
+                    ? "No Safari, toque em Compartilhar e depois em Adicionar à Tela de Início."
+                    : "Instale na tela inicial para usar em tela cheia como app nativo."}
+                </p>
+              </div>
+            </div>
+
+            {isStandalone ? (
+              <span className="inline-flex items-center gap-1.5 text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-full">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Instalado
+              </span>
+            ) : canPromptInstall ? (
+              <Button onClick={handleInstall} className="bg-gradient-primary glow-primary gap-2 h-11 md:h-9">
+                <Download className="w-4 h-4" /> Instalar App
+              </Button>
+            ) : null}
+          </div>
         </div>
 
         {/* Theme */}
@@ -104,7 +140,7 @@ export default function Settings() {
                 <span className="flex-1 font-medium">{h.name}</span>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                    <Button variant="ghost" size="icon" className="h-11 w-11 md:h-9 md:w-9 text-muted-foreground hover:text-destructive">
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </AlertDialogTrigger>
